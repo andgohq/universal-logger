@@ -1,6 +1,6 @@
 {
   "name": "@andgohq/andgo-logger",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Logger for brower, nodejs and electron",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",

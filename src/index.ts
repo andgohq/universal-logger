@@ -1,4 +1,4 @@
-import pino from 'pino';
+import pino, { Logger } from 'pino';
 import { format } from 'date-fns';
 import ja from 'date-fns/locale/ja';
 import { datadogLogs, StatusType, Datacenter } from '@datadog/browser-logs';
@@ -77,7 +77,7 @@ export const setLogLevel = (level: string) => {
   baseLogger.level = level;
 };
 
-export const logFactory = (name: string) => {
+export const logFactory = (name: string): Logger => {
   const _logger = baseLogger.child({ module: name });
 
   return _logger;

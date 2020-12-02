@@ -1,3 +1,4 @@
+import { Logger } from "pino";
 import { StatusType } from "@datadog/browser-logs";
 import { Context } from "@datadog/browser-core";
 export function initDatadog(opts: {
@@ -6,6 +7,6 @@ export function initDatadog(opts: {
 }): void;
 export function datadogMessage(message: string, context?: Context, status?: StatusType): void;
 export const setLogLevel: (level: string) => void;
-export const logFactory: (name: string) => pino.Logger;
+export const logFactory: (name: string) => Logger;
 
 //# sourceMappingURL=index.d.ts.map
