@@ -14,5 +14,5 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "repository": "https://github.com/andgohq/andgo-logger"
+  "repository": "git://github.com/andgohq/andgo-logger.git"
 }
