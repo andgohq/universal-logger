@@ -1,10 +1,20 @@
-import pino, { Logger } from 'pino';
+import pino, { Level } from 'pino';
+export type { Logger, Level } from 'pino';
 import { format } from 'date-fns';
 import ja from 'date-fns/locale/ja';
 import { datadogLogs, StatusType, Datacenter } from '@datadog/browser-logs';
 import { Context } from '@datadog/browser-core';
 
 let DATADOG_INITIALIZED = false;
+
+const PINO_TO_CONSOLE: Record<Level, StatusType> = {
+  fatal: StatusType.error,
+  error: StatusType.error,
+  warn: StatusType.warn,
+  info: StatusType.info,
+  debug: StatusType.debug,
+  trace: StatusType.info,
+};
 
 export function initDatadog(opts: { clientToken: string; applicationId: string }) {
   datadogLogs.init({
@@ -34,50 +44,54 @@ export function datadogMessage(message: string, context?: Context, status?: Stat
 }
 
 const baseLogger = pino({
-  level: 'debug', // this is overwritten by setLevel
+  level: 'debug', // this is overwritten by setLogLevel
   browser: {
     serialize: true,
-    write: () => {}, // skip default serializer
-    transmit: {
-      send(level, logEvent) {
-        const loggerTree = logEvent.bindings.map((b) => b.module).join('.');
+    write: (o) => {
+      const { module, type, stack, level, time, msg, ...rest } = o as {
+        module: string;
+        type?: 'Error'; // exist when logger.error is used
+        stack?: string;
+        level: number; // this is not a label (maybe this is a spec. bug)
+        time: number;
+        msg?: string;
+      };
 
-        const timeLabel = format(new Date(logEvent.ts), 'HH:mm:ss', { locale: ja });
+      const errMsg = type === 'Error' ? `${stack?.split('\n')[0].substr(7)} ` ?? 'Error ' : '';
 
-        // level !== 'error': set first arg as a message
-        // level === 'error': set first arg's msg field as a message
-        const isError = level === 'error' && logEvent.messages[0].type === 'Error';
+      const timeLabel = format(new Date(time), 'HH:mm:ss', { locale: ja });
+      const levelLabel = PINO_TO_CONSOLE[baseLogger.levels.labels[`${level}`] as Level];
 
-        const msg = isError ? logEvent.messages[1] ?? logEvent.messages[0].msg : logEvent.messages[0];
+      if (Object.keys(rest).length) {
+        console[levelLabel](`${timeLabel} ${errMsg}${msg ?? ''}`, rest);
+      } else {
+        console[levelLabel](`${timeLabel} ${errMsg}${msg ?? ''}`);
+      }
 
-        // level !== 'error': set second arg as a context
-        // level === 'error': set third arg as a context
-        const context = logEvent.messages[isError ? 2 : 1];
-
-        // validation
-        if (typeof msg !== 'string') {
-          console.debug('[logger]', { level, logEvent, msg });
-          throw new Error(`${msg} should be string type`);
-        }
-        if (typeof context !== 'object') {
-          console.debug('[logger]', { level, logEvent, context });
-          throw new Error(`${msg} should be object type`);
-        }
-
-        // when level === 'error', console.error shows a stack trace on dev console
-        console[level](`${timeLabel} [${loggerTree}] ${msg}`, context);
-
-        datadogMessage(msg, context, StatusType[level]);
-      },
+      datadogMessage(msg ?? '', { ...rest }, levelLabel);
     },
   },
 });
 
-export const setLogLevel = (level: string) => {
+export const setLogLevel = (level: Level) => {
   baseLogger.level = level;
 };
 
-export const logFactory = (name: string): Logger => {
+export type AGLoggerFunc = (
+  msgOrMergingObject?: string | Record<string, any>,
+  msg?: string,
+  ...interpolationValues: any[]
+) => void;
+
+export interface AGLogger {
+  fatal: AGLoggerFunc;
+  error: AGLoggerFunc;
+  warn: AGLoggerFunc;
+  info: AGLoggerFunc;
+  debug: AGLoggerFunc;
+}
+
+export const logFactory = (name: string): AGLogger => {
   const _logger = baseLogger.child({ module: name });
 
   return _logger;

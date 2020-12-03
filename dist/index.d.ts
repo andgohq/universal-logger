@@ -1,12 +1,21 @@
-import { Logger } from "pino";
+import { Level } from "pino";
 import { StatusType } from "@datadog/browser-logs";
 import { Context } from "@datadog/browser-core";
+export type { Logger, Level } from 'pino';
 export function initDatadog(opts: {
     clientToken: string;
     applicationId: string;
 }): void;
 export function datadogMessage(message: string, context?: Context, status?: StatusType): void;
-export const setLogLevel: (level: string) => void;
-export const logFactory: (name: string) => Logger;
+export const setLogLevel: (level: Level) => void;
+export type AGLoggerFunc = (msgOrMergingObject?: string | Record<string, any>, msg?: string, ...interpolationValues: any[]) => void;
+export interface AGLogger {
+    fatal: AGLoggerFunc;
+    error: AGLoggerFunc;
+    warn: AGLoggerFunc;
+    info: AGLoggerFunc;
+    debug: AGLoggerFunc;
+}
+export const logFactory: (name: string) => AGLogger;
 
 //# sourceMappingURL=index.d.ts.map
