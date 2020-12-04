@@ -1,11 +1,11 @@
-# andgo-logger
+# universal-logger
 
 Logger for brower, nodejs and electron.
 
 ## Install
 
 ```sh
-npm install @andgohq/andgo-logger
+npm install @andgohq/universal-logger
 ```
 
 ## Usage
