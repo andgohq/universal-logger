@@ -2,22 +2,7 @@
 
 Logger for brower, nodejs and electron.
 
-## Setup
-
-Place `.npmrc` file below on the project root
-
-```plain
-registry=https://npm.pkg.github.com/andgohq
-```
-
-Place `~/.npmrc` file below on the user home
-
-```plain
-//npm.pkg.github.com/:_authToken=[GITHUB PERSONAL TOKEN]
-@andgohq:registry=https://npm.pkg.github.com/
-```
-
-Install package
+## Install
 
 ```sh
 npm install @andgohq/andgo-logger
@@ -26,7 +11,7 @@ npm install @andgohq/andgo-logger
 ## Usage
 
 ```typescript
-import { setLogLevel, initDatadog, logFactory } from 'andgo-logger';
+import { setLogLevel, initDatadog, logFactory } from '@andgohq/universal-logger';
 
 setLogLevel('develop');
 
@@ -58,14 +43,8 @@ npm start
 
 ```
 
-## Build & Publish
+## Build
 
 ```sh
-# windows binary on mac/linux
-npm run build:win
-# mac binary
-npm run build:mac
-
-# publish
-npm publish
+npm run build
 ```
