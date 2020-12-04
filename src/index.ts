@@ -6,6 +6,7 @@ import { datadogLogs, StatusType, Datacenter } from '@datadog/browser-logs';
 import { Context } from '@datadog/browser-core';
 
 let DATADOG_INITIALIZED = false;
+let PRETTY_PRINT = false;
 
 const PINO_TO_CONSOLE: Record<Level, StatusType> = {
   fatal: StatusType.error,
@@ -44,6 +45,7 @@ export function datadogMessage(message: string, context?: Context, status?: Stat
 }
 
 const baseLogger = pino({
+  prettyPrint: PRETTY_PRINT,
   level: 'debug', // this is overwritten by setLogLevel
   browser: {
     serialize: true,
@@ -73,8 +75,9 @@ const baseLogger = pino({
   },
 });
 
-export const setLogLevel = (level: Level) => {
+export const setLogLevel = (level: Level, pretty = false) => {
   baseLogger.level = level;
+  PRETTY_PRINT = pretty;
 };
 
 export type AGLoggerFunc = (

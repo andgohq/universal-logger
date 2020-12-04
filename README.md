@@ -16,7 +16,7 @@ import { setLogLevel, initDatadog, logFactory } from '@andgohq/universal-logger'
 setLogLevel('develop');
 
 // optionally you can setup Datadog integration
-initDatadog({ clientToken: '', applicationId: '' });
+// initDatadog({ clientToken: DATADOG_CLIENT_TOKEN, applicationId: APPLICATION_ID });
 
 const logger = logFactory('Main');
 
