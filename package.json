@@ -1,6 +1,6 @@
 {
   "name": "@andgohq/universal-logger",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Logger for brower, nodejs and electron",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
@@ -32,13 +32,11 @@
   "license": "MIT",
   "repository": "git://github.com/andgohq/universal-logger.git",
   "prettier": "@andgohq/prettier-config",
-  "peerDependencies": {
-    "pino-pretty": "^4.3.0"
-  },
   "dependencies": {
     "@datadog/browser-logs": "^1.26.1",
     "date-fns": "^2.16.1",
-    "pino": "^6.7.0"
+    "pino": "^6.7.0",
+    "pino-pretty": "^4.3.0"
   },
   "devDependencies": {
     "@andgohq/eslint-config-ts": "^1.0.0",
