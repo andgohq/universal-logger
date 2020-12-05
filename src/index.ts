@@ -67,6 +67,7 @@ export const logFactory = (name: string): AGLogger =>
     prettyPrint: options.prettyPrint
       ? {
           translateTime: 'SYS:HH:mm:ss',
+          ignore: 'pid,hostname',
         }
       : false,
     level: options.logLevel,
