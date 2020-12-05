@@ -25,10 +25,11 @@
     }
   },
   "scripts": {
-    "start": "parcel src/index.html",
-    "build": "parcel build src/index.ts"
+    "dev": "parcel src/index.html",
+    "build": "rm -rf dist && parcel build src/index.ts",
+    "clean": "rm -rf .parcel-cache dist"
   },
-  "author": "",
+  "author": "ANDGO, Inc.",
   "license": "MIT",
   "repository": "git://github.com/andgohq/universal-logger.git",
   "prettier": "@andgohq/prettier-config",

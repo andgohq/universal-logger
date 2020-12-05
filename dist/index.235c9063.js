@@ -6,7 +6,7 @@
 // anything defined in a previous bundle is accessed via the
 // orig method which is the require for previous bundles
 
-(function(modules, cache, entry, globalName) {
+(function(modules, cache, entry, mainEntry, parcelRequireName, globalName) {
   /* eslint-disable no-undef */
   var globalObject =
     typeof globalThis !== 'undefined'
@@ -22,8 +22,8 @@
 
   // Save the require from previous bundle to this closure if any
   var previousRequire =
-    typeof globalObject.parcelRequire === 'function' &&
-    globalObject.parcelRequire;
+    typeof globalObject[parcelRequireName] === 'function' &&
+    globalObject[parcelRequireName];
   // Do not use `require` to prevent Webpack from trying to bundle this call
   var nodeRequire =
     typeof module !== 'undefined' &&
@@ -37,7 +37,8 @@
         // cache jump to the current global require ie. the last bundle
         // that was added to the page.
         var currentRequire =
-          typeof parcelRequire === 'function' && parcelRequire;
+          typeof globalObject[parcelRequireName] === 'function' &&
+          globalObject[parcelRequireName];
         if (!jumped && currentRequire) {
           return currentRequire(name, true);
         }
@@ -105,16 +106,22 @@
     ];
   };
 
-  globalObject.parcelRequire = newRequire;
+  Object.defineProperty(newRequire, 'root', {
+    get: function() {
+      return globalObject[parcelRequireName];
+    },
+  });
+
+  globalObject[parcelRequireName] = newRequire;
 
   for (var i = 0; i < entry.length; i++) {
     newRequire(entry[i]);
   }
 
-  if (entry.length) {
+  if (mainEntry) {
     // Expose entry point to Node, AMD or browser globals
     // Based on https://github.com/ForbesLindesay/umd/blob/master/template.js
-    var mainExports = newRequire(entry[entry.length - 1]);
+    var mainExports = newRequire(mainEntry);
 
     // CommonJS
     if (typeof exports === 'object' && typeof module !== 'undefined') {
@@ -131,15 +138,11 @@
       this[globalName] = mainExports;
     }
   }
-})({"2075bdda7f3d1179ab1798efa7bdc0f0":[function(require,module,exports) {
-var global = arguments[3];
-var HMR_HOST = null;
-var HMR_PORT = 1234;
-var HMR_ENV_HASH = "d751713988987e9331980363e24189ce";
-module.bundle.HMR_BUNDLE_ID = "9bcdf2072047b0ae8c717af4491d83e4";
-/* global HMR_HOST, HMR_PORT, HMR_ENV_HASH */
+})({"UL4Xj":[function(require,module,exports) {
+var HMR_HOST = null;var HMR_PORT = 1234;var HMR_ENV_HASH = "d751713988987e9331980363e24189ce";module.bundle.HMR_BUNDLE_ID = "4707e05225fe8b34141b1ba7235c9063";/* global HMR_HOST, HMR_PORT, HMR_ENV_HASH */
 
 var OVERLAY_ID = '__parcel__error__overlay__';
+
 var OldModule = module.bundle.Module;
 
 function Module(moduleName) {
@@ -148,42 +151,58 @@ function Module(moduleName) {
     data: module.bundle.hotData,
     _acceptCallbacks: [],
     _disposeCallbacks: [],
-    accept: function (fn) {
-      this._acceptCallbacks.push(fn || function () {});
+    accept: function(fn) {
+      this._acceptCallbacks.push(fn || function() {});
     },
-    dispose: function (fn) {
+    dispose: function(fn) {
       this._disposeCallbacks.push(fn);
-    }
+    },
   };
+
   module.bundle.hotData = null;
 }
 
 module.bundle.Module = Module;
-var checkedAssets, assetsToAccept, acceptedAssets; // eslint-disable-next-line no-redeclare
+var checkedAssets, assetsToAccept, acceptedAssets;
 
+function getHostname() {
+  return (
+    HMR_HOST ||
+    (location.protocol.indexOf('http') === 0 ? location.hostname : 'localhost')
+  );
+}
+
+function getPort() {
+  return HMR_PORT || location.port;
+}
+
+// eslint-disable-next-line no-redeclare
 var parent = module.bundle.parent;
-
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
-  var hostname = HMR_HOST || (location.protocol.indexOf('http') === 0 ? location.hostname : 'localhost');
-  var port = HMR_PORT || location.port;
+  var hostname = getHostname();
+  var port = getPort();
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + (port ? ':' + port : '') + '/');
-
-  ws.onmessage = function (event) {
+  var ws = new WebSocket(
+    protocol + '://' + hostname + (port ? ':' + port : '') + '/',
+  );
+  ws.onmessage = function(event) {
     checkedAssets = {};
     assetsToAccept = [];
     acceptedAssets = {};
+
     var data = JSON.parse(event.data);
 
     if (data.type === 'update') {
       // Remove error overlay if there is one
       removeErrorOverlay();
-      let assets = data.assets.filter(asset => asset.envHash === HMR_ENV_HASH); // Handle HMR Update
 
+      let assets = data.assets.filter(asset => asset.envHash === HMR_ENV_HASH);
+
+      // Handle HMR Update
       var handled = false;
       assets.forEach(asset => {
-        var didAccept = asset.type === 'css' || hmrAcceptCheck(global.parcelRequire, asset.id);
-
+        var didAccept =
+          asset.type === 'css' || hmrAcceptCheck(module.bundle.root, asset.id);
         if (didAccept) {
           handled = true;
         }
@@ -191,13 +210,13 @@ if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
 
       if (handled) {
         console.clear();
-        assets.forEach(function (asset) {
-          hmrApply(global.parcelRequire, asset);
+
+        assets.forEach(function(asset) {
+          hmrApply(module.bundle.root, asset);
         });
 
         for (var i = 0; i < assetsToAccept.length; i++) {
           var id = assetsToAccept[i][1];
-
           if (!acceptedAssets[id]) {
             hmrAcceptRun(assetsToAccept[i][0], id);
           }
@@ -210,29 +229,36 @@ if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
     if (data.type === 'error') {
       // Log parcel errors to console
       for (let ansiDiagnostic of data.diagnostics.ansi) {
-        let stack = ansiDiagnostic.codeframe ? ansiDiagnostic.codeframe : ansiDiagnostic.stack;
-        console.error('🚨 [parcel]: ' + ansiDiagnostic.message + '\n' + stack + '\n\n' + ansiDiagnostic.hints.join('\n'));
-      } // Render the fancy html overlay
+        let stack = ansiDiagnostic.codeframe
+          ? ansiDiagnostic.codeframe
+          : ansiDiagnostic.stack;
 
+        console.error(
+          '🚨 [parcel]: ' +
+            ansiDiagnostic.message +
+            '\n' +
+            stack +
+            '\n\n' +
+            ansiDiagnostic.hints.join('\n'),
+        );
+      }
 
+      // Render the fancy html overlay
       removeErrorOverlay();
       var overlay = createErrorOverlay(data.diagnostics.html);
       document.body.appendChild(overlay);
     }
   };
-
-  ws.onerror = function (e) {
+  ws.onerror = function(e) {
     console.error(e.message);
   };
-
-  ws.onclose = function (e) {
+  ws.onclose = function(e) {
     console.warn('[parcel] 🚨 Connection to the HMR server was lost');
   };
 }
 
 function removeErrorOverlay() {
   var overlay = document.getElementById(OVERLAY_ID);
-
   if (overlay) {
     overlay.remove();
     console.log('[parcel] ✨ Error resolved');
@@ -242,10 +268,13 @@ function removeErrorOverlay() {
 function createErrorOverlay(diagnostics) {
   var overlay = document.createElement('div');
   overlay.id = OVERLAY_ID;
-  let errorHTML = '<div style="background: black; opacity: 0.85; font-size: 16px; color: white; position: fixed; height: 100%; width: 100%; top: 0px; left: 0px; padding: 30px; font-family: Menlo, Consolas, monospace; z-index: 9999;">';
+
+  let errorHTML =
+    '<div style="background: black; opacity: 0.85; font-size: 16px; color: white; position: fixed; height: 100%; width: 100%; top: 0px; left: 0px; padding: 30px; font-family: Menlo, Consolas, monospace; z-index: 9999;">';
 
   for (let diagnostic of diagnostics) {
     let stack = diagnostic.codeframe ? diagnostic.codeframe : diagnostic.stack;
+
     errorHTML += `
       <div>
         <div style="font-size: 18px; font-weight: bold; margin-top: 20px;">
@@ -262,13 +291,14 @@ function createErrorOverlay(diagnostics) {
   }
 
   errorHTML += '</div>';
+
   overlay.innerHTML = errorHTML;
+
   return overlay;
 }
 
 function getParents(bundle, id) {
   var modules = bundle.modules;
-
   if (!modules) {
     return [];
   }
@@ -280,7 +310,7 @@ function getParents(bundle, id) {
     for (d in modules[k][1]) {
       dep = modules[k][1][d];
 
-      if (dep === id || Array.isArray(dep) && dep[dep.length - 1] === id) {
+      if (dep === id || (Array.isArray(dep) && dep[dep.length - 1] === id)) {
         parents.push([bundle, k]);
       }
     }
@@ -295,30 +325,39 @@ function getParents(bundle, id) {
 
 function updateLink(link) {
   var newLink = link.cloneNode();
-
-  newLink.onload = function () {
+  newLink.onload = function() {
     if (link.parentNode !== null) {
       link.parentNode.removeChild(link);
     }
   };
-
-  newLink.setAttribute('href', link.getAttribute('href').split('?')[0] + '?' + Date.now());
+  newLink.setAttribute(
+    'href',
+    link.getAttribute('href').split('?')[0] + '?' + Date.now(),
+  );
   link.parentNode.insertBefore(newLink, link.nextSibling);
 }
 
 var cssTimeout = null;
-
 function reloadCSS() {
   if (cssTimeout) {
     return;
   }
 
-  cssTimeout = setTimeout(function () {
+  cssTimeout = setTimeout(function() {
     var links = document.querySelectorAll('link[rel="stylesheet"]');
-
     for (var i = 0; i < links.length; i++) {
-      var absolute = /^https?:\/\//i.test(links[i].getAttribute('href'));
-
+      var href = links[i].getAttribute('href');
+      var hostname = getHostname();
+      var servedFromHMRServer =
+        hostname === 'localhost'
+          ? new RegExp(
+              '^(https?:\\/\\/(0.0.0.0|127.0.0.1)|localhost):' + getPort(),
+            ).test(href)
+          : href.indexOf(hostname + ':' + getPort());
+      var absolute =
+        /^https?:\/\//i.test(href) &&
+        href.indexOf(window.location.origin) !== 0 &&
+        !servedFromHMRServer;
       if (!absolute) {
         updateLink(links[i]);
       }
@@ -330,7 +369,6 @@ function reloadCSS() {
 
 function hmrApply(bundle, asset) {
   var modules = bundle.modules;
-
   if (!modules) {
     return;
   }
@@ -363,14 +401,16 @@ function hmrAcceptCheck(bundle, id) {
   }
 
   checkedAssets[id] = true;
+
   var cached = bundle.cache[id];
+
   assetsToAccept.push([bundle, id]);
 
   if (cached && cached.hot && cached.hot._acceptCallbacks.length) {
     return true;
   }
 
-  return getParents(global.parcelRequire, id).some(function (v) {
+  return getParents(module.bundle.root, id).some(function(v) {
     return hmrAcceptCheck(v[0], v[1]);
   });
 }
@@ -378,45 +418,42 @@ function hmrAcceptCheck(bundle, id) {
 function hmrAcceptRun(bundle, id) {
   var cached = bundle.cache[id];
   bundle.hotData = {};
-
   if (cached && cached.hot) {
     cached.hot.data = bundle.hotData;
   }
 
   if (cached && cached.hot && cached.hot._disposeCallbacks.length) {
-    cached.hot._disposeCallbacks.forEach(function (cb) {
+    cached.hot._disposeCallbacks.forEach(function(cb) {
       cb(bundle.hotData);
     });
   }
 
   delete bundle.cache[id];
   bundle(id);
+
   cached = bundle.cache[id];
-
   if (cached && cached.hot && cached.hot._acceptCallbacks.length) {
-    cached.hot._acceptCallbacks.forEach(function (cb) {
-      var assetsToAlsoAccept = cb(function () {
-        return getParents(global.parcelRequire, id);
+    cached.hot._acceptCallbacks.forEach(function(cb) {
+      var assetsToAlsoAccept = cb(function() {
+        return getParents(module.bundle.root, id);
       });
-
       if (assetsToAlsoAccept && assetsToAccept.length) {
         assetsToAccept.push.apply(assetsToAccept, assetsToAlsoAccept);
       }
     });
   }
-
   acceptedAssets[id] = true;
 }
-},{}],"f9d1fdab4daafc675f509edfcc40bc23":[function(require,module,exports) {
+
+},{}],"1NdLb":[function(require,module,exports) {
 "use strict";
 
 var _index = require("./index");
 
-const logger = (0, _index.logFactory)('Main');
-const childLogger = (0, _index.logFactory)('Child');
-
 const output = level => {
   (0, _index.setLogLevel)(level);
+  const logger = (0, _index.logFactory)('Main');
+  const childLogger = (0, _index.logFactory)('Child');
   logger.fatal('fatal test');
   logger.error('error test');
   logger.error({
@@ -443,7 +480,7 @@ console.log('=== DEBUG LEVEL ===');
 output('debug');
 console.log('=== INFO LEVEL ===');
 output('info');
-},{"./index":"7843b3960e086726267ff606847fc92b"}],"7843b3960e086726267ff606847fc92b":[function(require,module,exports) {
+},{"./index":"7032p"}],"7032p":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -464,6 +501,7 @@ var _browserLogs = require("@datadog/browser-logs");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 let DATADOG_INITIALIZED = false;
+let PRETTY_PRINT = false;
 const PINO_TO_CONSOLE = {
   fatal: _browserLogs.StatusType.error,
   error: _browserLogs.StatusType.error,
@@ -497,6 +535,7 @@ function datadogMessage(message, context, status) {
 }
 
 const baseLogger = (0, _pino.default)({
+  prettyPrint: PRETTY_PRINT,
   level: 'debug',
   // this is overwritten by setLogLevel
   browser: {
@@ -516,11 +555,12 @@ const baseLogger = (0, _pino.default)({
         locale: _ja.default
       });
       const levelLabel = PINO_TO_CONSOLE[baseLogger.levels.labels[`${level}`]];
+      const s = `${timeLabel} [${module}] ${errMsg}${msg ?? ''}`;
 
       if (Object.keys(rest).length) {
-        console[levelLabel](`${timeLabel} ${errMsg}${msg ?? ''}`, rest);
+        console[levelLabel](s, rest);
       } else {
-        console[levelLabel](`${timeLabel} ${errMsg}${msg ?? ''}`);
+        console[levelLabel](s);
       }
 
       datadogMessage(msg ?? '', { ...rest
@@ -529,8 +569,9 @@ const baseLogger = (0, _pino.default)({
   }
 });
 
-const setLogLevel = level => {
+const setLogLevel = (level, pretty = false) => {
   baseLogger.level = level;
+  PRETTY_PRINT = pretty;
 };
 
 exports.setLogLevel = setLogLevel;
@@ -544,7 +585,7 @@ const logFactory = name => {
 };
 
 exports.logFactory = logFactory;
-},{"pino":"53406330d12493e24777f49b9233054b","@datadog/browser-logs":"6e0c3116e37f766869430b3c4a2787cf","date-fns":"8ef0b0bcdaf6b121d785c4674025d8a8","date-fns/locale/ja":"e01b06873970098a24800651e0ccce10"}],"53406330d12493e24777f49b9233054b":[function(require,module,exports) {
+},{"pino":"4cYWJ","date-fns":"3Tb7P","date-fns/locale/ja":"mgcsp","@datadog/browser-logs":"2j2BB"}],"4cYWJ":[function(require,module,exports) {
 'use strict'
 
 var format = require('quick-format-unescaped')
@@ -890,7 +931,7 @@ function pfGlobalThisOrFallback () {
 }
 /* eslint-enable */
 
-},{"quick-format-unescaped":"87585a7c1c272705375f55ae0b6eed76"}],"87585a7c1c272705375f55ae0b6eed76":[function(require,module,exports) {
+},{"quick-format-unescaped":"7uXx4"}],"7uXx4":[function(require,module,exports) {
 'use strict'
 function tryStringify (o) {
   try { return JSON.stringify(o) } catch(e) { return '"[Circular]"' }
@@ -989,3711 +1030,7 @@ function format(f, args, opts) {
   return str
 }
 
-},{}],"6e0c3116e37f766869430b3c4a2787cf":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var browser_core_1 = require("@datadog/browser-core");
-exports.Datacenter = browser_core_1.Datacenter;
-var logger_1 = require("./domain/logger");
-exports.StatusType = logger_1.StatusType;
-exports.HandlerType = logger_1.HandlerType;
-exports.Logger = logger_1.Logger;
-var logs_entry_1 = require("./boot/logs.entry");
-exports.datadogLogs = logs_entry_1.datadogLogs;
-//# sourceMappingURL=index.js.map
-},{"@datadog/browser-core":"2c4da984019bc1ef174ca0e92bb0855d","./domain/logger":"c554a92bfe782f83f0d50f842e4de8fb","./boot/logs.entry":"c79a2cf2f6490c66d1cda96afe8b5ba6"}],"2c4da984019bc1ef174ca0e92bb0855d":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = require("tslib");
-var configuration_1 = require("./domain/configuration");
-exports.DEFAULT_CONFIGURATION = configuration_1.DEFAULT_CONFIGURATION;
-exports.isIntakeRequest = configuration_1.isIntakeRequest;
-exports.buildCookieOptions = configuration_1.buildCookieOptions;
-var automaticErrorCollection_1 = require("./domain/automaticErrorCollection");
-exports.startAutomaticErrorCollection = automaticErrorCollection_1.startAutomaticErrorCollection;
-var tracekit_1 = require("./domain/tracekit");
-exports.computeStackTrace = tracekit_1.computeStackTrace;
-var init_1 = require("./boot/init");
-exports.BuildMode = init_1.BuildMode;
-exports.Datacenter = init_1.Datacenter;
-exports.defineGlobal = init_1.defineGlobal;
-exports.makeGlobal = init_1.makeGlobal;
-exports.commonInit = init_1.commonInit;
-exports.checkCookiesAuthorized = init_1.checkCookiesAuthorized;
-exports.checkIsNotLocalFile = init_1.checkIsNotLocalFile;
-var internalMonitoring_1 = require("./domain/internalMonitoring");
-exports.monitored = internalMonitoring_1.monitored;
-exports.monitor = internalMonitoring_1.monitor;
-exports.addMonitoringMessage = internalMonitoring_1.addMonitoringMessage;
-var observable_1 = require("./tools/observable");
-exports.Observable = observable_1.Observable;
-var sessionManagement_1 = require("./domain/sessionManagement");
-exports.startSessionManagement = sessionManagement_1.startSessionManagement;
-exports.SESSION_TIME_OUT_DELAY = sessionManagement_1.SESSION_TIME_OUT_DELAY;
-// Exposed for tests
-exports.SESSION_COOKIE_NAME = sessionManagement_1.SESSION_COOKIE_NAME;
-exports.stopSessionManagement = sessionManagement_1.stopSessionManagement;
-var transport_1 = require("./transport/transport");
-exports.HttpRequest = transport_1.HttpRequest;
-exports.Batch = transport_1.Batch;
-tslib_1.__exportStar(require("./tools/urlPolyfill"), exports);
-tslib_1.__exportStar(require("./tools/utils"), exports);
-var error_1 = require("./tools/error");
-exports.ErrorSource = error_1.ErrorSource;
-exports.formatUnknownError = error_1.formatUnknownError;
-var context_1 = require("./tools/context");
-exports.combine = context_1.combine;
-exports.deepClone = context_1.deepClone;
-exports.withSnakeCaseKeys = context_1.withSnakeCaseKeys;
-var cookie_1 = require("./browser/cookie");
-exports.areCookiesAuthorized = cookie_1.areCookiesAuthorized;
-exports.getCookie = cookie_1.getCookie;
-exports.setCookie = cookie_1.setCookie;
-exports.COOKIE_ACCESS_DELAY = cookie_1.COOKIE_ACCESS_DELAY;
-var xhrProxy_1 = require("./browser/xhrProxy");
-exports.startXhrProxy = xhrProxy_1.startXhrProxy;
-exports.resetXhrProxy = xhrProxy_1.resetXhrProxy;
-var fetchProxy_1 = require("./browser/fetchProxy");
-exports.startFetchProxy = fetchProxy_1.startFetchProxy;
-exports.resetFetchProxy = fetchProxy_1.resetFetchProxy;
-var boundedBuffer_1 = require("./tools/boundedBuffer");
-exports.BoundedBuffer = boundedBuffer_1.BoundedBuffer;
-var contextManager_1 = require("./tools/contextManager");
-exports.createContextManager = contextManager_1.createContextManager;
-tslib_1.__exportStar(require("./tools/specHelper"), exports);
-//# sourceMappingURL=index.js.map
-},{"tslib":"a212b5bd40bedbc434eaed1b3a2942b1","./domain/configuration":"6763541ca333269e57118bc4c50800cf","./domain/automaticErrorCollection":"be29ffc5ff3ec36df8a0526d8efa37e5","./domain/tracekit":"35ac35b5e9178c44050ae5baee46483f","./boot/init":"a64034b0e647d8ea8b683cc52eb89f8d","./domain/internalMonitoring":"6d081b3adf74fb2ed9632aae8731586a","./tools/observable":"38310c2b77d6e778570b5a56ef9806bb","./domain/sessionManagement":"183a6e16ab4f7d1c9cc409df2a4654f3","./transport/transport":"7e0163e11a7ed0141607e7e5d6bf43a0","./tools/urlPolyfill":"30a74b82219bd3790087d6a539e0dec1","./tools/utils":"a4c0c5c567ad3af2f7aa1ae7108bd730","./tools/error":"0dddf352a2255acaa5426f9ee2e94d13","./tools/context":"0a95ec8b7489425ff8c95bc9182230cf","./browser/cookie":"ebaf883ffc0dcd01cd439a4ca56c6088","./browser/xhrProxy":"dfdf6d7dbd141ea1bafda02e0c0b4cae","./browser/fetchProxy":"139ace042ae6bdfd7849fc66c7e6554e","./tools/boundedBuffer":"c7de07e42779b3f5dae266fc246d6b22","./tools/contextManager":"a2b38010c0d318219e1b264edf210175","./tools/specHelper":"4086e826a87d0c04dcb7fa2132257e73"}],"a212b5bd40bedbc434eaed1b3a2942b1":[function(require,module,exports) {
-var global = arguments[3];
-var define;
-
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
-***************************************************************************** */
-
-/* global global, define, System, Reflect, Promise */
-var __extends;
-
-var __assign;
-
-var __rest;
-
-var __decorate;
-
-var __param;
-
-var __metadata;
-
-var __awaiter;
-
-var __generator;
-
-var __exportStar;
-
-var __values;
-
-var __read;
-
-var __spread;
-
-var __spreadArrays;
-
-var __await;
-
-var __asyncGenerator;
-
-var __asyncDelegator;
-
-var __asyncValues;
-
-var __makeTemplateObject;
-
-var __importStar;
-
-var __importDefault;
-
-var __classPrivateFieldGet;
-
-var __classPrivateFieldSet;
-
-var __createBinding;
-
-(function (factory) {
-  var root = typeof global === "object" ? global : typeof self === "object" ? self : typeof this === "object" ? this : {};
-
-  if (typeof define === "function" && define.amd) {
-    define("tslib", ["exports"], function (exports) {
-      factory(createExporter(root, createExporter(exports)));
-    });
-  } else if (typeof module === "object" && typeof module.exports === "object") {
-    factory(createExporter(root, createExporter(module.exports)));
-  } else {
-    factory(createExporter(root));
-  }
-
-  function createExporter(exports, previous) {
-    if (exports !== root) {
-      if (typeof Object.create === "function") {
-        Object.defineProperty(exports, "__esModule", {
-          value: true
-        });
-      } else {
-        exports.__esModule = true;
-      }
-    }
-
-    return function (id, v) {
-      return exports[id] = previous ? previous(id, v) : v;
-    };
-  }
-})(function (exporter) {
-  var extendStatics = Object.setPrototypeOf || {
-    __proto__: []
-  } instanceof Array && function (d, b) {
-    d.__proto__ = b;
-  } || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-  };
-
-  __extends = function (d, b) {
-    extendStatics(d, b);
-
-    function __() {
-      this.constructor = d;
-    }
-
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-  };
-
-  __assign = Object.assign || function (t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-      s = arguments[i];
-
-      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-    }
-
-    return t;
-  };
-
-  __rest = function (s, e) {
-    var t = {};
-
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
-
-    if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-      if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
-    }
-    return t;
-  };
-
-  __decorate = function (decorators, target, key, desc) {
-    var c = arguments.length,
-        r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
-        d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-  };
-
-  __param = function (paramIndex, decorator) {
-    return function (target, key) {
-      decorator(target, key, paramIndex);
-    };
-  };
-
-  __metadata = function (metadataKey, metadataValue) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
-  };
-
-  __awaiter = function (thisArg, _arguments, P, generator) {
-    function adopt(value) {
-      return value instanceof P ? value : new P(function (resolve) {
-        resolve(value);
-      });
-    }
-
-    return new (P || (P = Promise))(function (resolve, reject) {
-      function fulfilled(value) {
-        try {
-          step(generator.next(value));
-        } catch (e) {
-          reject(e);
-        }
-      }
-
-      function rejected(value) {
-        try {
-          step(generator["throw"](value));
-        } catch (e) {
-          reject(e);
-        }
-      }
-
-      function step(result) {
-        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-      }
-
-      step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-  };
-
-  __generator = function (thisArg, body) {
-    var _ = {
-      label: 0,
-      sent: function () {
-        if (t[0] & 1) throw t[1];
-        return t[1];
-      },
-      trys: [],
-      ops: []
-    },
-        f,
-        y,
-        t,
-        g;
-    return g = {
-      next: verb(0),
-      "throw": verb(1),
-      "return": verb(2)
-    }, typeof Symbol === "function" && (g[Symbol.iterator] = function () {
-      return this;
-    }), g;
-
-    function verb(n) {
-      return function (v) {
-        return step([n, v]);
-      };
-    }
-
-    function step(op) {
-      if (f) throw new TypeError("Generator is already executing.");
-
-      while (_) try {
-        if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-        if (y = 0, t) op = [op[0] & 2, t.value];
-
-        switch (op[0]) {
-          case 0:
-          case 1:
-            t = op;
-            break;
-
-          case 4:
-            _.label++;
-            return {
-              value: op[1],
-              done: false
-            };
-
-          case 5:
-            _.label++;
-            y = op[1];
-            op = [0];
-            continue;
-
-          case 7:
-            op = _.ops.pop();
-
-            _.trys.pop();
-
-            continue;
-
-          default:
-            if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
-              _ = 0;
-              continue;
-            }
-
-            if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
-              _.label = op[1];
-              break;
-            }
-
-            if (op[0] === 6 && _.label < t[1]) {
-              _.label = t[1];
-              t = op;
-              break;
-            }
-
-            if (t && _.label < t[2]) {
-              _.label = t[2];
-
-              _.ops.push(op);
-
-              break;
-            }
-
-            if (t[2]) _.ops.pop();
-
-            _.trys.pop();
-
-            continue;
-        }
-
-        op = body.call(thisArg, _);
-      } catch (e) {
-        op = [6, e];
-        y = 0;
-      } finally {
-        f = t = 0;
-      }
-
-      if (op[0] & 5) throw op[1];
-      return {
-        value: op[0] ? op[1] : void 0,
-        done: true
-      };
-    }
-  };
-
-  __createBinding = function (o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-  };
-
-  __exportStar = function (m, exports) {
-    for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) exports[p] = m[p];
-  };
-
-  __values = function (o) {
-    var s = typeof Symbol === "function" && Symbol.iterator,
-        m = s && o[s],
-        i = 0;
-    if (m) return m.call(o);
-    if (o && typeof o.length === "number") return {
-      next: function () {
-        if (o && i >= o.length) o = void 0;
-        return {
-          value: o && o[i++],
-          done: !o
-        };
-      }
-    };
-    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-  };
-
-  __read = function (o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o),
-        r,
-        ar = [],
-        e;
-
-    try {
-      while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    } catch (error) {
-      e = {
-        error: error
-      };
-    } finally {
-      try {
-        if (r && !r.done && (m = i["return"])) m.call(i);
-      } finally {
-        if (e) throw e.error;
-      }
-    }
-
-    return ar;
-  };
-
-  __spread = function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-
-    return ar;
-  };
-
-  __spreadArrays = function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-
-    for (var r = Array(s), k = 0, i = 0; i < il; i++) for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++) r[k] = a[j];
-
-    return r;
-  };
-
-  __await = function (v) {
-    return this instanceof __await ? (this.v = v, this) : new __await(v);
-  };
-
-  __asyncGenerator = function (thisArg, _arguments, generator) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var g = generator.apply(thisArg, _arguments || []),
-        i,
-        q = [];
-    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () {
-      return this;
-    }, i;
-
-    function verb(n) {
-      if (g[n]) i[n] = function (v) {
-        return new Promise(function (a, b) {
-          q.push([n, v, a, b]) > 1 || resume(n, v);
-        });
-      };
-    }
-
-    function resume(n, v) {
-      try {
-        step(g[n](v));
-      } catch (e) {
-        settle(q[0][3], e);
-      }
-    }
-
-    function step(r) {
-      r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
-    }
-
-    function fulfill(value) {
-      resume("next", value);
-    }
-
-    function reject(value) {
-      resume("throw", value);
-    }
-
-    function settle(f, v) {
-      if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]);
-    }
-  };
-
-  __asyncDelegator = function (o) {
-    var i, p;
-    return i = {}, verb("next"), verb("throw", function (e) {
-      throw e;
-    }), verb("return"), i[Symbol.iterator] = function () {
-      return this;
-    }, i;
-
-    function verb(n, f) {
-      i[n] = o[n] ? function (v) {
-        return (p = !p) ? {
-          value: __await(o[n](v)),
-          done: n === "return"
-        } : f ? f(v) : v;
-      } : f;
-    }
-  };
-
-  __asyncValues = function (o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator],
-        i;
-    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () {
-      return this;
-    }, i);
-
-    function verb(n) {
-      i[n] = o[n] && function (v) {
-        return new Promise(function (resolve, reject) {
-          v = o[n](v), settle(resolve, reject, v.done, v.value);
-        });
-      };
-    }
-
-    function settle(resolve, reject, d, v) {
-      Promise.resolve(v).then(function (v) {
-        resolve({
-          value: v,
-          done: d
-        });
-      }, reject);
-    }
-  };
-
-  __makeTemplateObject = function (cooked, raw) {
-    if (Object.defineProperty) {
-      Object.defineProperty(cooked, "raw", {
-        value: raw
-      });
-    } else {
-      cooked.raw = raw;
-    }
-
-    return cooked;
-  };
-
-  __importStar = function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-  };
-
-  __importDefault = function (mod) {
-    return mod && mod.__esModule ? mod : {
-      "default": mod
-    };
-  };
-
-  __classPrivateFieldGet = function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-      throw new TypeError("attempted to get private field on non-instance");
-    }
-
-    return privateMap.get(receiver);
-  };
-
-  __classPrivateFieldSet = function (receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-      throw new TypeError("attempted to set private field on non-instance");
-    }
-
-    privateMap.set(receiver, value);
-    return value;
-  };
-
-  exporter("__extends", __extends);
-  exporter("__assign", __assign);
-  exporter("__rest", __rest);
-  exporter("__decorate", __decorate);
-  exporter("__param", __param);
-  exporter("__metadata", __metadata);
-  exporter("__awaiter", __awaiter);
-  exporter("__generator", __generator);
-  exporter("__exportStar", __exportStar);
-  exporter("__createBinding", __createBinding);
-  exporter("__values", __values);
-  exporter("__read", __read);
-  exporter("__spread", __spread);
-  exporter("__spreadArrays", __spreadArrays);
-  exporter("__await", __await);
-  exporter("__asyncGenerator", __asyncGenerator);
-  exporter("__asyncDelegator", __asyncDelegator);
-  exporter("__asyncValues", __asyncValues);
-  exporter("__makeTemplateObject", __makeTemplateObject);
-  exporter("__importStar", __importStar);
-  exporter("__importDefault", __importDefault);
-  exporter("__classPrivateFieldGet", __classPrivateFieldGet);
-  exporter("__classPrivateFieldSet", __classPrivateFieldSet);
-});
-},{}],"6763541ca333269e57118bc4c50800cf":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = require("tslib");
-var init_1 = require("../boot/init");
-var cookie_1 = require("../browser/cookie");
-var urlPolyfill_1 = require("../tools/urlPolyfill");
-var utils_1 = require("../tools/utils");
-exports.DEFAULT_CONFIGURATION = {
-    allowedTracingOrigins: [],
-    maxErrorsByMinute: 3000,
-    maxInternalMonitoringMessagesPerPage: 15,
-    resourceSampleRate: 100,
-    sampleRate: 100,
-    silentMultipleInit: false,
-    trackInteractions: false,
-    /**
-     * arbitrary value, byte precision not needed
-     */
-    requestErrorResponseLengthLimit: 32 * utils_1.ONE_KILO_BYTE,
-    /**
-     * flush automatically, aim to be lower than ALB connection timeout
-     * to maximize connection reuse.
-     */
-    flushTimeout: 30 * utils_1.ONE_SECOND,
-    /**
-     * Logs intake limit
-     */
-    maxBatchSize: 50,
-    maxMessageSize: 256 * utils_1.ONE_KILO_BYTE,
-    /**
-     * beacon payload max queue size implementation is 64kb
-     * ensure that we leave room for logs, rum and potential other users
-     */
-    batchBytesLimit: 16 * utils_1.ONE_KILO_BYTE,
-};
-function buildConfiguration(userConfiguration, buildEnv) {
-    var transportConfiguration = {
-        applicationId: userConfiguration.applicationId,
-        buildMode: buildEnv.buildMode,
-        clientToken: userConfiguration.clientToken,
-        env: userConfiguration.env,
-        proxyHost: userConfiguration.proxyHost,
-        sdkVersion: buildEnv.sdkVersion,
-        service: userConfiguration.service,
-        site: userConfiguration.site || init_1.INTAKE_SITE[userConfiguration.datacenter || buildEnv.datacenter],
-        version: userConfiguration.version,
-    };
-    var enableExperimentalFeatures = Array.isArray(userConfiguration.enableExperimentalFeatures)
-        ? userConfiguration.enableExperimentalFeatures
-        : [];
-    var configuration = tslib_1.__assign({ cookieOptions: buildCookieOptions(userConfiguration), isEnabled: function (feature) {
-            return utils_1.includes(enableExperimentalFeatures, feature);
-        }, logsEndpoint: getEndpoint('browser', transportConfiguration), proxyHost: userConfiguration.proxyHost, rumEndpoint: getEndpoint('rum', transportConfiguration), service: userConfiguration.service, traceEndpoint: getEndpoint('public-trace', transportConfiguration) }, exports.DEFAULT_CONFIGURATION);
-    if (userConfiguration.internalMonitoringApiKey) {
-        configuration.internalMonitoringEndpoint = getEndpoint('browser', transportConfiguration, 'browser-agent-internal-monitoring');
-    }
-    if ('allowedTracingOrigins' in userConfiguration) {
-        configuration.allowedTracingOrigins = userConfiguration.allowedTracingOrigins;
-    }
-    if ('sampleRate' in userConfiguration) {
-        configuration.sampleRate = userConfiguration.sampleRate;
-    }
-    if ('resourceSampleRate' in userConfiguration) {
-        configuration.resourceSampleRate = userConfiguration.resourceSampleRate;
-    }
-    if ('trackInteractions' in userConfiguration) {
-        configuration.trackInteractions = !!userConfiguration.trackInteractions;
-    }
-    if (transportConfiguration.buildMode === init_1.BuildMode.E2E_TEST) {
-        configuration.internalMonitoringEndpoint = '<<< E2E INTERNAL MONITORING ENDPOINT >>>';
-        configuration.logsEndpoint = '<<< E2E LOGS ENDPOINT >>>';
-        configuration.rumEndpoint = '<<< E2E RUM ENDPOINT >>>';
-    }
-    if (transportConfiguration.buildMode === init_1.BuildMode.STAGING) {
-        if (userConfiguration.replica !== undefined) {
-            var replicaTransportConfiguration = tslib_1.__assign(tslib_1.__assign({}, transportConfiguration), { applicationId: userConfiguration.replica.applicationId, clientToken: userConfiguration.replica.clientToken, site: init_1.INTAKE_SITE[init_1.Datacenter.US] });
-            configuration.replica = {
-                applicationId: userConfiguration.replica.applicationId,
-                internalMonitoringEndpoint: getEndpoint('browser', replicaTransportConfiguration, 'browser-agent-internal-monitoring'),
-                logsEndpoint: getEndpoint('browser', replicaTransportConfiguration),
-                rumEndpoint: getEndpoint('rum', replicaTransportConfiguration),
-            };
-        }
-    }
-    return configuration;
-}
-exports.buildConfiguration = buildConfiguration;
-function buildCookieOptions(userConfiguration) {
-    var cookieOptions = {};
-    cookieOptions.secure = mustUseSecureCookie(userConfiguration);
-    cookieOptions.crossSite = !!userConfiguration.useCrossSiteSessionCookie;
-    if (!!userConfiguration.trackSessionAcrossSubdomains) {
-        cookieOptions.domain = cookie_1.getCurrentSite();
-    }
-    return cookieOptions;
-}
-exports.buildCookieOptions = buildCookieOptions;
-function getEndpoint(type, conf, source) {
-    var tags = "sdk_version:" + conf.sdkVersion +
-        ("" + (conf.env ? ",env:" + conf.env : '')) +
-        ("" + (conf.service ? ",service:" + conf.service : '')) +
-        ("" + (conf.version ? ",version:" + conf.version : ''));
-    var datadogHost = type + "-http-intake.logs." + conf.site;
-    var host = conf.proxyHost ? conf.proxyHost : datadogHost;
-    var proxyParameter = conf.proxyHost ? "ddhost=" + datadogHost + "&" : '';
-    var applicationIdParameter = conf.applicationId ? "_dd.application_id=" + conf.applicationId + "&" : '';
-    var parameters = "" + applicationIdParameter + proxyParameter + "ddsource=" + (source || 'browser') + "&ddtags=" + tags;
-    return "https://" + host + "/v1/input/" + conf.clientToken + "?" + parameters;
-}
-function isIntakeRequest(url, configuration) {
-    return (urlPolyfill_1.getPathName(url).indexOf('/v1/input/') !== -1 &&
-        (urlPolyfill_1.haveSameOrigin(url, configuration.logsEndpoint) ||
-            urlPolyfill_1.haveSameOrigin(url, configuration.rumEndpoint) ||
-            urlPolyfill_1.haveSameOrigin(url, configuration.traceEndpoint) ||
-            (!!configuration.internalMonitoringEndpoint && urlPolyfill_1.haveSameOrigin(url, configuration.internalMonitoringEndpoint)) ||
-            (!!configuration.replica &&
-                (urlPolyfill_1.haveSameOrigin(url, configuration.replica.logsEndpoint) ||
-                    urlPolyfill_1.haveSameOrigin(url, configuration.replica.rumEndpoint) ||
-                    urlPolyfill_1.haveSameOrigin(url, configuration.replica.internalMonitoringEndpoint)))));
-}
-exports.isIntakeRequest = isIntakeRequest;
-function mustUseSecureCookie(userConfiguration) {
-    return !!userConfiguration.useSecureSessionCookie || !!userConfiguration.useCrossSiteSessionCookie;
-}
-//# sourceMappingURL=configuration.js.map
-},{"tslib":"a212b5bd40bedbc434eaed1b3a2942b1","../boot/init":"a64034b0e647d8ea8b683cc52eb89f8d","../browser/cookie":"ebaf883ffc0dcd01cd439a4ca56c6088","../tools/urlPolyfill":"30a74b82219bd3790087d6a539e0dec1","../tools/utils":"a4c0c5c567ad3af2f7aa1ae7108bd730"}],"a64034b0e647d8ea8b683cc52eb89f8d":[function(require,module,exports) {
-"use strict";
-
-var _a;
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var tslib_1 = require("tslib");
-
-var cookie_1 = require("../browser/cookie");
-
-var configuration_1 = require("../domain/configuration");
-
-var internalMonitoring_1 = require("../domain/internalMonitoring");
-
-function makeGlobal(stub) {
-  var global = tslib_1.__assign(tslib_1.__assign({}, stub), {
-    // This API method is intentionally not monitored, since the only thing executed is the
-    // user-provided 'callback'.  All SDK usages executed in the callback should be monitored, and
-    // we don't want to interfer with the user uncaught exceptions.
-    onReady: function (callback) {
-      callback();
-    }
-  }); // Add an "hidden" property to set debug mode. We define it that way to hide it
-  // as much as possible but of course it's not a real protection.
-
-
-  Object.defineProperty(global, '_setDebug', {
-    get: function () {
-      return internalMonitoring_1.setDebugMode;
-    },
-    enumerable: false
-  });
-  return global;
-}
-
-exports.makeGlobal = makeGlobal;
-
-function defineGlobal(global, name, api) {
-  var existingGlobalVariable = global[name];
-  global[name] = api;
-
-  if (existingGlobalVariable && existingGlobalVariable.q) {
-    existingGlobalVariable.q.forEach(function (fn) {
-      return fn();
-    });
-  }
-}
-
-exports.defineGlobal = defineGlobal;
-var Datacenter;
-
-(function (Datacenter) {
-  Datacenter["US"] = "us";
-  Datacenter["EU"] = "eu";
-})(Datacenter = exports.Datacenter || (exports.Datacenter = {}));
-
-exports.INTAKE_SITE = (_a = {}, _a[Datacenter.EU] = 'datadoghq.eu', _a[Datacenter.US] = 'datadoghq.com', _a);
-var BuildMode;
-
-(function (BuildMode) {
-  BuildMode["RELEASE"] = "release";
-  BuildMode["STAGING"] = "staging";
-  BuildMode["E2E_TEST"] = "e2e-test";
-})(BuildMode = exports.BuildMode || (exports.BuildMode = {}));
-
-function commonInit(userConfiguration, buildEnv) {
-  var configuration = configuration_1.buildConfiguration(userConfiguration, buildEnv);
-  var internalMonitoring = internalMonitoring_1.startInternalMonitoring(configuration);
-  return {
-    configuration: configuration,
-    internalMonitoring: internalMonitoring
-  };
-}
-
-exports.commonInit = commonInit;
-
-function checkCookiesAuthorized(options) {
-  if (!cookie_1.areCookiesAuthorized(options)) {
-    console.warn('Cookies are not authorized, we will not send any data.');
-    return false;
-  }
-
-  return true;
-}
-
-exports.checkCookiesAuthorized = checkCookiesAuthorized;
-
-function checkIsNotLocalFile() {
-  if (isLocalFile()) {
-    console.error('Execution is not allowed in the current context.');
-    return false;
-  }
-
-  return true;
-}
-
-exports.checkIsNotLocalFile = checkIsNotLocalFile;
-
-function isLocalFile() {
-  return window.location.protocol === 'file:';
-} //# sourceMappingURL=init.js.map
-},{"tslib":"a212b5bd40bedbc434eaed1b3a2942b1","../browser/cookie":"ebaf883ffc0dcd01cd439a4ca56c6088","../domain/configuration":"6763541ca333269e57118bc4c50800cf","../domain/internalMonitoring":"6d081b3adf74fb2ed9632aae8731586a"}],"ebaf883ffc0dcd01cd439a4ca56c6088":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var utils_1 = require("../tools/utils");
-exports.COOKIE_ACCESS_DELAY = utils_1.ONE_SECOND;
-function cacheCookieAccess(name, options) {
-    var timeout;
-    var cache;
-    var hasCache = false;
-    var cacheAccess = function () {
-        hasCache = true;
-        window.clearTimeout(timeout);
-        timeout = window.setTimeout(function () {
-            hasCache = false;
-        }, exports.COOKIE_ACCESS_DELAY);
-    };
-    return {
-        get: function () {
-            if (hasCache) {
-                return cache;
-            }
-            cache = getCookie(name);
-            cacheAccess();
-            return cache;
-        },
-        set: function (value, expireDelay) {
-            setCookie(name, value, expireDelay, options);
-            cache = value;
-            cacheAccess();
-        },
-    };
-}
-exports.cacheCookieAccess = cacheCookieAccess;
-function setCookie(name, value, expireDelay, options) {
-    var date = new Date();
-    date.setTime(date.getTime() + expireDelay);
-    var expires = "expires=" + date.toUTCString();
-    var sameSite = options && options.crossSite ? 'none' : 'strict';
-    var domain = options && options.domain ? ";domain=" + options.domain : '';
-    var secure = options && options.secure ? ";secure" : '';
-    document.cookie = name + "=" + value + ";" + expires + ";path=/;samesite=" + sameSite + domain + secure;
-}
-exports.setCookie = setCookie;
-function getCookie(name) {
-    return utils_1.findCommaSeparatedValue(document.cookie, name);
-}
-exports.getCookie = getCookie;
-function areCookiesAuthorized(options) {
-    if (document.cookie === undefined || document.cookie === null) {
-        return false;
-    }
-    try {
-        // Use a unique cookie name to avoid issues when the SDK is initialized multiple times during
-        // the test cookie lifetime
-        var testCookieName = "dd_cookie_test_" + utils_1.generateUUID();
-        var testCookieValue = 'test';
-        setCookie(testCookieName, testCookieValue, utils_1.ONE_SECOND, options);
-        return getCookie(testCookieName) === testCookieValue;
-    }
-    catch (error) {
-        console.error(error);
-        return false;
-    }
-}
-exports.areCookiesAuthorized = areCookiesAuthorized;
-/**
- * No API to retrieve it, number of levels for subdomain and suffix are unknown
- * strategy: find the minimal domain on which cookies are allowed to be set
- * https://web.dev/same-site-same-origin/#site
- */
-var getCurrentSiteCache;
-function getCurrentSite() {
-    if (getCurrentSiteCache === undefined) {
-        // Use a unique cookie name to avoid issues when the SDK is initialized multiple times during
-        // the test cookie lifetime
-        var testCookieName = "dd_site_test_" + utils_1.generateUUID();
-        var testCookieValue = 'test';
-        var domainLevels = window.location.hostname.split('.');
-        var candidateDomain = domainLevels.pop();
-        while (domainLevels.length && !getCookie(testCookieName)) {
-            candidateDomain = domainLevels.pop() + "." + candidateDomain;
-            setCookie(testCookieName, testCookieValue, utils_1.ONE_SECOND, { domain: candidateDomain });
-        }
-        getCurrentSiteCache = candidateDomain;
-    }
-    return getCurrentSiteCache;
-}
-exports.getCurrentSite = getCurrentSite;
-//# sourceMappingURL=cookie.js.map
-},{"../tools/utils":"a4c0c5c567ad3af2f7aa1ae7108bd730"}],"a4c0c5c567ad3af2f7aa1ae7108bd730":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var internalMonitoring_1 = require("../domain/internalMonitoring");
-exports.ONE_SECOND = 1000;
-exports.ONE_MINUTE = 60 * exports.ONE_SECOND;
-exports.ONE_HOUR = 60 * exports.ONE_MINUTE;
-exports.ONE_KILO_BYTE = 1024;
-var DOM_EVENT;
-(function (DOM_EVENT) {
-    DOM_EVENT["BEFORE_UNLOAD"] = "beforeunload";
-    DOM_EVENT["CLICK"] = "click";
-    DOM_EVENT["KEY_DOWN"] = "keydown";
-    DOM_EVENT["LOAD"] = "load";
-    DOM_EVENT["POP_STATE"] = "popstate";
-    DOM_EVENT["SCROLL"] = "scroll";
-    DOM_EVENT["TOUCH_START"] = "touchstart";
-    DOM_EVENT["VISIBILITY_CHANGE"] = "visibilitychange";
-    DOM_EVENT["DOM_CONTENT_LOADED"] = "DOMContentLoaded";
-    DOM_EVENT["POINTER_DOWN"] = "pointerdown";
-    DOM_EVENT["POINTER_UP"] = "pointerup";
-    DOM_EVENT["POINTER_CANCEL"] = "pointercancel";
-    DOM_EVENT["HASH_CHANGE"] = "hashchange";
-    DOM_EVENT["PAGE_HIDE"] = "pagehide";
-    DOM_EVENT["MOUSE_DOWN"] = "mousedown";
-})(DOM_EVENT = exports.DOM_EVENT || (exports.DOM_EVENT = {}));
-var ResourceType;
-(function (ResourceType) {
-    ResourceType["DOCUMENT"] = "document";
-    ResourceType["XHR"] = "xhr";
-    ResourceType["BEACON"] = "beacon";
-    ResourceType["FETCH"] = "fetch";
-    ResourceType["CSS"] = "css";
-    ResourceType["JS"] = "js";
-    ResourceType["IMAGE"] = "image";
-    ResourceType["FONT"] = "font";
-    ResourceType["MEDIA"] = "media";
-    ResourceType["OTHER"] = "other";
-})(ResourceType = exports.ResourceType || (exports.ResourceType = {}));
-var RequestType;
-(function (RequestType) {
-    RequestType["FETCH"] = "fetch";
-    RequestType["XHR"] = "xhr";
-})(RequestType = exports.RequestType || (exports.RequestType = {}));
-// use lodash API
-function throttle(fn, wait, options) {
-    var needLeadingExecution = options && options.leading !== undefined ? options.leading : true;
-    var needTrailingExecution = options && options.trailing !== undefined ? options.trailing : true;
-    var inWaitPeriod = false;
-    var hasPendingExecution = false;
-    var pendingTimeoutId;
-    return {
-        throttled: function () {
-            var _this = this;
-            if (inWaitPeriod) {
-                hasPendingExecution = true;
-                return;
-            }
-            if (needLeadingExecution) {
-                fn.apply(this);
-            }
-            else {
-                hasPendingExecution = true;
-            }
-            inWaitPeriod = true;
-            pendingTimeoutId = window.setTimeout(function () {
-                if (needTrailingExecution && hasPendingExecution) {
-                    fn.apply(_this);
-                }
-                inWaitPeriod = false;
-                hasPendingExecution = false;
-            }, wait);
-        },
-        cancel: function () {
-            window.clearTimeout(pendingTimeoutId);
-            inWaitPeriod = false;
-            hasPendingExecution = false;
-        },
-    };
-}
-exports.throttle = throttle;
-function assign(target) {
-    var toAssign = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        toAssign[_i - 1] = arguments[_i];
-    }
-    toAssign.forEach(function (source) {
-        for (var key in source) {
-            if (Object.prototype.hasOwnProperty.call(source, key)) {
-                target[key] = source[key];
-            }
-        }
-    });
-}
-exports.assign = assign;
-/**
- * UUID v4
- * from https://gist.github.com/jed/982883
- */
-function generateUUID(placeholder) {
-    return placeholder
-        ? // tslint:disable-next-line no-bitwise
-            (parseInt(placeholder, 10) ^ ((Math.random() * 16) >> (parseInt(placeholder, 10) / 4))).toString(16)
-        : (1e7 + "-" + 1e3 + "-" + 4e3 + "-" + 8e3 + "-" + 1e11).replace(/[018]/g, generateUUID);
-}
-exports.generateUUID = generateUUID;
-/**
- * Return true if the draw is successful
- * @param threshold between 0 and 100
- */
-function performDraw(threshold) {
-    return threshold !== 0 && Math.random() * 100 <= threshold;
-}
-exports.performDraw = performDraw;
-function round(num, decimals) {
-    return +num.toFixed(decimals);
-}
-exports.round = round;
-function msToNs(duration) {
-    if (typeof duration !== 'number') {
-        return duration;
-    }
-    return round(duration * 1e6, 0);
-}
-exports.msToNs = msToNs;
-// tslint:disable-next-line:no-empty
-function noop() { }
-exports.noop = noop;
-/**
- * Custom implementation of JSON.stringify that ignores value.toJSON.
- * We need to do that because some sites badly override toJSON on certain objects.
- * Note this still supposes that JSON.stringify is correct...
- */
-function jsonStringify(value, replacer, space) {
-    if (value === null || value === undefined) {
-        return JSON.stringify(value);
-    }
-    var originalToJSON = [false, undefined];
-    if (hasToJSON(value)) {
-        // We need to add a flag and not rely on the truthiness of value.toJSON
-        // because it can be set but undefined and that's actually significant.
-        originalToJSON = [true, value.toJSON];
-        delete value.toJSON;
-    }
-    var originalProtoToJSON = [false, undefined];
-    var prototype;
-    if (typeof value === 'object') {
-        prototype = Object.getPrototypeOf(value);
-        if (hasToJSON(prototype)) {
-            originalProtoToJSON = [true, prototype.toJSON];
-            delete prototype.toJSON;
-        }
-    }
-    var result;
-    try {
-        result = JSON.stringify(value, undefined, space);
-    }
-    catch (_a) {
-        result = '<error: unable to serialize object>';
-    }
-    finally {
-        if (originalToJSON[0]) {
-            ;
-            value.toJSON = originalToJSON[1];
-        }
-        if (originalProtoToJSON[0]) {
-            ;
-            prototype.toJSON = originalProtoToJSON[1];
-        }
-    }
-    return result;
-}
-exports.jsonStringify = jsonStringify;
-function hasToJSON(value) {
-    return typeof value === 'object' && value !== null && value.hasOwnProperty('toJSON');
-}
-function includes(candidate, search) {
-    // tslint:disable-next-line: no-unsafe-any
-    return candidate.indexOf(search) !== -1;
-}
-exports.includes = includes;
-function find(array, predicate) {
-    for (var i = 0; i < array.length; i += 1) {
-        var item = array[i];
-        if (predicate(item, i, array)) {
-            return item;
-        }
-    }
-    return undefined;
-}
-exports.find = find;
-function isPercentage(value) {
-    return isNumber(value) && value >= 0 && value <= 100;
-}
-exports.isPercentage = isPercentage;
-function isNumber(value) {
-    return typeof value === 'number';
-}
-exports.isNumber = isNumber;
-/**
- * Get the time since the navigation was started.
- *
- * Note: this does not use `performance.timeOrigin` because it doesn't seem to reflect the actual
- * time on which the navigation has started: it may be much farther in the past, at least in Firefox 71.
- * Related issue in Firefox: https://bugzilla.mozilla.org/show_bug.cgi?id=1429926
- */
-function getRelativeTime(timestamp) {
-    return timestamp - getNavigationStart();
-}
-exports.getRelativeTime = getRelativeTime;
-function getTimestamp(relativeTime) {
-    return Math.floor(getNavigationStart() + relativeTime);
-}
-exports.getTimestamp = getTimestamp;
-/**
- * Navigation start slightly change on some rare cases
- */
-var navigationStart;
-function getNavigationStart() {
-    if (navigationStart === undefined) {
-        navigationStart = performance.timing.navigationStart;
-    }
-    return navigationStart;
-}
-exports.getNavigationStart = getNavigationStart;
-function objectValues(object) {
-    var values = [];
-    Object.keys(object).forEach(function (key) {
-        values.push(object[key]);
-    });
-    return values;
-}
-exports.objectValues = objectValues;
-function objectEntries(object) {
-    return Object.keys(object).map(function (key) { return [key, object[key]]; });
-}
-exports.objectEntries = objectEntries;
-function isEmptyObject(object) {
-    return Object.keys(object).length === 0;
-}
-exports.isEmptyObject = isEmptyObject;
-/**
- * inspired by https://mathiasbynens.be/notes/globalthis
- */
-function getGlobalObject() {
-    if (typeof globalThis === 'object') {
-        return globalThis;
-    }
-    Object.defineProperty(Object.prototype, '_dd_temp_', {
-        get: function () {
-            return this;
-        },
-        configurable: true,
-    });
-    // @ts-ignore
-    var globalObject = _dd_temp_;
-    // @ts-ignore
-    delete Object.prototype._dd_temp_;
-    if (typeof globalObject !== 'object') {
-        // on safari _dd_temp_ is available on window but not globally
-        // fallback on other browser globals check
-        if (typeof self === 'object') {
-            globalObject = self;
-        }
-        else if (typeof window === 'object') {
-            globalObject = window;
-        }
-        else {
-            globalObject = {};
-        }
-    }
-    return globalObject;
-}
-exports.getGlobalObject = getGlobalObject;
-function getLocationOrigin() {
-    return getLinkElementOrigin(window.location);
-}
-exports.getLocationOrigin = getLocationOrigin;
-/**
- * IE fallback
- * https://developer.mozilla.org/en-US/docs/Web/API/HTMLHyperlinkElementUtils/origin
- */
-function getLinkElementOrigin(element) {
-    if (element.origin) {
-        return element.origin;
-    }
-    var sanitizedHost = element.host.replace(/(:80|:443)$/, '');
-    return element.protocol + "//" + sanitizedHost;
-}
-exports.getLinkElementOrigin = getLinkElementOrigin;
-function findCommaSeparatedValue(rawString, name) {
-    var matches = rawString.match("(?:^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
-    return matches ? matches[1] : undefined;
-}
-exports.findCommaSeparatedValue = findCommaSeparatedValue;
-function safeTruncate(candidate, length) {
-    var lastChar = candidate.charCodeAt(length - 1);
-    // check if it is the high part of a surrogate pair
-    if (lastChar >= 0xd800 && lastChar <= 0xdbff) {
-        return candidate.slice(0, length + 1);
-    }
-    return candidate.slice(0, length);
-}
-exports.safeTruncate = safeTruncate;
-/**
- * Add an event listener to an event emitter object (Window, Element, mock object...).  This provides
- * a few conveniences compared to using `element.addEventListener` directly:
- *
- * * supports IE11 by:
- *   * using an option object only if needed
- *   * emulating the `once` option
- *
- * * wraps the listener with a `monitor` function
- *
- * * returns a `stop` function to remove the listener
- */
-function addEventListener(emitter, event, listener, options) {
-    return addEventListeners(emitter, [event], listener, options);
-}
-exports.addEventListener = addEventListener;
-/**
- * Add event listeners to an event emitter object (Window, Element, mock object...).  This provides
- * a few conveniences compared to using `element.addEventListener` directly:
- *
- * * supports IE11 by:
- *   * using an option object only if needed
- *   * emulating the `once` option
- *
- * * wraps the listener with a `monitor` function
- *
- * * returns a `stop` function to remove the listener
- *
- * * with `once: true`, the listener will be called at most once, even if different events are
- *   listened
- */
-function addEventListeners(emitter, events, listener, _a) {
-    var _b = _a === void 0 ? {} : _a, once = _b.once, capture = _b.capture, passive = _b.passive;
-    var wrapedListener = internalMonitoring_1.monitor(once
-        ? function (event) {
-            stop();
-            listener(event);
-        }
-        : listener);
-    var options = passive ? { capture: capture, passive: passive } : capture;
-    events.forEach(function (event) { return emitter.addEventListener(event, wrapedListener, options); });
-    var stop = function () { return events.forEach(function (event) { return emitter.removeEventListener(event, wrapedListener, options); }); };
-    return {
-        stop: stop,
-    };
-}
-exports.addEventListeners = addEventListeners;
-//# sourceMappingURL=utils.js.map
-},{"../domain/internalMonitoring":"6d081b3adf74fb2ed9632aae8731586a"}],"6d081b3adf74fb2ed9632aae8731586a":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = require("tslib");
-// tslint:disable ban-types
-var context_1 = require("../tools/context");
-var error_1 = require("../tools/error");
-var utils = tslib_1.__importStar(require("../tools/utils"));
-var transport_1 = require("../transport/transport");
-var tracekit_1 = require("./tracekit");
-var StatusType;
-(function (StatusType) {
-    StatusType["info"] = "info";
-    StatusType["error"] = "error";
-})(StatusType || (StatusType = {}));
-var monitoringConfiguration = { maxMessagesPerPage: 0, sentMessageCount: 0 };
-var externalContextProvider;
-function startInternalMonitoring(configuration) {
-    if (configuration.internalMonitoringEndpoint) {
-        var batch = startMonitoringBatch(configuration);
-        utils.assign(monitoringConfiguration, {
-            batch: batch,
-            maxMessagesPerPage: configuration.maxInternalMonitoringMessagesPerPage,
-            sentMessageCount: 0,
-        });
-    }
-    return {
-        setExternalContextProvider: function (provider) {
-            externalContextProvider = provider;
-        },
-    };
-}
-exports.startInternalMonitoring = startInternalMonitoring;
-function startMonitoringBatch(configuration) {
-    var primaryBatch = createMonitoringBatch(configuration.internalMonitoringEndpoint);
-    var replicaBatch;
-    if (configuration.replica !== undefined) {
-        replicaBatch = createMonitoringBatch(configuration.replica.internalMonitoringEndpoint);
-    }
-    function createMonitoringBatch(endpointUrl) {
-        return new transport_1.Batch(new transport_1.HttpRequest(endpointUrl, configuration.batchBytesLimit), configuration.maxBatchSize, configuration.batchBytesLimit, configuration.maxMessageSize, configuration.flushTimeout);
-    }
-    function withContext(message) {
-        return context_1.combine({
-            date: new Date().getTime(),
-            view: {
-                referrer: document.referrer,
-                url: window.location.href,
-            },
-        }, externalContextProvider !== undefined ? externalContextProvider() : {}, message);
-    }
-    return {
-        add: function (message) {
-            var contextualizedMessage = withContext(message);
-            primaryBatch.add(contextualizedMessage);
-            if (replicaBatch) {
-                replicaBatch.add(contextualizedMessage);
-            }
-        },
-    };
-}
-function resetInternalMonitoring() {
-    monitoringConfiguration.batch = undefined;
-}
-exports.resetInternalMonitoring = resetInternalMonitoring;
-function monitored(_, __, descriptor) {
-    var originalMethod = descriptor.value;
-    descriptor.value = function () {
-        var decorated = (monitoringConfiguration.batch ? monitor(originalMethod) : originalMethod);
-        return decorated.apply(this, arguments);
-    };
-}
-exports.monitored = monitored;
-function monitor(fn) {
-    return function () {
-        try {
-            return fn.apply(this, arguments);
-        }
-        catch (e) {
-            logErrorIfDebug(e);
-            try {
-                addErrorToMonitoringBatch(e);
-            }
-            catch (e) {
-                logErrorIfDebug(e);
-            }
-        }
-    }; // consider output type has input type
-}
-exports.monitor = monitor;
-function addMonitoringMessage(message, context) {
-    logMessageIfDebug(message);
-    addToMonitoringBatch(tslib_1.__assign(tslib_1.__assign({ message: message }, context), { status: StatusType.info }));
-}
-exports.addMonitoringMessage = addMonitoringMessage;
-function addErrorToMonitoringBatch(e) {
-    addToMonitoringBatch(tslib_1.__assign(tslib_1.__assign({}, formatError(e)), { status: StatusType.error }));
-}
-function addToMonitoringBatch(message) {
-    if (monitoringConfiguration.batch &&
-        monitoringConfiguration.sentMessageCount < monitoringConfiguration.maxMessagesPerPage) {
-        monitoringConfiguration.sentMessageCount += 1;
-        monitoringConfiguration.batch.add(message);
-    }
-}
-function formatError(e) {
-    if (e instanceof Error) {
-        var stackTrace = tracekit_1.computeStackTrace(e);
-        return {
-            error: {
-                kind: stackTrace.name,
-                stack: error_1.toStackTraceString(stackTrace),
-            },
-            message: stackTrace.message,
-        };
-    }
-    return {
-        error: {
-            stack: 'Not an instance of error',
-        },
-        message: "Uncaught " + utils.jsonStringify(e),
-    };
-}
-function setDebugMode(debugMode) {
-    monitoringConfiguration.debugMode = debugMode;
-}
-exports.setDebugMode = setDebugMode;
-function logErrorIfDebug(e) {
-    if (monitoringConfiguration.debugMode) {
-        // Log as warn to not forward the logs.
-        console.warn('[INTERNAL ERROR]', e);
-    }
-}
-function logMessageIfDebug(message) {
-    if (monitoringConfiguration.debugMode) {
-        console.log('[MONITORING MESSAGE]', message);
-    }
-}
-//# sourceMappingURL=internalMonitoring.js.map
-},{"tslib":"a212b5bd40bedbc434eaed1b3a2942b1","../tools/context":"0a95ec8b7489425ff8c95bc9182230cf","../tools/error":"0dddf352a2255acaa5426f9ee2e94d13","../tools/utils":"a4c0c5c567ad3af2f7aa1ae7108bd730","../transport/transport":"7e0163e11a7ed0141607e7e5d6bf43a0","./tracekit":"35ac35b5e9178c44050ae5baee46483f"}],"0a95ec8b7489425ff8c95bc9182230cf":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function withSnakeCaseKeys(candidate) {
-    var result = {};
-    Object.keys(candidate).forEach(function (key) {
-        result[toSnakeCase(key)] = deepSnakeCase(candidate[key]);
-    });
-    return result;
-}
-exports.withSnakeCaseKeys = withSnakeCaseKeys;
-function deepSnakeCase(candidate) {
-    if (Array.isArray(candidate)) {
-        return candidate.map(function (value) { return deepSnakeCase(value); });
-    }
-    if (typeof candidate === 'object' && candidate !== null) {
-        return withSnakeCaseKeys(candidate);
-    }
-    return candidate;
-}
-exports.deepSnakeCase = deepSnakeCase;
-function toSnakeCase(word) {
-    return word
-        .replace(/[A-Z]/g, function (uppercaseLetter, index) { return "" + (index !== 0 ? '_' : '') + uppercaseLetter.toLowerCase(); })
-        .replace(/-/g, '_');
-}
-exports.toSnakeCase = toSnakeCase;
-var isContextArray = function (value) { return Array.isArray(value); };
-var isContext = function (value) {
-    return !Array.isArray(value) && typeof value === 'object' && value !== null;
-};
-function combine() {
-    var sources = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        sources[_i] = arguments[_i];
-    }
-    var destination;
-    for (var _a = 0, sources_1 = sources; _a < sources_1.length; _a++) {
-        var source = sources_1[_a];
-        // Ignore any undefined or null sources.
-        if (source === undefined || source === null) {
-            continue;
-        }
-        destination = mergeInto(destination, source, createCircularReferenceChecker());
-    }
-    return destination;
-}
-exports.combine = combine;
-/*
- * Performs a deep clone of objects and arrays.
- * - Circular references are replaced by 'undefined'
- */
-function deepClone(context) {
-    return mergeInto(undefined, context, createCircularReferenceChecker());
-}
-exports.deepClone = deepClone;
-function createCircularReferenceChecker() {
-    if (typeof WeakSet !== 'undefined') {
-        var set_1 = new WeakSet();
-        return {
-            hasAlreadyBeenSeen: function (value) {
-                var has = set_1.has(value);
-                if (!has) {
-                    set_1.add(value);
-                }
-                return has;
-            },
-        };
-    }
-    var array = [];
-    return {
-        hasAlreadyBeenSeen: function (value) {
-            var has = array.indexOf(value) >= 0;
-            if (!has) {
-                array.push(value);
-            }
-            return has;
-        },
-    };
-}
-exports.createCircularReferenceChecker = createCircularReferenceChecker;
-/**
- * Iterate over 'source' and affect its subvalues into 'destination', recursively.  If the 'source'
- * and 'destination' can't be merged, return 'source'.
- */
-function mergeInto(destination, source, circularReferenceChecker) {
-    // Ignore the 'source' if it is undefined
-    if (source === undefined) {
-        return destination;
-    }
-    // If the 'source' is not an object or array, it can't be merged with 'destination' in any way, so
-    // return it directly.
-    if (!isContext(source) && !isContextArray(source)) {
-        return source;
-    }
-    // Return 'undefined' if we already iterated over this 'source' to avoid infinite recursion
-    if (circularReferenceChecker.hasAlreadyBeenSeen(source)) {
-        return undefined;
-    }
-    // 'source' and 'destination' are objects, merge them together
-    if (isContext(source) && (destination === undefined || isContext(destination))) {
-        var finalDestination = destination || {};
-        for (var key in source) {
-            if (Object.prototype.hasOwnProperty.call(source, key)) {
-                finalDestination[key] = mergeInto(finalDestination[key], source[key], circularReferenceChecker);
-            }
-        }
-        return finalDestination;
-    }
-    // 'source' and 'destination' are arrays, merge them together
-    if (isContextArray(source) && (destination === undefined || isContextArray(destination))) {
-        var finalDestination = destination || [];
-        finalDestination.length = Math.max(finalDestination.length, source.length);
-        for (var index = 0; index < source.length; index += 1) {
-            finalDestination[index] = mergeInto(finalDestination[index], source[index], circularReferenceChecker);
-        }
-        return finalDestination;
-    }
-    // The destination in not an array nor an object, so we can't merge it
-    return source;
-}
-exports.mergeInto = mergeInto;
-//# sourceMappingURL=context.js.map
-},{}],"0dddf352a2255acaa5426f9ee2e94d13":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var utils_1 = require("./utils");
-var ErrorSource;
-(function (ErrorSource) {
-    ErrorSource["AGENT"] = "agent";
-    ErrorSource["CONSOLE"] = "console";
-    ErrorSource["NETWORK"] = "network";
-    ErrorSource["SOURCE"] = "source";
-    ErrorSource["LOGGER"] = "logger";
-    ErrorSource["CUSTOM"] = "custom";
-})(ErrorSource = exports.ErrorSource || (exports.ErrorSource = {}));
-function formatUnknownError(stackTrace, errorObject, nonErrorPrefix) {
-    if (!stackTrace || (stackTrace.message === undefined && !(errorObject instanceof Error))) {
-        return {
-            message: nonErrorPrefix + " " + utils_1.jsonStringify(errorObject),
-            stack: 'No stack, consider using an instance of Error',
-            type: stackTrace && stackTrace.name,
-        };
-    }
-    return {
-        message: stackTrace.message || 'Empty message',
-        stack: toStackTraceString(stackTrace),
-        type: stackTrace.name,
-    };
-}
-exports.formatUnknownError = formatUnknownError;
-function toStackTraceString(stack) {
-    var result = (stack.name || 'Error') + ": " + stack.message;
-    stack.stack.forEach(function (frame) {
-        var func = frame.func === '?' ? '<anonymous>' : frame.func;
-        var args = frame.args && frame.args.length > 0 ? "(" + frame.args.join(', ') + ")" : '';
-        var line = frame.line ? ":" + frame.line : '';
-        var column = frame.line && frame.column ? ":" + frame.column : '';
-        result += "\n  at " + func + args + " @ " + frame.url + line + column;
-    });
-    return result;
-}
-exports.toStackTraceString = toStackTraceString;
-//# sourceMappingURL=error.js.map
-},{"./utils":"a4c0c5c567ad3af2f7aa1ae7108bd730"}],"7e0163e11a7ed0141607e7e5d6bf43a0":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = require("tslib");
-var utils_1 = require("../tools/utils");
-// https://en.wikipedia.org/wiki/UTF-8
-var HAS_MULTI_BYTES_CHARACTERS = /[^\u0000-\u007F]/;
-/**
- * Use POST request without content type to:
- * - avoid CORS preflight requests
- * - allow usage of sendBeacon
- *
- * multiple elements are sent separated by \n in order
- * to be parsed correctly without content type header
- */
-var HttpRequest = /** @class */ (function () {
-    function HttpRequest(endpointUrl, bytesLimit, withBatchTime) {
-        if (withBatchTime === void 0) { withBatchTime = false; }
-        this.endpointUrl = endpointUrl;
-        this.bytesLimit = bytesLimit;
-        this.withBatchTime = withBatchTime;
-    }
-    HttpRequest.prototype.send = function (data, size) {
-        var url = this.withBatchTime ? addBatchTime(this.endpointUrl) : this.endpointUrl;
-        if (navigator.sendBeacon && size < this.bytesLimit) {
-            var isQueued = navigator.sendBeacon(url, data);
-            if (isQueued) {
-                return;
-            }
-        }
-        var request = new XMLHttpRequest();
-        request.open('POST', url, true);
-        request.send(data);
-    };
-    return HttpRequest;
-}());
-exports.HttpRequest = HttpRequest;
-function addBatchTime(url) {
-    return "" + url + (url.indexOf('?') === -1 ? '?' : '&') + "batch_time=" + new Date().getTime();
-}
-var Batch = /** @class */ (function () {
-    function Batch(request, maxSize, bytesLimit, maxMessageSize, flushTimeout, beforeUnloadCallback) {
-        if (beforeUnloadCallback === void 0) { beforeUnloadCallback = utils_1.noop; }
-        this.request = request;
-        this.maxSize = maxSize;
-        this.bytesLimit = bytesLimit;
-        this.maxMessageSize = maxMessageSize;
-        this.flushTimeout = flushTimeout;
-        this.beforeUnloadCallback = beforeUnloadCallback;
-        this.pushOnlyBuffer = [];
-        this.upsertBuffer = {};
-        this.bufferBytesSize = 0;
-        this.bufferMessageCount = 0;
-        this.flushOnVisibilityHidden();
-        this.flushPeriodically();
-    }
-    Batch.prototype.add = function (message) {
-        this.addOrUpdate(message);
-    };
-    Batch.prototype.upsert = function (message, key) {
-        this.addOrUpdate(message, key);
-    };
-    Batch.prototype.flush = function () {
-        if (this.bufferMessageCount !== 0) {
-            var messages = tslib_1.__spreadArrays(this.pushOnlyBuffer, utils_1.objectValues(this.upsertBuffer));
-            this.request.send(messages.join('\n'), this.bufferBytesSize);
-            this.pushOnlyBuffer = [];
-            this.upsertBuffer = {};
-            this.bufferBytesSize = 0;
-            this.bufferMessageCount = 0;
-        }
-    };
-    Batch.prototype.sizeInBytes = function (candidate) {
-        // Accurate byte size computations can degrade performances when there is a lot of events to process
-        if (!HAS_MULTI_BYTES_CHARACTERS.test(candidate)) {
-            return candidate.length;
-        }
-        if (window.TextEncoder !== undefined) {
-            return new TextEncoder().encode(candidate).length;
-        }
-        return new Blob([candidate]).size;
-    };
-    Batch.prototype.addOrUpdate = function (message, key) {
-        var _a = this.process(message), processedMessage = _a.processedMessage, messageBytesSize = _a.messageBytesSize;
-        if (messageBytesSize >= this.maxMessageSize) {
-            console.warn("Discarded a message whose size was bigger than the maximum allowed size " + this.maxMessageSize + "KB.");
-            return;
-        }
-        if (this.hasMessageFor(key)) {
-            this.remove(key);
-        }
-        if (this.willReachedBytesLimitWith(messageBytesSize)) {
-            this.flush();
-        }
-        this.push(processedMessage, messageBytesSize, key);
-        if (this.isFull()) {
-            this.flush();
-        }
-    };
-    Batch.prototype.process = function (message) {
-        var processedMessage = utils_1.jsonStringify(message);
-        var messageBytesSize = this.sizeInBytes(processedMessage);
-        return { processedMessage: processedMessage, messageBytesSize: messageBytesSize };
-    };
-    Batch.prototype.push = function (processedMessage, messageBytesSize, key) {
-        if (this.bufferMessageCount > 0) {
-            // \n separator at serialization
-            this.bufferBytesSize += 1;
-        }
-        if (key !== undefined) {
-            this.upsertBuffer[key] = processedMessage;
-        }
-        else {
-            this.pushOnlyBuffer.push(processedMessage);
-        }
-        this.bufferBytesSize += messageBytesSize;
-        this.bufferMessageCount += 1;
-    };
-    Batch.prototype.remove = function (key) {
-        var removedMessage = this.upsertBuffer[key];
-        delete this.upsertBuffer[key];
-        var messageBytesSize = this.sizeInBytes(removedMessage);
-        this.bufferBytesSize -= messageBytesSize;
-        this.bufferMessageCount -= 1;
-        if (this.bufferMessageCount > 0) {
-            this.bufferBytesSize -= 1;
-        }
-    };
-    Batch.prototype.hasMessageFor = function (key) {
-        return key !== undefined && this.upsertBuffer[key] !== undefined;
-    };
-    Batch.prototype.willReachedBytesLimitWith = function (messageBytesSize) {
-        // byte of the separator at the end of the message
-        return this.bufferBytesSize + messageBytesSize + 1 >= this.bytesLimit;
-    };
-    Batch.prototype.isFull = function () {
-        return this.bufferMessageCount === this.maxSize || this.bufferBytesSize >= this.bytesLimit;
-    };
-    Batch.prototype.flushPeriodically = function () {
-        var _this = this;
-        setTimeout(function () {
-            _this.flush();
-            _this.flushPeriodically();
-        }, this.flushTimeout);
-    };
-    Batch.prototype.flushOnVisibilityHidden = function () {
-        var _this = this;
-        /**
-         * With sendBeacon, requests are guaranteed to be successfully sent during document unload
-         */
-        // @ts-ignore this function is not always defined
-        if (navigator.sendBeacon) {
-            /**
-             * beforeunload is called before visibilitychange
-             * register first to be sure to be called before flush on beforeunload
-             * caveat: unload can still be canceled by another listener
-             */
-            utils_1.addEventListener(window, utils_1.DOM_EVENT.BEFORE_UNLOAD, this.beforeUnloadCallback);
-            /**
-             * Only event that guarantee to fire on mobile devices when the page transitions to background state
-             * (e.g. when user switches to a different application, goes to homescreen, etc), or is being unloaded.
-             */
-            utils_1.addEventListener(document, utils_1.DOM_EVENT.VISIBILITY_CHANGE, function () {
-                if (document.visibilityState === 'hidden') {
-                    _this.flush();
-                }
-            });
-            /**
-             * Safari does not support yet to send a request during:
-             * - a visibility change during doc unload (cf: https://bugs.webkit.org/show_bug.cgi?id=194897)
-             * - a page hide transition (cf: https://bugs.webkit.org/show_bug.cgi?id=188329)
-             */
-            utils_1.addEventListener(window, utils_1.DOM_EVENT.BEFORE_UNLOAD, function () { return _this.flush(); });
-        }
-    };
-    return Batch;
-}());
-exports.Batch = Batch;
-//# sourceMappingURL=transport.js.map
-},{"tslib":"a212b5bd40bedbc434eaed1b3a2942b1","../tools/utils":"a4c0c5c567ad3af2f7aa1ae7108bd730"}],"35ac35b5e9178c44050ae5baee46483f":[function(require,module,exports) {
-"use strict";
-// tslint:disable no-unsafe-any
-Object.defineProperty(exports, "__esModule", { value: true });
-var internalMonitoring_1 = require("./internalMonitoring");
-var UNKNOWN_FUNCTION = '?';
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#Error_types
-// tslint:disable-next-line max-line-length
-var ERROR_TYPES_RE = /^(?:[Uu]ncaught (?:exception: )?)?(?:((?:Eval|Internal|Range|Reference|Syntax|Type|URI|)Error): )?(.*)$/;
-/**
- * A better form of hasOwnProperty<br/>
- * Example: `has(MainHostObject, property) === true/false`
- *
- * @param {Object} object to check property
- * @param {string} key to check
- * @return {Boolean} true if the object has the key and it is not inherited
- */
-function has(object, key) {
-    return Object.prototype.hasOwnProperty.call(object, key);
-}
-/**
- * Returns true if the parameter is undefined<br/>
- * Example: `isUndefined(val) === true/false`
- *
- * @param {*} what Value to check
- * @return {Boolean} true if undefined and false otherwise
- */
-function isUndefined(what) {
-    return typeof what === 'undefined';
-}
-/**
- * Wrap any function in a TraceKit reporter<br/>
- * Example: `func = wrap(func);`
- *
- * @param {Function} func Function to be wrapped
- * @return {Function} The wrapped func
- * @memberof TraceKit
- */
-// tslint:disable-next-line ban-types
-function wrap(func) {
-    function wrapped() {
-        try {
-            return func.apply(this, arguments);
-        }
-        catch (e) {
-            exports.report(e);
-            throw e;
-        }
-    }
-    return wrapped;
-}
-exports.wrap = wrap;
-/**
- * Cross-browser processing of unhandled exceptions
- *
- * Syntax:
- * ```js
- *   report.subscribe(function(stackInfo) { ... })
- *   report.unsubscribe(function(stackInfo) { ... })
- *   report(exception)
- *   try { ...code... } catch(ex) { report(ex); }
- * ```
- *
- * Supports:
- *   - Firefox: full stack trace with line numbers, plus column number
- *     on top frame; column number is not guaranteed
- *   - Opera: full stack trace with line and column numbers
- *   - Chrome: full stack trace with line and column numbers
- *   - Safari: line and column number for the top frame only; some frames
- *     may be missing, and column number is not guaranteed
- *   - IE: line and column number for the top frame only; some frames
- *     may be missing, and column number is not guaranteed
- *
- * In theory, TraceKit should work on all of the following versions:
- *   - IE5.5+ (only 8.0 tested)
- *   - Firefox 0.9+ (only 3.5+ tested)
- *   - Opera 7+ (only 10.50 tested; versions 9 and earlier may require
- *     Exceptions Have Stacktrace to be enabled in opera:config)
- *   - Safari 3+ (only 4+ tested)
- *   - Chrome 1+ (only 5+ tested)
- *   - Konqueror 3.5+ (untested)
- *
- * Requires computeStackTrace.
- *
- * Tries to catch all unhandled exceptions and report them to the
- * subscribed handlers. Please note that report will rethrow the
- * exception. This is REQUIRED in order to get a useful stack trace in IE.
- * If the exception does not reach the top of the browser, you will only
- * get a stack trace from the point where report was called.
- *
- * Handlers receive a StackTrace object as described in the
- * computeStackTrace docs.
- *
- * @memberof TraceKit
- * @namespace
- */
-exports.report = (function reportModuleWrapper() {
-    var handlers = [];
-    var lastException;
-    var lastExceptionStack;
-    /**
-     * Add a crash handler.
-     * @param {Function} handler
-     * @memberof report
-     */
-    function subscribe(handler) {
-        installGlobalHandler();
-        installGlobalUnhandledRejectionHandler();
-        handlers.push(handler);
-    }
-    /**
-     * Remove a crash handler.
-     * @param {Function} handler
-     * @memberof report
-     */
-    function unsubscribe(handler) {
-        for (var i = handlers.length - 1; i >= 0; i -= 1) {
-            if (handlers[i] === handler) {
-                handlers.splice(i, 1);
-            }
-        }
-        if (handlers.length === 0) {
-            uninstallGlobalHandler();
-            uninstallGlobalUnhandledRejectionHandler();
-        }
-    }
-    /**
-     * Dispatch stack information to all handlers.
-     * @param {StackTrace} stack
-     * @param {boolean} isWindowError Is this a top-level window error?
-     * @param {Error=} error The error that's being handled (if available, null otherwise)
-     * @memberof report
-     * @throws An exception if an error occurs while calling an handler.
-     */
-    function notifyHandlers(stack, isWindowError, error) {
-        var exception;
-        for (var i in handlers) {
-            if (has(handlers, i)) {
-                try {
-                    handlers[i](stack, isWindowError, error);
-                }
-                catch (inner) {
-                    exception = inner;
-                }
-            }
-        }
-        if (exception) {
-            throw exception;
-        }
-    }
-    var oldOnerrorHandler;
-    var onErrorHandlerInstalled;
-    var oldOnunhandledrejectionHandler;
-    var onUnhandledRejectionHandlerInstalled;
-    /**
-     * Ensures all global unhandled exceptions are recorded.
-     * Supported by Gecko and IE.
-     * @param {Event|string} message Error message.
-     * @param {string=} url URL of script that generated the exception.
-     * @param {(number|string)=} lineNo The line number at which the error occurred.
-     * @param {(number|string)=} columnNo The column number at which the error occurred.
-     * @param {Error=} errorObj The actual Error object.
-     * @memberof report
-     */
-    function traceKitWindowOnError(message, url, lineNo, columnNo, errorObj) {
-        var stack;
-        if (lastExceptionStack) {
-            exports.computeStackTrace.augmentStackTraceWithInitialElement(lastExceptionStack, url, lineNo, "" + message);
-            processLastException();
-        }
-        else if (errorObj) {
-            stack = exports.computeStackTrace(errorObj);
-            notifyHandlers(stack, true, errorObj);
-        }
-        else {
-            var location_1 = {
-                url: url,
-                column: columnNo,
-                line: lineNo,
-            };
-            var name_1;
-            var msg = message;
-            if ({}.toString.call(message) === '[object String]') {
-                var groups = msg.match(ERROR_TYPES_RE);
-                if (groups) {
-                    name_1 = groups[1];
-                    msg = groups[2];
-                }
-            }
-            stack = {
-                name: name_1,
-                message: msg,
-                stack: [location_1],
-            };
-            notifyHandlers(stack, true);
-        }
-        if (oldOnerrorHandler) {
-            return oldOnerrorHandler.apply(this, arguments);
-        }
-        return false;
-    }
-    /**
-     * Ensures all unhandled rejections are recorded.
-     * @param {PromiseRejectionEvent} e event.
-     * @memberof report
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onunhandledrejection
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/PromiseRejectionEvent
-     */
-    function traceKitWindowOnUnhandledRejection(e) {
-        var reason = e.reason || 'Empty reason';
-        var stack = exports.computeStackTrace(reason);
-        notifyHandlers(stack, true, reason);
-    }
-    /**
-     * Install a global onerror handler
-     * @memberof report
-     */
-    function installGlobalHandler() {
-        if (onErrorHandlerInstalled) {
-            return;
-        }
-        oldOnerrorHandler = window.onerror;
-        window.onerror = internalMonitoring_1.monitor(traceKitWindowOnError);
-        onErrorHandlerInstalled = true;
-    }
-    /**
-     * Uninstall the global onerror handler
-     * @memberof report
-     */
-    function uninstallGlobalHandler() {
-        if (onErrorHandlerInstalled) {
-            window.onerror = oldOnerrorHandler;
-            onErrorHandlerInstalled = false;
-        }
-    }
-    /**
-     * Install a global onunhandledrejection handler
-     * @memberof report
-     */
-    function installGlobalUnhandledRejectionHandler() {
-        if (onUnhandledRejectionHandlerInstalled) {
-            return;
-        }
-        oldOnunhandledrejectionHandler = window.onunhandledrejection !== null ? window.onunhandledrejection : undefined;
-        window.onunhandledrejection = internalMonitoring_1.monitor(traceKitWindowOnUnhandledRejection);
-        onUnhandledRejectionHandlerInstalled = true;
-    }
-    /**
-     * Uninstall the global onunhandledrejection handler
-     * @memberof report
-     */
-    function uninstallGlobalUnhandledRejectionHandler() {
-        if (onUnhandledRejectionHandlerInstalled) {
-            window.onunhandledrejection = oldOnunhandledrejectionHandler;
-            onUnhandledRejectionHandlerInstalled = false;
-        }
-    }
-    /**
-     * Process the most recent exception
-     * @memberof report
-     */
-    function processLastException() {
-        var currentLastExceptionStack = lastExceptionStack;
-        var currentLastException = lastException;
-        lastExceptionStack = undefined;
-        lastException = undefined;
-        notifyHandlers(currentLastExceptionStack, false, currentLastException);
-    }
-    /**
-     * Reports an unhandled Error.
-     * @param {Error} ex
-     * @memberof report
-     * @throws An exception if an incomplete stack trace is detected (old IE browsers).
-     */
-    function doReport(ex) {
-        if (lastExceptionStack) {
-            if (lastException === ex) {
-                return; // already caught by an inner catch block, ignore
-            }
-            processLastException();
-        }
-        var stack = exports.computeStackTrace(ex);
-        lastExceptionStack = stack;
-        lastException = ex;
-        // If the stack trace is incomplete, wait for 2 seconds for
-        // slow slow IE to see if onerror occurs or not before reporting
-        // this exception; otherwise, we will end up with an incomplete
-        // stack trace
-        setTimeout(function () {
-            if (lastException === ex) {
-                processLastException();
-            }
-        }, stack.incomplete ? 2000 : 0);
-        throw ex; // re-throw to propagate to the top level (and cause window.onerror)
-    }
-    doReport.subscribe = subscribe;
-    doReport.unsubscribe = unsubscribe;
-    doReport.traceKitWindowOnError = traceKitWindowOnError;
-    return doReport;
-})();
-/**
- * computeStackTrace: cross-browser stack traces in JavaScript
- *
- * Syntax:
- *   ```js
- *   s = computeStackTrace.ofCaller([depth])
- *   s = computeStackTrace(exception) // consider using report instead (see below)
- *   ```
- *
- * Supports:
- *   - Firefox:  full stack trace with line numbers and unreliable column
- *               number on top frame
- *   - Opera 10: full stack trace with line and column numbers
- *   - Opera 9-: full stack trace with line numbers
- *   - Chrome:   full stack trace with line and column numbers
- *   - Safari:   line and column number for the topmost stacktrace element
- *               only
- *   - IE:       no line numbers whatsoever
- *
- * Tries to guess names of anonymous functions by looking for assignments
- * in the source code. In IE and Safari, we have to guess source file names
- * by searching for function bodies inside all page scripts. This will not
- * work for scripts that are loaded cross-domain.
- * Here be dragons: some function names may be guessed incorrectly, and
- * duplicate functions may be mismatched.
- *
- * computeStackTrace should only be used for tracing purposes.
- * Logging of unhandled exceptions should be done with report,
- * which builds on top of computeStackTrace and provides better
- * IE support by utilizing the window.onerror event to retrieve information
- * about the top of the stack.
- *
- * Note: In IE and Safari, no stack trace is recorded on the Error object,
- * so computeStackTrace instead walks its *own* chain of callers.
- * This means that:
- *  * in Safari, some methods may be missing from the stack trace;
- *  * in IE, the topmost function in the stack trace will always be the
- *    caller of computeStackTrace.
- *
- * This is okay for tracing (because you are likely to be calling
- * computeStackTrace from the function you want to be the topmost element
- * of the stack trace anyway), but not okay for logging unhandled
- * exceptions (because your catch block will likely be far away from the
- * inner function that actually caused the exception).
- *
- * Tracing example:
- *  ```js
- *     function trace(message) {
- *         let stackInfo = computeStackTrace.ofCaller();
- *         let data = message + "\n";
- *         for(let i in stackInfo.stack) {
- *             let item = stackInfo.stack[i];
- *             data += (item.func || '[anonymous]') + "() in " + item.url + ":" + (item.line || '0') + "\n";
- *         }
- *         if (window.console)
- *             console.info(data);
- *         else
- *             alert(data);
- *     }
- * ```
- * @memberof TraceKit
- * @namespace
- */
-exports.computeStackTrace = (function computeStackTraceWrapper() {
-    var debug = false;
-    // Contents of Exception in various browsers.
-    //
-    // SAFARI:
-    // ex.message = Can't find variable: qq
-    // ex.line = 59
-    // ex.sourceId = 580238192
-    // ex.sourceURL = http://...
-    // ex.expressionBeginOffset = 96
-    // ex.expressionCaretOffset = 98
-    // ex.expressionEndOffset = 98
-    // ex.name = ReferenceError
-    //
-    // FIREFOX:
-    // ex.message = qq is not defined
-    // ex.fileName = http://...
-    // ex.lineNumber = 59
-    // ex.columnNumber = 69
-    // ex.stack = ...stack trace... (see the example below)
-    // ex.name = ReferenceError
-    //
-    // CHROME:
-    // ex.message = qq is not defined
-    // ex.name = ReferenceError
-    // ex.type = not_defined
-    // ex.arguments = ['aa']
-    // ex.stack = ...stack trace...
-    //
-    // INTERNET EXPLORER:
-    // ex.message = ...
-    // ex.name = ReferenceError
-    //
-    // OPERA:
-    // ex.message = ...message... (see the example below)
-    // ex.name = ReferenceError
-    // ex.opera#sourceloc = 11  (pretty much useless, duplicates the info in ex.message)
-    // ex.stacktrace = n/a; see 'opera:config#UserPrefs|Exceptions Have Stacktrace'
-    /**
-     * Computes stack trace information from the stack property.
-     * Chrome and Gecko use this property.
-     * @param {Error} ex
-     * @return {?StackTrace} Stack trace information.
-     * @memberof computeStackTrace
-     */
-    function computeStackTraceFromStackProp(ex) {
-        if (!ex.stack) {
-            return;
-        }
-        // tslint:disable-next-line max-line-length
-        var chrome = /^\s*at (.*?) ?\(((?:file|https?|blob|chrome-extension|native|eval|webpack|<anonymous>|\/).*?)(?::(\d+))?(?::(\d+))?\)?\s*$/i;
-        // tslint:disable-next-line max-line-length
-        var gecko = /^\s*(.*?)(?:\((.*?)\))?(?:^|@)((?:file|https?|blob|chrome|webpack|resource|\[native).*?|[^@]*bundle)(?::(\d+))?(?::(\d+))?\s*$/i;
-        // tslint:disable-next-line max-line-length
-        var winjs = /^\s*at (?:((?:\[object object\])?.+) )?\(?((?:file|ms-appx|https?|webpack|blob):.*?):(\d+)(?::(\d+))?\)?\s*$/i;
-        // Used to additionally parse URL/line/column from eval frames
-        var isEval;
-        var geckoEval = /(\S+) line (\d+)(?: > eval line \d+)* > eval/i;
-        var chromeEval = /\((\S*)(?::(\d+))(?::(\d+))\)/;
-        var lines = ex.stack.split('\n');
-        var stack = [];
-        var submatch;
-        var parts;
-        var element;
-        for (var i = 0, j = lines.length; i < j; i += 1) {
-            if (chrome.exec(lines[i])) {
-                parts = chrome.exec(lines[i]);
-                var isNative = parts[2] && parts[2].indexOf('native') === 0; // start of line
-                isEval = parts[2] && parts[2].indexOf('eval') === 0; // start of line
-                submatch = chromeEval.exec(parts[2]);
-                if (isEval && submatch) {
-                    // throw out eval line/column and use top-most line/column number
-                    parts[2] = submatch[1]; // url
-                    parts[3] = submatch[2]; // line
-                    parts[4] = submatch[3]; // column
-                }
-                element = {
-                    args: isNative ? [parts[2]] : [],
-                    column: parts[4] ? +parts[4] : undefined,
-                    func: parts[1] || UNKNOWN_FUNCTION,
-                    line: parts[3] ? +parts[3] : undefined,
-                    url: !isNative ? parts[2] : undefined,
-                };
-            }
-            else if (winjs.exec(lines[i])) {
-                parts = winjs.exec(lines[i]);
-                element = {
-                    args: [],
-                    column: parts[4] ? +parts[4] : undefined,
-                    func: parts[1] || UNKNOWN_FUNCTION,
-                    line: +parts[3],
-                    url: parts[2],
-                };
-            }
-            else if (gecko.exec(lines[i])) {
-                parts = gecko.exec(lines[i]);
-                isEval = parts[3] && parts[3].indexOf(' > eval') > -1;
-                submatch = geckoEval.exec(parts[3]);
-                if (isEval && submatch) {
-                    // throw out eval line/column and use top-most line number
-                    parts[3] = submatch[1];
-                    parts[4] = submatch[2];
-                    parts[5] = undefined; // no column when eval
-                }
-                else if (i === 0 && !parts[5] && !isUndefined(ex.columnNumber)) {
-                    // FireFox uses this awesome columnNumber property for its top frame
-                    // Also note, Firefox's column number is 0-based and everything else expects 1-based,
-                    // so adding 1
-                    // NOTE: this hack doesn't work if top-most frame is eval
-                    stack[0].column = ex.columnNumber + 1;
-                }
-                element = {
-                    args: parts[2] ? parts[2].split(',') : [],
-                    column: parts[5] ? +parts[5] : undefined,
-                    func: parts[1] || UNKNOWN_FUNCTION,
-                    line: parts[4] ? +parts[4] : undefined,
-                    url: parts[3],
-                };
-            }
-            else {
-                continue;
-            }
-            if (!element.func && element.line) {
-                element.func = UNKNOWN_FUNCTION;
-            }
-            stack.push(element);
-        }
-        if (!stack.length) {
-            return;
-        }
-        return {
-            stack: stack,
-            message: ex.message,
-            name: ex.name,
-        };
-    }
-    /**
-     * Computes stack trace information from the stacktrace property.
-     * Opera 10+ uses this property.
-     * @param {Error} ex
-     * @return {?StackTrace} Stack trace information.
-     * @memberof computeStackTrace
-     */
-    function computeStackTraceFromStacktraceProp(ex) {
-        // Access and store the stacktrace property before doing ANYTHING
-        // else to it because Opera is not very good at providing it
-        // reliably in other circumstances.
-        var stacktrace = ex.stacktrace;
-        if (!stacktrace) {
-            return;
-        }
-        var opera10Regex = / line (\d+).*script (?:in )?(\S+)(?:: in function (\S+))?$/i;
-        // tslint:disable-next-line max-line-length
-        var opera11Regex = / line (\d+), column (\d+)\s*(?:in (?:<anonymous function: ([^>]+)>|([^\)]+))\((.*)\))? in (.*):\s*$/i;
-        var lines = stacktrace.split('\n');
-        var stack = [];
-        var parts;
-        for (var line = 0; line < lines.length; line += 2) {
-            var element = void 0;
-            if (opera10Regex.exec(lines[line])) {
-                parts = opera10Regex.exec(lines[line]);
-                element = {
-                    args: [],
-                    column: undefined,
-                    func: parts[3],
-                    line: +parts[1],
-                    url: parts[2],
-                };
-            }
-            else if (opera11Regex.exec(lines[line])) {
-                parts = opera11Regex.exec(lines[line]);
-                element = {
-                    args: parts[5] ? parts[5].split(',') : [],
-                    column: +parts[2],
-                    func: parts[3] || parts[4],
-                    line: +parts[1],
-                    url: parts[6],
-                };
-            }
-            if (element) {
-                if (!element.func && element.line) {
-                    element.func = UNKNOWN_FUNCTION;
-                }
-                element.context = [lines[line + 1]];
-                stack.push(element);
-            }
-        }
-        if (!stack.length) {
-            return;
-        }
-        return {
-            stack: stack,
-            message: ex.message,
-            name: ex.name,
-        };
-    }
-    /**
-     * NOT TESTED.
-     * Computes stack trace information from an error message that includes
-     * the stack trace.
-     * Opera 9 and earlier use this method if the option to show stack
-     * traces is turned on in opera:config.
-     * @param {Error} ex
-     * @return {?StackTrace} Stack information.
-     * @memberof computeStackTrace
-     */
-    function computeStackTraceFromOperaMultiLineMessage(ex) {
-        // TODO: Clean this function up
-        // Opera includes a stack trace into the exception message. An example is:
-        //
-        // Statement on line 3: Undefined variable: undefinedFunc
-        // Backtrace:
-        //   Line 3 of linked script file://localhost/Users/andreyvit/Projects/TraceKit/javascript-client/sample.js:
-        //   In function zzz
-        //         undefinedFunc(a);
-        //   Line 7 of inline#1 script in file://localhost/Users/andreyvit/Projects/TraceKit/javascript-client/sample.html:
-        //   In function yyy
-        //           zzz(x, y, z);
-        //   Line 3 of inline#1 script in file://localhost/Users/andreyvit/Projects/TraceKit/javascript-client/sample.html:
-        //   In function xxx
-        //           yyy(a, a, a);
-        //   Line 1 of function script
-        //     try { xxx('hi'); return false; } catch(ex) { report(ex); }
-        //   ...
-        var lines = ex.message.split('\n');
-        if (lines.length < 4) {
-            return;
-        }
-        var lineRE1 = /^\s*Line (\d+) of linked script ((?:file|https?|blob)\S+)(?:: in function (\S+))?\s*$/i;
-        var lineRE2 = /^\s*Line (\d+) of inline#(\d+) script in ((?:file|https?|blob)\S+)(?:: in function (\S+))?\s*$/i;
-        var lineRE3 = /^\s*Line (\d+) of function script\s*$/i;
-        var stack = [];
-        var scripts = window && window.document && window.document.getElementsByTagName('script');
-        var inlineScriptBlocks = [];
-        var parts;
-        for (var s in scripts) {
-            if (has(scripts, s) && !scripts[s].src) {
-                inlineScriptBlocks.push(scripts[s]);
-            }
-        }
-        for (var line = 2; line < lines.length; line += 2) {
-            var item = void 0;
-            if (lineRE1.exec(lines[line])) {
-                parts = lineRE1.exec(lines[line]);
-                item = {
-                    args: [],
-                    column: undefined,
-                    func: parts[3],
-                    line: +parts[1],
-                    url: parts[2],
-                };
-            }
-            else if (lineRE2.exec(lines[line])) {
-                parts = lineRE2.exec(lines[line]);
-                item = {
-                    args: [],
-                    column: undefined,
-                    func: parts[4],
-                    line: +parts[1],
-                    url: parts[3],
-                };
-            }
-            else if (lineRE3.exec(lines[line])) {
-                parts = lineRE3.exec(lines[line]);
-                var url = window.location.href.replace(/#.*$/, '');
-                item = {
-                    url: url,
-                    args: [],
-                    column: undefined,
-                    func: '',
-                    line: +parts[1],
-                };
-            }
-            if (item) {
-                if (!item.func) {
-                    item.func = UNKNOWN_FUNCTION;
-                }
-                item.context = [lines[line + 1]];
-                stack.push(item);
-            }
-        }
-        if (!stack.length) {
-            return; // could not parse multiline exception message as Opera stack trace
-        }
-        return {
-            stack: stack,
-            message: lines[0],
-            name: ex.name,
-        };
-    }
-    /**
-     * Adds information about the first frame to incomplete stack traces.
-     * Safari and IE require this to get complete data on the first frame.
-     * @param {StackTrace} stackInfo Stack trace information from
-     * one of the compute* methods.
-     * @param {string=} url The URL of the script that caused an error.
-     * @param {(number|string)=} lineNo The line number of the script that
-     * caused an error.
-     * @param {string=} message The error generated by the browser, which
-     * hopefully contains the name of the object that caused the error.
-     * @return {boolean} Whether or not the stack information was
-     * augmented.
-     * @memberof computeStackTrace
-     */
-    function augmentStackTraceWithInitialElement(stackInfo, url, lineNo, message) {
-        var initial = {
-            url: url,
-            line: lineNo ? +lineNo : undefined,
-        };
-        if (initial.url && initial.line) {
-            stackInfo.incomplete = false;
-            var stack = stackInfo.stack;
-            if (stack.length > 0) {
-                if (stack[0].url === initial.url) {
-                    if (stack[0].line === initial.line) {
-                        return false; // already in stack trace
-                    }
-                    if (!stack[0].line && stack[0].func === initial.func) {
-                        stack[0].line = initial.line;
-                        stack[0].context = initial.context;
-                        return false;
-                    }
-                }
-            }
-            stack.unshift(initial);
-            stackInfo.partial = true;
-            return true;
-        }
-        stackInfo.incomplete = true;
-        return false;
-    }
-    /**
-     * Computes stack trace information by walking the arguments.caller
-     * chain at the time the exception occurred. This will cause earlier
-     * frames to be missed but is the only way to get any stack trace in
-     * Safari and IE. The top frame is restored by
-     * {@link augmentStackTraceWithInitialElement}.
-     * @param {Error} ex
-     * @param {number} depth
-     * @return {StackTrace} Stack trace information.
-     * @memberof computeStackTrace
-     */
-    function computeStackTraceByWalkingCallerChain(ex, depth) {
-        var functionName = /function\s+([_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*)?\s*\(/i;
-        var stack = [];
-        var funcs = {};
-        var recursion = false;
-        var parts;
-        var item;
-        for (var curr = computeStackTraceByWalkingCallerChain.caller; curr && !recursion; curr = curr.caller) {
-            if (curr === exports.computeStackTrace || curr === exports.report) {
-                continue;
-            }
-            item = {
-                args: [],
-                column: undefined,
-                func: UNKNOWN_FUNCTION,
-                line: undefined,
-                url: undefined,
-            };
-            parts = functionName.exec(curr.toString());
-            if (curr.name) {
-                item.func = curr.name;
-            }
-            else if (parts) {
-                item.func = parts[1];
-            }
-            if (typeof item.func === 'undefined') {
-                item.func = parts ? parts.input.substring(0, parts.input.indexOf('{')) : undefined;
-            }
-            if (funcs["" + curr]) {
-                recursion = true;
-            }
-            else {
-                funcs["" + curr] = true;
-            }
-            stack.push(item);
-        }
-        if (depth) {
-            stack.splice(0, depth);
-        }
-        var result = {
-            stack: stack,
-            message: ex.message,
-            name: ex.name,
-        };
-        augmentStackTraceWithInitialElement(result, ex.sourceURL || ex.fileName, ex.line || ex.lineNumber, ex.message || ex.description);
-        return result;
-    }
-    /**
-     * Computes a stack trace for an exception.
-     * @param {Error} ex
-     * @param {(string|number)=} depth
-     * @memberof computeStackTrace
-     */
-    function doComputeStackTrace(ex, depth) {
-        var stack;
-        var normalizedDepth = depth === undefined ? 0 : +depth;
-        try {
-            // This must be tried first because Opera 10 *destroys*
-            // its stacktrace property if you try to access the stack
-            // property first!!
-            stack = computeStackTraceFromStacktraceProp(ex);
-            if (stack) {
-                return stack;
-            }
-        }
-        catch (e) {
-            if (debug) {
-                throw e;
-            }
-        }
-        try {
-            stack = computeStackTraceFromStackProp(ex);
-            if (stack) {
-                return stack;
-            }
-        }
-        catch (e) {
-            if (debug) {
-                throw e;
-            }
-        }
-        try {
-            stack = computeStackTraceFromOperaMultiLineMessage(ex);
-            if (stack) {
-                return stack;
-            }
-        }
-        catch (e) {
-            if (debug) {
-                throw e;
-            }
-        }
-        try {
-            stack = computeStackTraceByWalkingCallerChain(ex, normalizedDepth + 1);
-            if (stack) {
-                return stack;
-            }
-        }
-        catch (e) {
-            if (debug) {
-                throw e;
-            }
-        }
-        return {
-            message: ex.message,
-            name: ex.name,
-            stack: [],
-        };
-    }
-    /**
-     * Logs a stacktrace starting from the previous call and working down.
-     * @param {(number|string)=} depth How many frames deep to trace.
-     * @return {StackTrace} Stack trace information.
-     * @memberof computeStackTrace
-     */
-    function computeStackTraceOfCaller(depth) {
-        var currentDepth = (depth === undefined ? 0 : +depth) + 1; // "+ 1" because "ofCaller" should drop one frame
-        try {
-            throw new Error();
-        }
-        catch (ex) {
-            return exports.computeStackTrace(ex, currentDepth + 1);
-        }
-    }
-    doComputeStackTrace.augmentStackTraceWithInitialElement = augmentStackTraceWithInitialElement;
-    doComputeStackTrace.computeStackTraceFromStackProp = computeStackTraceFromStackProp;
-    doComputeStackTrace.ofCaller = computeStackTraceOfCaller;
-    return doComputeStackTrace;
-})();
-/**
- * Extends support for global error handling for asynchronous browser
- * functions. Adopted from Closure Library's errorhandler.js
- * @memberof TraceKit
- */
-function extendToAsynchronousCallbacks() {
-    function helper(fnName) {
-        var originalFn = window[fnName];
-        window[fnName] = function traceKitAsyncExtension() {
-            // Make a copy of the arguments
-            var args = [].slice.call(arguments);
-            var originalCallback = args[0];
-            if (typeof originalCallback === 'function') {
-                args[0] = wrap(originalCallback);
-            }
-            // IE < 9 doesn't support .call/.apply on setInterval/setTimeout, but it
-            // also only supports 2 argument and doesn't care what "this" is, so we
-            // can just call the original function directly.
-            if (originalFn.apply) {
-                return originalFn.apply(this, args);
-            }
-            return originalFn(args[0], args[1]);
-        };
-    }
-    helper('setTimeout');
-    helper('setInterval');
-}
-exports.extendToAsynchronousCallbacks = extendToAsynchronousCallbacks;
-//# sourceMappingURL=tracekit.js.map
-},{"./internalMonitoring":"6d081b3adf74fb2ed9632aae8731586a"}],"30a74b82219bd3790087d6a539e0dec1":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var utils_1 = require("./utils");
-function normalizeUrl(url) {
-    return buildUrl(url, utils_1.getLocationOrigin()).href;
-}
-exports.normalizeUrl = normalizeUrl;
-function isValidUrl(url) {
-    try {
-        return !!buildUrl(url);
-    }
-    catch (_a) {
-        return false;
-    }
-}
-exports.isValidUrl = isValidUrl;
-function haveSameOrigin(url1, url2) {
-    return getOrigin(url1) === getOrigin(url2);
-}
-exports.haveSameOrigin = haveSameOrigin;
-function getOrigin(url) {
-    return utils_1.getLinkElementOrigin(buildUrl(url));
-}
-exports.getOrigin = getOrigin;
-function getPathName(url) {
-    var pathname = buildUrl(url).pathname;
-    return pathname[0] === '/' ? pathname : "/" + pathname;
-}
-exports.getPathName = getPathName;
-function getSearch(url) {
-    return buildUrl(url).search;
-}
-exports.getSearch = getSearch;
-function getHash(url) {
-    return buildUrl(url).hash;
-}
-exports.getHash = getHash;
-function buildUrl(url, base) {
-    if (checkURLSupported()) {
-        return base !== undefined ? new URL(url, base) : new URL(url);
-    }
-    if (base === undefined && !/:/.test(url)) {
-        throw new Error("Invalid URL: '" + url + "'");
-    }
-    var doc = document;
-    var anchorElement = doc.createElement('a');
-    if (base !== undefined) {
-        doc = document.implementation.createHTMLDocument('');
-        var baseElement = doc.createElement('base');
-        baseElement.href = base;
-        doc.head.appendChild(baseElement);
-        doc.body.appendChild(anchorElement);
-    }
-    anchorElement.href = url;
-    return anchorElement;
-}
-exports.buildUrl = buildUrl;
-var isURLSupported;
-function checkURLSupported() {
-    if (isURLSupported !== undefined) {
-        return isURLSupported;
-    }
-    try {
-        var url = new URL('http://test/path');
-        isURLSupported = url.href === 'http://test/path';
-        return isURLSupported;
-    }
-    catch (_a) {
-        isURLSupported = false;
-    }
-    return isURLSupported;
-}
-//# sourceMappingURL=urlPolyfill.js.map
-},{"./utils":"a4c0c5c567ad3af2f7aa1ae7108bd730"}],"be29ffc5ff3ec36df8a0526d8efa37e5":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = require("tslib");
-var fetchProxy_1 = require("../browser/fetchProxy");
-var xhrProxy_1 = require("../browser/xhrProxy");
-var error_1 = require("../tools/error");
-var observable_1 = require("../tools/observable");
-var utils_1 = require("../tools/utils");
-var configuration_1 = require("./configuration");
-var internalMonitoring_1 = require("./internalMonitoring");
-var tracekit_1 = require("./tracekit");
-var filteredErrorsObservable;
-function startAutomaticErrorCollection(configuration) {
-    if (!filteredErrorsObservable) {
-        var errorObservable = new observable_1.Observable();
-        trackNetworkError(configuration, errorObservable);
-        startConsoleTracking(errorObservable);
-        startRuntimeErrorTracking(errorObservable);
-        filteredErrorsObservable = filterErrors(configuration, errorObservable);
-    }
-    return filteredErrorsObservable;
-}
-exports.startAutomaticErrorCollection = startAutomaticErrorCollection;
-function filterErrors(configuration, errorObservable) {
-    var errorCount = 0;
-    var filteredErrorObservable = new observable_1.Observable();
-    errorObservable.subscribe(function (error) {
-        if (errorCount < configuration.maxErrorsByMinute) {
-            errorCount += 1;
-            filteredErrorObservable.notify(error);
-        }
-        else if (errorCount === configuration.maxErrorsByMinute) {
-            errorCount += 1;
-            filteredErrorObservable.notify({
-                message: "Reached max number of errors by minute: " + configuration.maxErrorsByMinute,
-                source: error_1.ErrorSource.AGENT,
-                startTime: performance.now(),
-            });
-        }
-    });
-    setInterval(function () { return (errorCount = 0); }, utils_1.ONE_MINUTE);
-    return filteredErrorObservable;
-}
-exports.filterErrors = filterErrors;
-var originalConsoleError;
-function startConsoleTracking(errorObservable) {
-    originalConsoleError = console.error;
-    console.error = internalMonitoring_1.monitor(function (message) {
-        var optionalParams = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            optionalParams[_i - 1] = arguments[_i];
-        }
-        originalConsoleError.apply(console, tslib_1.__spreadArrays([message], optionalParams));
-        errorObservable.notify({
-            message: tslib_1.__spreadArrays(['console error:', message], optionalParams).map(formatConsoleParameters).join(' '),
-            source: error_1.ErrorSource.CONSOLE,
-            startTime: performance.now(),
-        });
-    });
-}
-exports.startConsoleTracking = startConsoleTracking;
-function stopConsoleTracking() {
-    console.error = originalConsoleError;
-}
-exports.stopConsoleTracking = stopConsoleTracking;
-function formatConsoleParameters(param) {
-    if (typeof param === 'string') {
-        return param;
-    }
-    if (param instanceof Error) {
-        return error_1.toStackTraceString(tracekit_1.computeStackTrace(param));
-    }
-    return utils_1.jsonStringify(param, undefined, 2);
-}
-var traceKitReportHandler;
-function startRuntimeErrorTracking(errorObservable) {
-    traceKitReportHandler = function (stackTrace, _, errorObject) {
-        var _a = error_1.formatUnknownError(stackTrace, errorObject, 'Uncaught'), stack = _a.stack, message = _a.message, type = _a.type;
-        errorObservable.notify({
-            message: message,
-            stack: stack,
-            type: type,
-            source: error_1.ErrorSource.SOURCE,
-            startTime: performance.now(),
-        });
-    };
-    tracekit_1.report.subscribe(traceKitReportHandler);
-}
-exports.startRuntimeErrorTracking = startRuntimeErrorTracking;
-function stopRuntimeErrorTracking() {
-    ;
-    tracekit_1.report.unsubscribe(traceKitReportHandler);
-}
-exports.stopRuntimeErrorTracking = stopRuntimeErrorTracking;
-function trackNetworkError(configuration, errorObservable) {
-    xhrProxy_1.startXhrProxy().onRequestComplete(function (context) { return handleCompleteRequest(utils_1.RequestType.XHR, context); });
-    fetchProxy_1.startFetchProxy().onRequestComplete(function (context) { return handleCompleteRequest(utils_1.RequestType.FETCH, context); });
-    function handleCompleteRequest(type, request) {
-        if (!configuration_1.isIntakeRequest(request.url, configuration) && (isRejected(request) || isServerError(request))) {
-            errorObservable.notify({
-                message: format(type) + " error " + request.method + " " + request.url,
-                resource: {
-                    method: request.method,
-                    statusCode: request.status,
-                    url: request.url,
-                },
-                source: error_1.ErrorSource.NETWORK,
-                stack: truncateResponse(request.response, configuration) || 'Failed to load',
-                startTime: request.startTime,
-            });
-        }
-    }
-    return {
-        stop: function () {
-            xhrProxy_1.resetXhrProxy();
-            fetchProxy_1.resetFetchProxy();
-        },
-    };
-}
-exports.trackNetworkError = trackNetworkError;
-function isRejected(request) {
-    return request.status === 0 && request.responseType !== 'opaque';
-}
-function isServerError(request) {
-    return request.status >= 500;
-}
-function truncateResponse(response, configuration) {
-    if (response && response.length > configuration.requestErrorResponseLengthLimit) {
-        return response.substring(0, configuration.requestErrorResponseLengthLimit) + "...";
-    }
-    return response;
-}
-function format(type) {
-    if (utils_1.RequestType.XHR === type) {
-        return 'XHR';
-    }
-    return 'Fetch';
-}
-//# sourceMappingURL=automaticErrorCollection.js.map
-},{"tslib":"a212b5bd40bedbc434eaed1b3a2942b1","../browser/fetchProxy":"139ace042ae6bdfd7849fc66c7e6554e","../browser/xhrProxy":"dfdf6d7dbd141ea1bafda02e0c0b4cae","../tools/error":"0dddf352a2255acaa5426f9ee2e94d13","../tools/observable":"38310c2b77d6e778570b5a56ef9806bb","../tools/utils":"a4c0c5c567ad3af2f7aa1ae7108bd730","./configuration":"6763541ca333269e57118bc4c50800cf","./internalMonitoring":"6d081b3adf74fb2ed9632aae8731586a","./tracekit":"35ac35b5e9178c44050ae5baee46483f"}],"139ace042ae6bdfd7849fc66c7e6554e":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = require("tslib");
-var internalMonitoring_1 = require("../domain/internalMonitoring");
-var tracekit_1 = require("../domain/tracekit");
-var error_1 = require("../tools/error");
-var urlPolyfill_1 = require("../tools/urlPolyfill");
-var fetchProxySingleton;
-var originalFetch;
-var beforeSendCallbacks = [];
-var onRequestCompleteCallbacks = [];
-function startFetchProxy() {
-    if (!fetchProxySingleton) {
-        proxyFetch();
-        fetchProxySingleton = {
-            beforeSend: function (callback) {
-                beforeSendCallbacks.push(callback);
-            },
-            onRequestComplete: function (callback) {
-                onRequestCompleteCallbacks.push(callback);
-            },
-        };
-    }
-    return fetchProxySingleton;
-}
-exports.startFetchProxy = startFetchProxy;
-function resetFetchProxy() {
-    if (fetchProxySingleton) {
-        fetchProxySingleton = undefined;
-        beforeSendCallbacks.splice(0, beforeSendCallbacks.length);
-        onRequestCompleteCallbacks.splice(0, onRequestCompleteCallbacks.length);
-        window.fetch = originalFetch;
-    }
-}
-exports.resetFetchProxy = resetFetchProxy;
-function proxyFetch() {
-    if (!window.fetch) {
-        return;
-    }
-    originalFetch = window.fetch;
-    // tslint:disable promise-function-async
-    window.fetch = internalMonitoring_1.monitor(function (input, init) {
-        var _this = this;
-        var method = (init && init.method) || (typeof input === 'object' && input.method) || 'GET';
-        var url = urlPolyfill_1.normalizeUrl((typeof input === 'object' && input.url) || input);
-        var startTime = performance.now();
-        var context = {
-            init: init,
-            method: method,
-            startTime: startTime,
-            url: url,
-        };
-        var reportFetch = function (response) { return tslib_1.__awaiter(_this, void 0, void 0, function () {
-            var text, e_1;
-            return tslib_1.__generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        context.duration = performance.now() - context.startTime;
-                        if (!('stack' in response || response instanceof Error)) return [3 /*break*/, 1];
-                        context.status = 0;
-                        context.response = error_1.toStackTraceString(tracekit_1.computeStackTrace(response));
-                        onRequestCompleteCallbacks.forEach(function (callback) { return callback(context); });
-                        return [3 /*break*/, 6];
-                    case 1:
-                        if (!('status' in response)) return [3 /*break*/, 6];
-                        text = void 0;
-                        _a.label = 2;
-                    case 2:
-                        _a.trys.push([2, 4, , 5]);
-                        return [4 /*yield*/, response.clone().text()];
-                    case 3:
-                        text = _a.sent();
-                        return [3 /*break*/, 5];
-                    case 4:
-                        e_1 = _a.sent();
-                        text = "Unable to retrieve response: " + e_1;
-                        return [3 /*break*/, 5];
-                    case 5:
-                        context.response = text;
-                        context.responseType = response.type;
-                        context.status = response.status;
-                        onRequestCompleteCallbacks.forEach(function (callback) { return callback(context); });
-                        _a.label = 6;
-                    case 6: return [2 /*return*/];
-                }
-            });
-        }); };
-        beforeSendCallbacks.forEach(function (callback) { return callback(context); });
-        var responsePromise = originalFetch.call(this, input, context.init);
-        responsePromise.then(internalMonitoring_1.monitor(reportFetch), internalMonitoring_1.monitor(reportFetch));
-        return responsePromise;
-    });
-}
-//# sourceMappingURL=fetchProxy.js.map
-},{"tslib":"a212b5bd40bedbc434eaed1b3a2942b1","../domain/internalMonitoring":"6d081b3adf74fb2ed9632aae8731586a","../domain/tracekit":"35ac35b5e9178c44050ae5baee46483f","../tools/error":"0dddf352a2255acaa5426f9ee2e94d13","../tools/urlPolyfill":"30a74b82219bd3790087d6a539e0dec1"}],"dfdf6d7dbd141ea1bafda02e0c0b4cae":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var internalMonitoring_1 = require("../domain/internalMonitoring");
-var urlPolyfill_1 = require("../tools/urlPolyfill");
-var xhrProxySingleton;
-var beforeSendCallbacks = [];
-var onRequestCompleteCallbacks = [];
-var originalXhrOpen;
-var originalXhrSend;
-function startXhrProxy() {
-    if (!xhrProxySingleton) {
-        proxyXhr();
-        xhrProxySingleton = {
-            beforeSend: function (callback) {
-                beforeSendCallbacks.push(callback);
-            },
-            onRequestComplete: function (callback) {
-                onRequestCompleteCallbacks.push(callback);
-            },
-        };
-    }
-    return xhrProxySingleton;
-}
-exports.startXhrProxy = startXhrProxy;
-function resetXhrProxy() {
-    if (xhrProxySingleton) {
-        xhrProxySingleton = undefined;
-        beforeSendCallbacks.splice(0, beforeSendCallbacks.length);
-        onRequestCompleteCallbacks.splice(0, onRequestCompleteCallbacks.length);
-        XMLHttpRequest.prototype.open = originalXhrOpen;
-        XMLHttpRequest.prototype.send = originalXhrSend;
-    }
-}
-exports.resetXhrProxy = resetXhrProxy;
-function proxyXhr() {
-    originalXhrOpen = XMLHttpRequest.prototype.open;
-    originalXhrSend = XMLHttpRequest.prototype.send;
-    XMLHttpRequest.prototype.open = internalMonitoring_1.monitor(function (method, url) {
-        // WARN: since this data structure is tied to the instance, it is shared by both logs and rum
-        // and can be used by different code versions depending on customer setup
-        // so it should stay compatible with older versions
-        this._datadog_xhr = {
-            method: method,
-            startTime: -1,
-            url: urlPolyfill_1.normalizeUrl(url),
-        };
-        return originalXhrOpen.apply(this, arguments);
-    });
-    XMLHttpRequest.prototype.send = internalMonitoring_1.monitor(function (body) {
-        var _this = this;
-        if (this._datadog_xhr) {
-            this._datadog_xhr.startTime = performance.now();
-            var originalOnreadystatechange_1 = this.onreadystatechange;
-            this.onreadystatechange = function () {
-                if (this.readyState === XMLHttpRequest.DONE) {
-                    internalMonitoring_1.monitor(reportXhr_1)();
-                }
-                if (originalOnreadystatechange_1) {
-                    originalOnreadystatechange_1.apply(this, arguments);
-                }
-            };
-            var hasBeenReported_1 = false;
-            var reportXhr_1 = function () {
-                if (hasBeenReported_1) {
-                    return;
-                }
-                hasBeenReported_1 = true;
-                _this._datadog_xhr.duration = performance.now() - _this._datadog_xhr.startTime;
-                _this._datadog_xhr.response = _this.response;
-                _this._datadog_xhr.status = _this.status;
-                onRequestCompleteCallbacks.forEach(function (callback) { return callback(_this._datadog_xhr); });
-            };
-            this.addEventListener('loadend', internalMonitoring_1.monitor(reportXhr_1));
-            beforeSendCallbacks.forEach(function (callback) { return callback(_this._datadog_xhr, _this); });
-        }
-        return originalXhrSend.apply(this, arguments);
-    });
-}
-//# sourceMappingURL=xhrProxy.js.map
-},{"../domain/internalMonitoring":"6d081b3adf74fb2ed9632aae8731586a","../tools/urlPolyfill":"30a74b82219bd3790087d6a539e0dec1"}],"38310c2b77d6e778570b5a56ef9806bb":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var Observable = /** @class */ (function () {
-    function Observable() {
-        this.observers = [];
-    }
-    Observable.prototype.subscribe = function (f) {
-        this.observers.push(f);
-    };
-    Observable.prototype.notify = function (data) {
-        this.observers.forEach(function (observer) { return observer(data); });
-    };
-    return Observable;
-}());
-exports.Observable = Observable;
-//# sourceMappingURL=observable.js.map
-},{}],"183a6e16ab4f7d1c9cc409df2a4654f3":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = require("tslib");
-var cookie_1 = require("../browser/cookie");
-var observable_1 = require("../tools/observable");
-var utils = tslib_1.__importStar(require("../tools/utils"));
-var internalMonitoring_1 = require("./internalMonitoring");
-var oldCookiesMigration_1 = require("./oldCookiesMigration");
-exports.SESSION_COOKIE_NAME = '_dd_s';
-exports.SESSION_EXPIRATION_DELAY = 15 * utils.ONE_MINUTE;
-exports.SESSION_TIME_OUT_DELAY = 4 * utils.ONE_HOUR;
-exports.VISIBILITY_CHECK_DELAY = utils.ONE_MINUTE;
-/**
- * Limit access to cookie to avoid performance issues
- */
-function startSessionManagement(options, productKey, computeSessionState) {
-    var sessionCookie = cookie_1.cacheCookieAccess(exports.SESSION_COOKIE_NAME, options);
-    oldCookiesMigration_1.tryOldCookiesMigration(sessionCookie);
-    var renewObservable = new observable_1.Observable();
-    var currentSessionId = retrieveActiveSession(sessionCookie).id;
-    var expandOrRenewSession = utils.throttle(function () {
-        var session = retrieveActiveSession(sessionCookie);
-        var _a = computeSessionState(session[productKey]), trackingType = _a.trackingType, isTracked = _a.isTracked;
-        session[productKey] = trackingType;
-        if (isTracked && !session.id) {
-            session.id = utils.generateUUID();
-            session.created = String(Date.now());
-        }
-        // save changes and expand session duration
-        persistSession(session, sessionCookie);
-        // If the session id has changed, notify that the session has been renewed
-        if (isTracked && currentSessionId !== session.id) {
-            currentSessionId = session.id;
-            renewObservable.notify();
-        }
-    }, cookie_1.COOKIE_ACCESS_DELAY).throttled;
-    var expandSession = function () {
-        var session = retrieveActiveSession(sessionCookie);
-        persistSession(session, sessionCookie);
-    };
-    expandOrRenewSession();
-    trackActivity(expandOrRenewSession);
-    trackVisibility(expandSession);
-    return {
-        getId: function () {
-            return retrieveActiveSession(sessionCookie).id;
-        },
-        getTrackingType: function () {
-            return retrieveActiveSession(sessionCookie)[productKey];
-        },
-        renewObservable: renewObservable,
-    };
-}
-exports.startSessionManagement = startSessionManagement;
-var SESSION_ENTRY_REGEXP = /^([a-z]+)=([a-z0-9-]+)$/;
-var SESSION_ENTRY_SEPARATOR = '&';
-function isValidSessionString(sessionString) {
-    return (sessionString !== undefined &&
-        (sessionString.indexOf(SESSION_ENTRY_SEPARATOR) !== -1 || SESSION_ENTRY_REGEXP.test(sessionString)));
-}
-exports.isValidSessionString = isValidSessionString;
-function retrieveActiveSession(sessionCookie) {
-    var session = retrieveSession(sessionCookie);
-    if (isActiveSession(session)) {
-        return session;
-    }
-    clearSession(sessionCookie);
-    return {};
-}
-function isActiveSession(session) {
-    // created and expire can be undefined for versions which was not storing them
-    // these checks could be removed when older versions will not be available/live anymore
-    return ((session.created === undefined || Date.now() - Number(session.created) < exports.SESSION_TIME_OUT_DELAY) &&
-        (session.expire === undefined || Date.now() < Number(session.expire)));
-}
-function retrieveSession(sessionCookie) {
-    var sessionString = sessionCookie.get();
-    var session = {};
-    if (isValidSessionString(sessionString)) {
-        sessionString.split(SESSION_ENTRY_SEPARATOR).forEach(function (entry) {
-            var matches = SESSION_ENTRY_REGEXP.exec(entry);
-            if (matches !== null) {
-                var key = matches[1], value = matches[2];
-                session[key] = value;
-            }
-        });
-    }
-    return session;
-}
-function persistSession(session, cookie) {
-    if (utils.isEmptyObject(session)) {
-        clearSession(cookie);
-        return;
-    }
-    session.expire = String(Date.now() + exports.SESSION_EXPIRATION_DELAY);
-    var cookieString = utils
-        .objectEntries(session)
-        .map(function (_a) {
-        var key = _a[0], value = _a[1];
-        return key + "=" + value;
-    })
-        .join(SESSION_ENTRY_SEPARATOR);
-    cookie.set(cookieString, exports.SESSION_EXPIRATION_DELAY);
-}
-exports.persistSession = persistSession;
-function clearSession(cookie) {
-    cookie.set('', 0);
-}
-function stopSessionManagement() {
-    stopCallbacks.forEach(function (e) { return e(); });
-    stopCallbacks = [];
-}
-exports.stopSessionManagement = stopSessionManagement;
-var stopCallbacks = [];
-function trackActivity(expandOrRenewSession) {
-    var stop = utils.addEventListeners(window, [utils.DOM_EVENT.CLICK, utils.DOM_EVENT.TOUCH_START, utils.DOM_EVENT.KEY_DOWN, utils.DOM_EVENT.SCROLL], expandOrRenewSession, { capture: true, passive: true }).stop;
-    stopCallbacks.push(stop);
-}
-exports.trackActivity = trackActivity;
-function trackVisibility(expandSession) {
-    var expandSessionWhenVisible = internalMonitoring_1.monitor(function () {
-        if (document.visibilityState === 'visible') {
-            expandSession();
-        }
-    });
-    var stop = utils.addEventListener(document, utils.DOM_EVENT.VISIBILITY_CHANGE, expandSessionWhenVisible).stop;
-    stopCallbacks.push(stop);
-    var visibilityCheckInterval = window.setInterval(expandSessionWhenVisible, exports.VISIBILITY_CHECK_DELAY);
-    stopCallbacks.push(function () {
-        clearInterval(visibilityCheckInterval);
-    });
-}
-//# sourceMappingURL=sessionManagement.js.map
-},{"tslib":"a212b5bd40bedbc434eaed1b3a2942b1","../browser/cookie":"ebaf883ffc0dcd01cd439a4ca56c6088","../tools/observable":"38310c2b77d6e778570b5a56ef9806bb","../tools/utils":"a4c0c5c567ad3af2f7aa1ae7108bd730","./internalMonitoring":"6d081b3adf74fb2ed9632aae8731586a","./oldCookiesMigration":"cb1bc434093eb0e1b8981b4a33ad989e"}],"cb1bc434093eb0e1b8981b4a33ad989e":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var cookie_1 = require("../browser/cookie");
-var sessionManagement_1 = require("./sessionManagement");
-exports.OLD_SESSION_COOKIE_NAME = '_dd';
-exports.OLD_RUM_COOKIE_NAME = '_dd_r';
-exports.OLD_LOGS_COOKIE_NAME = '_dd_l';
-// duplicate values to avoid dependency issues
-exports.RUM_SESSION_KEY = 'rum';
-exports.LOGS_SESSION_KEY = 'logs';
-/**
- * This migration should remain in the codebase as long as older versions are available/live
- * to allow older sdk versions to be upgraded to newer versions without compatibility issues.
- */
-function tryOldCookiesMigration(sessionCookie) {
-    var sessionString = sessionCookie.get();
-    var oldSessionId = cookie_1.getCookie(exports.OLD_SESSION_COOKIE_NAME);
-    var oldRumType = cookie_1.getCookie(exports.OLD_RUM_COOKIE_NAME);
-    var oldLogsType = cookie_1.getCookie(exports.OLD_LOGS_COOKIE_NAME);
-    if (!sessionString) {
-        var session = {};
-        if (oldSessionId) {
-            session.id = oldSessionId;
-        }
-        if (oldLogsType && /^[01]$/.test(oldLogsType)) {
-            session[exports.LOGS_SESSION_KEY] = oldLogsType;
-        }
-        if (oldRumType && /^[012]$/.test(oldRumType)) {
-            session[exports.RUM_SESSION_KEY] = oldRumType;
-        }
-        sessionManagement_1.persistSession(session, sessionCookie);
-    }
-}
-exports.tryOldCookiesMigration = tryOldCookiesMigration;
-//# sourceMappingURL=oldCookiesMigration.js.map
-},{"../browser/cookie":"ebaf883ffc0dcd01cd439a4ca56c6088","./sessionManagement":"183a6e16ab4f7d1c9cc409df2a4654f3"}],"c7de07e42779b3f5dae266fc246d6b22":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var DEFAULT_LIMIT = 10000;
-var BoundedBuffer = /** @class */ (function () {
-    function BoundedBuffer(limit) {
-        if (limit === void 0) { limit = DEFAULT_LIMIT; }
-        this.limit = limit;
-        this.buffer = [];
-    }
-    BoundedBuffer.prototype.add = function (item) {
-        var length = this.buffer.push(item);
-        if (length > this.limit) {
-            this.buffer.splice(0, 1);
-        }
-    };
-    BoundedBuffer.prototype.drain = function (fn) {
-        this.buffer.forEach(function (item) { return fn(item); });
-        this.buffer.length = 0;
-    };
-    return BoundedBuffer;
-}());
-exports.BoundedBuffer = BoundedBuffer;
-//# sourceMappingURL=boundedBuffer.js.map
-},{}],"a2b38010c0d318219e1b264edf210175":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function createContextManager() {
-    var context = {};
-    return {
-        get: function () {
-            return context;
-        },
-        add: function (key, value) {
-            context[key] = value;
-        },
-        remove: function (key) {
-            delete context[key];
-        },
-        set: function (newContext) {
-            context = newContext;
-        },
-    };
-}
-exports.createContextManager = createContextManager;
-//# sourceMappingURL=contextManager.js.map
-},{}],"4086e826a87d0c04dcb7fa2132257e73":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = require("tslib");
-var utils_1 = require("./utils");
-exports.SPEC_ENDPOINTS = {
-    internalMonitoringEndpoint: 'https://monitoring-intake.com/v1/input/abcde?foo=bar',
-    logsEndpoint: 'https://logs-intake.com/v1/input/abcde?foo=bar',
-    rumEndpoint: 'https://rum-intake.com/v1/input/abcde?foo=bar',
-    traceEndpoint: 'https://trace-intake.com/v1/input/abcde?foo=bar',
-};
-function isSafari() {
-    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-}
-exports.isSafari = isSafari;
-function isFirefox() {
-    return navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-}
-exports.isFirefox = isFirefox;
-function isIE() {
-    return navigator.userAgent.indexOf('MSIE ') > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./);
-}
-exports.isIE = isIE;
-function clearAllCookies() {
-    document.cookie.split(';').forEach(function (c) {
-        document.cookie = c.replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/;samesite=strict");
-    });
-}
-exports.clearAllCookies = clearAllCookies;
-function stubFetch() {
-    var _this = this;
-    var originalFetch = window.fetch;
-    var allFetchCompleteCallback = utils_1.noop;
-    var pendingRequests = 0;
-    function onRequestEnd() {
-        pendingRequests -= 1;
-        if (pendingRequests === 0) {
-            setTimeout(function () { return allFetchCompleteCallback(); });
-        }
-    }
-    window.fetch = (function () {
-        pendingRequests += 1;
-        var resolve;
-        var reject;
-        var promise = new Promise(function (res, rej) {
-            resolve = res;
-            reject = rej;
-        });
-        promise.resolveWith = function (response) { return tslib_1.__awaiter(_this, void 0, void 0, function () {
-            var resolved;
-            var _this = this;
-            return tslib_1.__generator(this, function (_a) {
-                resolved = resolve(tslib_1.__assign(tslib_1.__assign({}, response), { clone: function () {
-                        var cloned = {
-                            text: function () { return tslib_1.__awaiter(_this, void 0, void 0, function () {
-                                return tslib_1.__generator(this, function (_a) {
-                                    if (response.responseTextError) {
-                                        throw response.responseTextError;
-                                    }
-                                    return [2 /*return*/, response.responseText];
-                                });
-                            }); },
-                        };
-                        return cloned;
-                    } }));
-                onRequestEnd();
-                return [2 /*return*/, resolved];
-            });
-        }); };
-        promise.rejectWith = function (error) { return tslib_1.__awaiter(_this, void 0, void 0, function () {
-            var rejected;
-            return tslib_1.__generator(this, function (_a) {
-                rejected = reject(error);
-                onRequestEnd();
-                return [2 /*return*/, rejected];
-            });
-        }); };
-        return promise;
-    });
-    return {
-        whenAllComplete: function (callback) {
-            allFetchCompleteCallback = callback;
-        },
-        reset: function () {
-            window.fetch = originalFetch;
-            allFetchCompleteCallback = utils_1.noop;
-        },
-    };
-}
-exports.stubFetch = stubFetch;
-var StubXhr = /** @class */ (function () {
-    function StubXhr() {
-        this.response = undefined;
-        this.status = undefined;
-        this.readyState = XMLHttpRequest.UNSENT;
-        this.onreadystatechange = utils_1.noop;
-        this.fakeEventTarget = document.createElement('div');
-    }
-    // tslint:disable:no-empty
-    StubXhr.prototype.open = function (method, url) { };
-    StubXhr.prototype.send = function () { };
-    // tslint:enable:no-empty
-    StubXhr.prototype.abort = function () {
-        this.status = 0;
-    };
-    StubXhr.prototype.complete = function (status, response) {
-        this.response = response;
-        this.status = status;
-        this.readyState = XMLHttpRequest.DONE;
-        this.onreadystatechange();
-        if (status >= 200 && status < 500) {
-            this.dispatchEvent('load');
-        }
-        if (status >= 500) {
-            this.dispatchEvent('error');
-        }
-        this.dispatchEvent('loadend');
-    };
-    StubXhr.prototype.addEventListener = function (name, callback) {
-        this.fakeEventTarget.addEventListener(name, callback);
-    };
-    StubXhr.prototype.dispatchEvent = function (name) {
-        this.fakeEventTarget.dispatchEvent(createNewEvent(name));
-    };
-    return StubXhr;
-}());
-function createNewEvent(eventName, properties) {
-    if (properties === void 0) { properties = {}; }
-    var event;
-    if (typeof Event === 'function') {
-        event = new Event(eventName);
-    }
-    else {
-        event = document.createEvent('Event');
-        event.initEvent(eventName, true, true);
-    }
-    utils_1.objectEntries(properties).forEach(function (_a) {
-        var name = _a[0], value = _a[1];
-        // Setting values directly or with a `value` descriptor seems unsupported in IE11
-        Object.defineProperty(event, name, {
-            get: function () {
-                return value;
-            },
-        });
-    });
-    return event;
-}
-exports.createNewEvent = createNewEvent;
-function stubXhr() {
-    var originalXhr = XMLHttpRequest;
-    XMLHttpRequest = StubXhr;
-    return {
-        reset: function () {
-            XMLHttpRequest = originalXhr;
-        },
-    };
-}
-exports.stubXhr = stubXhr;
-function withXhr(_a) {
-    var setup = _a.setup, onComplete = _a.onComplete;
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener('loadend', function () {
-        setTimeout(function () {
-            onComplete(xhr);
-        });
-    });
-    setup(xhr);
-}
-exports.withXhr = withXhr;
-function setPageVisibility(visibility) {
-    Object.defineProperty(document, 'visibilityState', {
-        get: function () {
-            return visibility;
-        },
-        configurable: true,
-    });
-}
-exports.setPageVisibility = setPageVisibility;
-function restorePageVisibility() {
-    delete document.visibilityState;
-}
-exports.restorePageVisibility = restorePageVisibility;
-//# sourceMappingURL=specHelper.js.map
-},{"tslib":"a212b5bd40bedbc434eaed1b3a2942b1","./utils":"a4c0c5c567ad3af2f7aa1ae7108bd730"}],"c554a92bfe782f83f0d50f842e4de8fb":[function(require,module,exports) {
-"use strict";
-var _a;
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = require("tslib");
-var browser_core_1 = require("@datadog/browser-core");
-var StatusType;
-(function (StatusType) {
-    StatusType["debug"] = "debug";
-    StatusType["info"] = "info";
-    StatusType["warn"] = "warn";
-    StatusType["error"] = "error";
-})(StatusType = exports.StatusType || (exports.StatusType = {}));
-exports.STATUS_PRIORITIES = (_a = {},
-    _a[StatusType.debug] = 0,
-    _a[StatusType.info] = 1,
-    _a[StatusType.warn] = 2,
-    _a[StatusType.error] = 3,
-    _a);
-exports.STATUSES = Object.keys(StatusType);
-var HandlerType;
-(function (HandlerType) {
-    HandlerType["http"] = "http";
-    HandlerType["console"] = "console";
-    HandlerType["silent"] = "silent";
-})(HandlerType = exports.HandlerType || (exports.HandlerType = {}));
-var Logger = /** @class */ (function () {
-    function Logger(sendLog, handlerType, level, loggerContext) {
-        if (handlerType === void 0) { handlerType = HandlerType.http; }
-        if (level === void 0) { level = StatusType.debug; }
-        if (loggerContext === void 0) { loggerContext = {}; }
-        this.sendLog = sendLog;
-        this.handlerType = handlerType;
-        this.level = level;
-        this.contextManager = browser_core_1.createContextManager();
-        this.contextManager.set(loggerContext);
-    }
-    Logger.prototype.log = function (message, messageContext, status) {
-        if (status === void 0) { status = StatusType.info; }
-        if (exports.STATUS_PRIORITIES[status] >= exports.STATUS_PRIORITIES[this.level]) {
-            switch (this.handlerType) {
-                case HandlerType.http:
-                    this.sendLog(tslib_1.__assign({ message: message,
-                        status: status }, browser_core_1.combine(this.contextManager.get(), messageContext)));
-                    break;
-                case HandlerType.console:
-                    console.log(status + ": " + message, browser_core_1.combine(this.contextManager.get(), messageContext));
-                    break;
-                case HandlerType.silent:
-                    break;
-            }
-        }
-    };
-    Logger.prototype.debug = function (message, messageContext) {
-        this.log(message, messageContext, StatusType.debug);
-    };
-    Logger.prototype.info = function (message, messageContext) {
-        this.log(message, messageContext, StatusType.info);
-    };
-    Logger.prototype.warn = function (message, messageContext) {
-        this.log(message, messageContext, StatusType.warn);
-    };
-    Logger.prototype.error = function (message, messageContext) {
-        var errorOrigin = {
-            error: {
-                origin: browser_core_1.ErrorSource.LOGGER,
-            },
-        };
-        this.log(message, browser_core_1.combine(errorOrigin, messageContext), StatusType.error);
-    };
-    Logger.prototype.setContext = function (context) {
-        this.contextManager.set(context);
-    };
-    Logger.prototype.addContext = function (key, value) {
-        this.contextManager.add(key, value);
-    };
-    Logger.prototype.removeContext = function (key) {
-        this.contextManager.remove(key);
-    };
-    Logger.prototype.setHandler = function (handler) {
-        this.handlerType = handler;
-    };
-    Logger.prototype.setLevel = function (level) {
-        this.level = level;
-    };
-    tslib_1.__decorate([
-        browser_core_1.monitored
-    ], Logger.prototype, "log", null);
-    return Logger;
-}());
-exports.Logger = Logger;
-//# sourceMappingURL=logger.js.map
-},{"tslib":"a212b5bd40bedbc434eaed1b3a2942b1","@datadog/browser-core":"2c4da984019bc1ef174ca0e92bb0855d"}],"c79a2cf2f6490c66d1cda96afe8b5ba6":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = require("tslib");
-var browser_core_1 = require("@datadog/browser-core");
-var logger_1 = require("../domain/logger");
-var logs_1 = require("./logs");
-exports.datadogLogs = makeLogsGlobal(logs_1.startLogs);
-browser_core_1.defineGlobal(browser_core_1.getGlobalObject(), 'DD_LOGS', exports.datadogLogs);
-function makeLogsGlobal(startLogsImpl) {
-    var isAlreadyInitialized = false;
-    var globalContextManager = browser_core_1.createContextManager();
-    var customLoggers = {};
-    var beforeInitSendLog = new browser_core_1.BoundedBuffer();
-    var sendLogStrategy = function (message, currentContext) {
-        beforeInitSendLog.add([message, currentContext]);
-    };
-    var logger = new logger_1.Logger(sendLog);
-    return browser_core_1.makeGlobal({
-        logger: logger,
-        init: browser_core_1.monitor(function (userConfiguration) {
-            if (!browser_core_1.checkIsNotLocalFile() || !canInitLogs(userConfiguration)) {
-                return;
-            }
-            if (userConfiguration.publicApiKey) {
-                userConfiguration.clientToken = userConfiguration.publicApiKey;
-                console.warn('Public API Key is deprecated. Please use Client Token instead.');
-            }
-            sendLogStrategy = startLogsImpl(userConfiguration, logger, globalContextManager.get);
-            beforeInitSendLog.drain(function (_a) {
-                var message = _a[0], context = _a[1];
-                return sendLogStrategy(message, context);
-            });
-            isAlreadyInitialized = true;
-        }),
-        getLoggerGlobalContext: browser_core_1.monitor(globalContextManager.get),
-        setLoggerGlobalContext: browser_core_1.monitor(globalContextManager.set),
-        addLoggerGlobalContext: browser_core_1.monitor(globalContextManager.add),
-        removeLoggerGlobalContext: browser_core_1.monitor(globalContextManager.remove),
-        createLogger: browser_core_1.monitor(function (name, conf) {
-            if (conf === void 0) { conf = {}; }
-            customLoggers[name] = new logger_1.Logger(sendLog, conf.handler, conf.level, tslib_1.__assign(tslib_1.__assign({}, conf.context), { logger: { name: name } }));
-            return customLoggers[name];
-        }),
-        getLogger: browser_core_1.monitor(function (name) {
-            return customLoggers[name];
-        }),
-    });
-    function canInitLogs(userConfiguration) {
-        if (isAlreadyInitialized) {
-            if (!userConfiguration.silentMultipleInit) {
-                console.error('DD_LOGS is already initialized.');
-            }
-            return false;
-        }
-        if (!userConfiguration || (!userConfiguration.publicApiKey && !userConfiguration.clientToken)) {
-            console.error('Client Token is not configured, we will not send any data.');
-            return false;
-        }
-        if (userConfiguration.sampleRate !== undefined && !browser_core_1.isPercentage(userConfiguration.sampleRate)) {
-            console.error('Sample Rate should be a number between 0 and 100');
-            return false;
-        }
-        return true;
-    }
-    function sendLog(message) {
-        sendLogStrategy(message, browser_core_1.combine({
-            date: Date.now(),
-            view: {
-                referrer: document.referrer,
-                url: window.location.href,
-            },
-        }, globalContextManager.get()));
-    }
-}
-exports.makeLogsGlobal = makeLogsGlobal;
-//# sourceMappingURL=logs.entry.js.map
-},{"tslib":"a212b5bd40bedbc434eaed1b3a2942b1","@datadog/browser-core":"2c4da984019bc1ef174ca0e92bb0855d","../domain/logger":"c554a92bfe782f83f0d50f842e4de8fb","./logs":"0e370e779ac03ba8475f482e6a0bcf37"}],"0e370e779ac03ba8475f482e6a0bcf37":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var browser_core_1 = require("@datadog/browser-core");
-var loggerSession_1 = require("../domain/loggerSession");
-var buildEnv_1 = require("./buildEnv");
-function startLogs(userConfiguration, errorLogger, getGlobalContext) {
-    var _a = browser_core_1.commonInit(userConfiguration, buildEnv_1.buildEnv), configuration = _a.configuration, internalMonitoring = _a.internalMonitoring;
-    var errorObservable = userConfiguration.forwardErrorsToLogs !== false
-        ? browser_core_1.startAutomaticErrorCollection(configuration)
-        : new browser_core_1.Observable();
-    var session = loggerSession_1.startLoggerSession(configuration, browser_core_1.areCookiesAuthorized(configuration.cookieOptions));
-    return doStartLogs(configuration, errorObservable, internalMonitoring, session, errorLogger, getGlobalContext);
-}
-exports.startLogs = startLogs;
-function doStartLogs(configuration, errorObservable, internalMonitoring, session, errorLogger, getGlobalContext) {
-    internalMonitoring.setExternalContextProvider(function () {
-        return browser_core_1.combine({ session_id: session.getId() }, getGlobalContext(), getRUMInternalContext());
-    });
-    var batch = startLoggerBatch(configuration, session);
-    errorObservable.subscribe(function (error) {
-        errorLogger.error(error.message, browser_core_1.combine({
-            date: browser_core_1.getTimestamp(error.startTime),
-            error: {
-                kind: error.type,
-                origin: error.source,
-                stack: error.stack,
-            },
-        }, error.resource
-            ? {
-                http: {
-                    method: error.resource.method,
-                    status_code: error.resource.statusCode,
-                    url: error.resource.url,
-                },
-            }
-            : undefined, getRUMInternalContext(error.startTime)));
-    });
-    return function (message, currentContext) {
-        if (session.isTracked()) {
-            batch.add(message, currentContext);
-        }
-    };
-}
-exports.doStartLogs = doStartLogs;
-function startLoggerBatch(configuration, session) {
-    var primaryBatch = createLoggerBatch(configuration.logsEndpoint);
-    var replicaBatch;
-    if (configuration.replica !== undefined) {
-        replicaBatch = createLoggerBatch(configuration.replica.logsEndpoint);
-    }
-    function createLoggerBatch(endpointUrl) {
-        return new browser_core_1.Batch(new browser_core_1.HttpRequest(endpointUrl, configuration.batchBytesLimit), configuration.maxBatchSize, configuration.batchBytesLimit, configuration.maxMessageSize, configuration.flushTimeout);
-    }
-    return {
-        add: function (message, currentContext) {
-            var contextualizedMessage = assembleMessageContexts({ service: configuration.service, session_id: session.getId() }, currentContext, getRUMInternalContext(), message);
-            primaryBatch.add(contextualizedMessage);
-            if (replicaBatch) {
-                replicaBatch.add(contextualizedMessage);
-            }
-        },
-    };
-}
-function assembleMessageContexts(defaultContext, currentContext, rumInternalContext, message) {
-    return browser_core_1.combine(defaultContext, currentContext, rumInternalContext, message);
-}
-exports.assembleMessageContexts = assembleMessageContexts;
-function getRUMInternalContext(startTime) {
-    var rum = window.DD_RUM;
-    return rum && rum.getInternalContext ? rum.getInternalContext(startTime) : undefined;
-}
-//# sourceMappingURL=logs.js.map
-},{"@datadog/browser-core":"2c4da984019bc1ef174ca0e92bb0855d","../domain/loggerSession":"4e8a324063c0e4b712d8c4f54647d9d0","./buildEnv":"1f613e6b3a007e3d973b36c1c51e0051"}],"4e8a324063c0e4b712d8c4f54647d9d0":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var browser_core_1 = require("@datadog/browser-core");
-exports.LOGGER_SESSION_KEY = 'logs';
-var LoggerTrackingType;
-(function (LoggerTrackingType) {
-    LoggerTrackingType["NOT_TRACKED"] = "0";
-    LoggerTrackingType["TRACKED"] = "1";
-})(LoggerTrackingType = exports.LoggerTrackingType || (exports.LoggerTrackingType = {}));
-function startLoggerSession(configuration, areCookieAuthorized) {
-    if (!areCookieAuthorized) {
-        var isTracked_1 = computeTrackingType(configuration) === LoggerTrackingType.TRACKED;
-        return {
-            getId: function () { return undefined; },
-            isTracked: function () { return isTracked_1; },
-        };
-    }
-    var session = browser_core_1.startSessionManagement(configuration.cookieOptions, exports.LOGGER_SESSION_KEY, function (rawTrackingType) {
-        return computeSessionState(configuration, rawTrackingType);
-    });
-    return {
-        getId: session.getId,
-        isTracked: function () { return session.getTrackingType() === LoggerTrackingType.TRACKED; },
-    };
-}
-exports.startLoggerSession = startLoggerSession;
-function computeTrackingType(configuration) {
-    if (!browser_core_1.performDraw(configuration.sampleRate)) {
-        return LoggerTrackingType.NOT_TRACKED;
-    }
-    return LoggerTrackingType.TRACKED;
-}
-function computeSessionState(configuration, rawSessionType) {
-    var trackingType = hasValidLoggerSession(rawSessionType) ? rawSessionType : computeTrackingType(configuration);
-    return {
-        trackingType: trackingType,
-        isTracked: trackingType === LoggerTrackingType.TRACKED,
-    };
-}
-function hasValidLoggerSession(trackingType) {
-    return trackingType === LoggerTrackingType.NOT_TRACKED || trackingType === LoggerTrackingType.TRACKED;
-}
-//# sourceMappingURL=loggerSession.js.map
-},{"@datadog/browser-core":"2c4da984019bc1ef174ca0e92bb0855d"}],"1f613e6b3a007e3d973b36c1c51e0051":[function(require,module,exports) {
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildEnv = {
-    buildMode: 'release',
-    datacenter: 'us',
-    sdkVersion: '1.26.1',
-};
-//# sourceMappingURL=buildEnv.js.map
-},{}],"8ef0b0bcdaf6b121d785c4674025d8a8":[function(require,module,exports) {
+},{}],"3Tb7P":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6480,7 +2817,7 @@ Object.keys(_index197).forEach(function (key) {
 });
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-},{"./add/index.js":"dbc152ece63d89d8bdc08cbfd38c638f","./addBusinessDays/index.js":"e461bf4ab3d2c090b0e29faa612bfb12","./addDays/index.js":"5fdec9afb4e5b1ea71ca3db109ea4b4a","./addHours/index.js":"cd47d6b53a35480fa364f0daccc1ea68","./addISOWeekYears/index.js":"0597a676a6f18ebb7f1c8b05acab95aa","./addMilliseconds/index.js":"c4e4e6442c21d238185ea6cfbfc467c7","./addMinutes/index.js":"6add3d9bd711b465b1f3fcfd9dbaacef","./addMonths/index.js":"c378d91acb6a81ab70e2f3bf5c6f8f0b","./addQuarters/index.js":"928b02c9289f2a44dc206b85a4f19db0","./addSeconds/index.js":"06da1dae2be75137482b0934e6a816e4","./addWeeks/index.js":"d7f228172dbd1739d5d2624dd7fbb932","./addYears/index.js":"e3b1a16fd74a5e331a21f425de5cae3a","./areIntervalsOverlapping/index.js":"e47bf185512c165acce5a3741e0c6e04","./closestIndexTo/index.js":"8381fcdddd0fdf1fc4fd28334af2f2aa","./closestTo/index.js":"7fea8f1ae7de29ba39f17c90da0ea282","./compareAsc/index.js":"b04482b11d51799a5c68a70b87615149","./compareDesc/index.js":"e02fecb119e20fe80086932a10da9ed7","./differenceInBusinessDays/index.js":"eddd240809e8fee5af7f8f5bad8ac998","./differenceInCalendarDays/index.js":"8255b070c42b22dde4ff1d9e2d1f8222","./differenceInCalendarISOWeekYears/index.js":"18c16c5332fa4f63b09e67b9c7a7fc1b","./differenceInCalendarISOWeeks/index.js":"ec76ab77b7bb44461e431771fb94f6fc","./differenceInCalendarMonths/index.js":"e984a378c181216f952d3092b443aafe","./differenceInCalendarQuarters/index.js":"8e1087f3fd86a7da0e03c6c28d4e4212","./differenceInCalendarWeeks/index.js":"d4d5352b34b5aee15bb4569fd972b1cf","./differenceInCalendarYears/index.js":"b1fe2f7d039a16b07bc71fa8afb3fb98","./differenceInDays/index.js":"e72a5837ea1f56123b018d801f470db5","./differenceInHours/index.js":"92048a9d588a87285c40d130e50b6b68","./differenceInISOWeekYears/index.js":"9b4375424ff0357c135ad7ef30291ee6","./differenceInMilliseconds/index.js":"26b72fa6011e59ec2ab4f8e75a9c84f5","./differenceInMinutes/index.js":"77e3eae59cf68a6fdb8fa98359c05325","./differenceInMonths/index.js":"cb69a5f4f1d92f10394e57b4ab1bcbd0","./differenceInQuarters/index.js":"a02a8f0f2afe250f4823662a268803f7","./differenceInSeconds/index.js":"e36bd3db1290140be285bef03e3cf595","./differenceInWeeks/index.js":"a53a705bac8f744f6a4547bde44bebc8","./differenceInYears/index.js":"3cb153d4a0f49dc0186870c197a4b734","./eachDayOfInterval/index.js":"30e84481553b98cf72d4cbc1fc8c0e2b","./eachHourOfInterval/index.js":"923eb1ebe3e1942ce41572286f2fe691","./eachMonthOfInterval/index.js":"946da497007277cb7e59a6b9a12d31c2","./eachQuarterOfInterval/index.js":"0b98245e34fffb5cd9e6bd82d29b63b2","./eachWeekOfInterval/index.js":"6870f81cf26a7c18a8196bcedfc05685","./eachWeekendOfInterval/index.js":"394859bd13016bd8353d2891dcaab335","./eachWeekendOfMonth/index.js":"8e0966d62adce416522ef62832c07b2a","./eachWeekendOfYear/index.js":"25254f6429c18f2c8bb810591eaea380","./eachYearOfInterval/index.js":"d4d34126fc2fa29ea78e984c22e374b9","./endOfDay/index.js":"ad0eb03bd09a3bb13c3ba6ca29582aac","./endOfDecade/index.js":"675e51ca6e9a18bbb85b85a48291192d","./endOfHour/index.js":"99c14fbb29ece220627d0b749c9b69a0","./endOfISOWeek/index.js":"1f67ae1ce17426b004656e0d42115075","./endOfISOWeekYear/index.js":"2702e02bbede1ff194db4b63f3c6d5f4","./endOfMinute/index.js":"f2c85f2643486d739872940cb479184c","./endOfMonth/index.js":"13de8359936822f10aa6792c9ec3415b","./endOfQuarter/index.js":"5829e3cbf279671a678ef447081faf9e","./endOfSecond/index.js":"fe443b00c99bb183746141467747d68c","./endOfToday/index.js":"99273d15b894708ed794b2508b31d46c","./endOfTomorrow/index.js":"8e495b2d2946155bce8800c44171ff02","./endOfWeek/index.js":"0dbe9973f377852a567dffa03a94feb5","./endOfYear/index.js":"1af7d1321e39f626a1be376833fa51fa","./endOfYesterday/index.js":"76fefa545970aabab7afa8b654656a2b","./format/index.js":"c217462ea1c04722fbe0db40230d04da","./formatDistance/index.js":"f26f2bc96ec50f6f32d2e74132053377","./formatDistanceStrict/index.js":"cad7995075a76bac8ef24c788ff855d5","./formatDistanceToNow/index.js":"e3a91c3d174f69e12f671cb9cbf559d6","./formatDistanceToNowStrict/index.js":"4287171b502a903b79ebcc55ca87c654","./formatDuration/index.js":"46046c529c6bfe793a16c15cce52341d","./formatISO/index.js":"cec88e60960d0931b8bb01acad62380a","./formatISO9075/index.js":"b21ae32a71a4abde22435b4dd50b72a7","./formatISODuration/index.js":"9511734b55c82b556eeea741e98b2529","./formatRFC3339/index.js":"337e1183fe2e777440e0896dc87d149d","./formatRFC7231/index.js":"d23e2348fc30428dcecca286a3cc6302","./formatRelative/index.js":"32883df9534093463c147e6f123c8121","./fromUnixTime/index.js":"78bd40dd208b9760ab8804267384e418","./getDate/index.js":"dfdbada56c5e909dbb4dc7f0e91a1072","./getDay/index.js":"fe98ca9a7a81ba5cd11fd41eef44d9f6","./getDayOfYear/index.js":"9c22dff0a24b471b4a422965091e531c","./getDaysInMonth/index.js":"8298413df5cc7073c82e7242ea292acd","./getDaysInYear/index.js":"41f8ca411898af0bc8fd0b4a36122a99","./getDecade/index.js":"467843cfb510d5293958569f428acf18","./getHours/index.js":"5183d01c6c581da2f9fe2961fef70b2f","./getISODay/index.js":"6a3e0610b347e6c8e6f76863aab4f479","./getISOWeek/index.js":"71883f1860b86a189ef2fc77e755a732","./getISOWeekYear/index.js":"29a61091f03d2559b5ae8dbb8640b0af","./getISOWeeksInYear/index.js":"e971f00d9a879791052a9d3649e54b73","./getMilliseconds/index.js":"535b0a56278f233d449b49867f7c0e19","./getMinutes/index.js":"feaaedb714ccb9855efd2709a78a5d17","./getMonth/index.js":"8dee39b68db47d65f6195a33239a626d","./getOverlappingDaysInIntervals/index.js":"67ef46684e15271c1e13bd8a9b83443c","./getQuarter/index.js":"648826ec24a33d43dc7a7aae676df432","./getSeconds/index.js":"7bd5a4d5b46a09bc32809037ff18634b","./getTime/index.js":"22861e17c251157a65c1c172dec5ec26","./getUnixTime/index.js":"9e48a7ab65268131d9bdb270fabd09d1","./getWeek/index.js":"a997e8e39a4da3af79e448fa39a525be","./getWeekOfMonth/index.js":"4708f77d239a2a7c12ee8ec587dd8bfa","./getWeekYear/index.js":"239b765e7843884489fe96ce6a15edf9","./getWeeksInMonth/index.js":"675c288b63035ef0f5617ddbc37187e9","./getYear/index.js":"7c62184b9bdaf8d2935707eb39476f0e","./intervalToDuration/index.js":"ff55739890702a124dd2f05b3251e692","./isAfter/index.js":"18372d0b3b61759ba962b2a2b35f5459","./isBefore/index.js":"64fead70a1ae27ab94c3936da1f68966","./isDate/index.js":"f8dc856ec7b070a9064f46eabc655589","./isEqual/index.js":"9002389ff04dcbcee3da6f5309c67e46","./isExists/index.js":"000b6b2ea0c996a6d63a91aa1dea72a7","./isFirstDayOfMonth/index.js":"44499fe204134bb46a09d8a800c23d5f","./isFriday/index.js":"b8df0f14e0bb3af5f063c737dc50dfc6","./isFuture/index.js":"7d8dfa1d074c1b4d18ac0018d57ff445","./isLastDayOfMonth/index.js":"edc74cad19c0b41205865fb2a8829ffc","./isLeapYear/index.js":"ef313748214a21b8b16038e2f5ad1d5e","./isMatch/index.js":"74b61f0febcdecdbee0d218835e2ff92","./isMonday/index.js":"f6bfe08b8d7d7835d9bc8e62d80794da","./isPast/index.js":"7a24ae0b780d99bc22ba24757009f9dc","./isSameDay/index.js":"444d26f8c29e5f455146d915b97fd66d","./isSameHour/index.js":"385f6ac118e285619ea9712563b8988e","./isSameISOWeek/index.js":"2db3ddd96ca94f2bf32fb95a4587cea7","./isSameISOWeekYear/index.js":"ba3c0e6f36d971c15ee11f326eaf6d42","./isSameMinute/index.js":"150dcf88a9186e501c8ddc097bd1e7d7","./isSameMonth/index.js":"81adb2ef01aae27ad4ce057c66c2656f","./isSameQuarter/index.js":"dd61663df2ab7c3c09a5cc1f7f46b2f7","./isSameSecond/index.js":"6fcb80b72940c3561a7d273d878bd881","./isSameWeek/index.js":"37fe8e6e10ab49bef0bdb83d65177d66","./isSameYear/index.js":"5e947007c9aa91445703fa03c1fa3743","./isSaturday/index.js":"ea4d946847e65dcc3b0eceba96bc5b54","./isSunday/index.js":"3d25d420af4143a09d4b2d3bf8e6338a","./isThisHour/index.js":"06d531dbcb1f239580b8e59d2daa1438","./isThisISOWeek/index.js":"578b008b8d5483a0a10d855f18efb76c","./isThisMinute/index.js":"ffd6095abe07ffd1e01d843dfd3fde95","./isThisMonth/index.js":"f4724bc521b4e96fc16503c3a3bb9f12","./isThisQuarter/index.js":"ecad26fa72313a4252b2b48f631d73f7","./isThisSecond/index.js":"01600f408c7ba656a6e61c717093b0c8","./isThisWeek/index.js":"9aa0211e673af75e1f5ee48c8e7dd507","./isThisYear/index.js":"8c1de84ae5a9d09a635123ebc2c64ab6","./isThursday/index.js":"9607416ea3b170ae8d77a290847d4c0d","./isToday/index.js":"67da3cd3ca238e192c0dd11d2aacf172","./isTomorrow/index.js":"3c07555b1dde6eabeabfa153d2487167","./isTuesday/index.js":"be83b9b29cf0fedd047879f7c1bdec85","./isValid/index.js":"e498f8242893901cb098193d741d5e7a","./isWednesday/index.js":"a3d7529edfe734998e30f5539a2f9ee7","./isWeekend/index.js":"e1bdc4b76a9814a07a461efe9dc25d58","./isWithinInterval/index.js":"3509ac09a6c7f1f41ad82e411146add7","./isYesterday/index.js":"656d68e013180585a56e31ee3cd32d59","./lastDayOfDecade/index.js":"83d6b22b1d0086d1798a4a6e965c8d2f","./lastDayOfISOWeek/index.js":"644b3635fcb0200454813043b0300ebb","./lastDayOfISOWeekYear/index.js":"5d7ff489623578ef313254fc1dd72f21","./lastDayOfMonth/index.js":"7d2f7158ed0821a6753f961942ce1a0c","./lastDayOfQuarter/index.js":"599f8b744c992cbaa64ec474a44a1a2f","./lastDayOfWeek/index.js":"a133e2aa766515de6db672ba39771a2c","./lastDayOfYear/index.js":"fc9356a5267f529004b5ac5c2d12fa63","./lightFormat/index.js":"e4ee3c1b701234b1d31f1584ebaf8850","./max/index.js":"85f164c93466a8032b1e63dd8dffdd5e","./min/index.js":"cb9968590348c3277d9086ce2d814ccf","./parse/index.js":"74f434cfff03493e820ee532b0e3d2f2","./parseISO/index.js":"39723a78eb8b374467405e532e310d94","./parseJSON/index.js":"16d5412446adeb40a9cf7840c93ec114","./roundToNearestMinutes/index.js":"b0061c9fe342923672da62c452cf1904","./set/index.js":"3aeb2a4c24eb0b0b0f160a8dc94f667c","./setDate/index.js":"e2dec063b4e5f7e9cbe7696b5d6e9666","./setDay/index.js":"a71fd34e1ecfa7761719202ba566a403","./setDayOfYear/index.js":"cedb3d267a5636728a65550cf793b5f5","./setHours/index.js":"8ceafa0198583670c2bccf4454f38794","./setISODay/index.js":"a3624be2c4911b06b3fa58307fce5f0d","./setISOWeek/index.js":"050399cd697636cd8e914dbc6186d831","./setISOWeekYear/index.js":"20fc0b1cd8ed7eb93f5dd4fef5d1c6e1","./setMilliseconds/index.js":"dca6009831992d9318e40f1684915140","./setMinutes/index.js":"09cd966935083291ac9970913055f927","./setMonth/index.js":"f1c5ebb39c2a668d3a445d46f935ca2c","./setQuarter/index.js":"21b5f859c69ef4933710126207ae21ab","./setSeconds/index.js":"614a3436499e906c08b869cdb16370ce","./setWeek/index.js":"f6718bd87379ed600a0e516621879633","./setWeekYear/index.js":"0a9036a4faff0278acde0c3bf4523d30","./setYear/index.js":"0980643c559e7cff77f6ce2c5d6034b4","./startOfDay/index.js":"744d936ab12e05d0425f696fac165804","./startOfDecade/index.js":"b2f1c99c79182001fe9763c34ffb30f2","./startOfHour/index.js":"1459963c5acd6a374d91d4ff8b87d166","./startOfISOWeek/index.js":"5cdfef1aaca2ce8eb5f04f653206d691","./startOfISOWeekYear/index.js":"8335b930839a50f32d190455599201c0","./startOfMinute/index.js":"fcee0c3b3244d2626be2d438770da43b","./startOfMonth/index.js":"7ab6abfabd43021d3a26e7331311a7cb","./startOfQuarter/index.js":"169a2e7964834756211ffaa78256e0de","./startOfSecond/index.js":"df63f10981bee5473694888e5f813faf","./startOfToday/index.js":"8dfe1c16ea542e8b1c7afa351a4fb2c7","./startOfTomorrow/index.js":"74fdb0c4bed6fd0542b5cca829f14bc1","./startOfWeek/index.js":"9773da116ecae709ccce70a09b54431c","./startOfWeekYear/index.js":"78e987916a9f12e1c18744fd944f6014","./startOfYear/index.js":"655a08231b6bc1822e7a69e1372d74f9","./startOfYesterday/index.js":"ad75d97f335f78ab3d3c0a0961f50744","./sub/index.js":"03521e77eb3ab73dd1ae4b9e11f0d7a1","./subBusinessDays/index.js":"5fde211b45ae5d3c2c4fdc7c1e19477c","./subDays/index.js":"70eaf93ad7b28e364c9f707a17d69bcf","./subHours/index.js":"a9708b84504bdd67663413519bc924d0","./subISOWeekYears/index.js":"090345afe34fd3cbc75d5a7eb0f96431","./subMilliseconds/index.js":"d4c3fa7c1a401b98fc12fd2f31ab3db4","./subMinutes/index.js":"c9b4820f62efa127bead6974eb642f14","./subMonths/index.js":"6e33148d4a1d84362d717b05a63adcee","./subQuarters/index.js":"afaa74b055749afcfe4234604fc159af","./subSeconds/index.js":"49ca86ad057e050f8cebdd01a06d5bfa","./subWeeks/index.js":"aee1d441e5f850d2ec745c4c6098dd09","./subYears/index.js":"35538a1800388d694d4ef9c863fea581","./toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","./constants/index.js":"fd3e1097ec67f3d6a19982ca02550c0a"}],"dbc152ece63d89d8bdc08cbfd38c638f":[function(require,module,exports) {
+},{"./add/index.js":"3vcH3","./addBusinessDays/index.js":"8xGLs","./addDays/index.js":"6YmUH","./addHours/index.js":"1OTbG","./addISOWeekYears/index.js":"4zmBY","./addMilliseconds/index.js":"4Yyce","./addMinutes/index.js":"6I4ae","./addMonths/index.js":"40ufh","./addQuarters/index.js":"9Mqeg","./addSeconds/index.js":"4OM4T","./addWeeks/index.js":"7l07p","./addYears/index.js":"1SQq0","./areIntervalsOverlapping/index.js":"6cjbw","./closestIndexTo/index.js":"6VUen","./closestTo/index.js":"4I9L6","./compareAsc/index.js":"1Gup7","./compareDesc/index.js":"6OIOq","./differenceInBusinessDays/index.js":"1MfbT","./differenceInCalendarDays/index.js":"2QdQz","./differenceInCalendarISOWeekYears/index.js":"VUPPK","./differenceInCalendarISOWeeks/index.js":"zOk71","./differenceInCalendarMonths/index.js":"6qkbr","./differenceInCalendarQuarters/index.js":"6lpZ1","./differenceInCalendarWeeks/index.js":"38Pkj","./differenceInCalendarYears/index.js":"3u47g","./differenceInDays/index.js":"2MBLV","./differenceInHours/index.js":"141V5","./differenceInISOWeekYears/index.js":"2xLM9","./differenceInMilliseconds/index.js":"5YAL2","./differenceInMinutes/index.js":"2JO1P","./differenceInMonths/index.js":"73jva","./differenceInQuarters/index.js":"2jP0o","./differenceInSeconds/index.js":"25GaE","./differenceInWeeks/index.js":"7sCrz","./differenceInYears/index.js":"EghjJ","./eachDayOfInterval/index.js":"334sZ","./eachHourOfInterval/index.js":"31krq","./eachMonthOfInterval/index.js":"1soMQ","./eachQuarterOfInterval/index.js":"16NiI","./eachWeekOfInterval/index.js":"24UuS","./eachWeekendOfInterval/index.js":"3IHce","./eachWeekendOfMonth/index.js":"gXwer","./eachWeekendOfYear/index.js":"3xdZ9","./eachYearOfInterval/index.js":"2tJkE","./endOfDay/index.js":"64Jhj","./endOfDecade/index.js":"4XZd3","./endOfHour/index.js":"7arq3","./endOfISOWeek/index.js":"2V1CI","./endOfISOWeekYear/index.js":"6mFPj","./endOfMinute/index.js":"7mcmS","./endOfMonth/index.js":"6XQ7a","./endOfQuarter/index.js":"NnYNs","./endOfSecond/index.js":"7bOfC","./endOfToday/index.js":"ebBBd","./endOfTomorrow/index.js":"1zCVv","./endOfWeek/index.js":"6KrcQ","./endOfYear/index.js":"2UK33","./endOfYesterday/index.js":"7pyot","./format/index.js":"51r1m","./formatDistance/index.js":"7e3Qi","./formatDistanceStrict/index.js":"1u1jM","./formatDistanceToNow/index.js":"75iKO","./formatDistanceToNowStrict/index.js":"2k788","./formatDuration/index.js":"7w8CX","./formatISO/index.js":"4pepN","./formatISO9075/index.js":"4tJEg","./formatISODuration/index.js":"YxNIV","./formatRFC3339/index.js":"7pI4K","./formatRFC7231/index.js":"3An1G","./formatRelative/index.js":"5Asxm","./fromUnixTime/index.js":"2l9Ns","./getDate/index.js":"2yUJY","./getDay/index.js":"5Gwkw","./getDayOfYear/index.js":"HUkoA","./getDaysInMonth/index.js":"4GP2w","./getDaysInYear/index.js":"7lNym","./getDecade/index.js":"1eejr","./getHours/index.js":"2Ooz1","./getISODay/index.js":"424GV","./getISOWeek/index.js":"34YB0","./getISOWeekYear/index.js":"74tdA","./getISOWeeksInYear/index.js":"3989S","./getMilliseconds/index.js":"3yHyU","./getMinutes/index.js":"3r7Wu","./getMonth/index.js":"6zj0Q","./getOverlappingDaysInIntervals/index.js":"46tK9","./getQuarter/index.js":"4mGel","./getSeconds/index.js":"7AAlb","./getTime/index.js":"4fpQQ","./getUnixTime/index.js":"3J51R","./getWeek/index.js":"5HxNL","./getWeekOfMonth/index.js":"55XYL","./getWeekYear/index.js":"6aHtM","./getWeeksInMonth/index.js":"4g9mv","./getYear/index.js":"3u5P4","./intervalToDuration/index.js":"2OYr3","./isAfter/index.js":"7gMIo","./isBefore/index.js":"syi9x","./isDate/index.js":"5GC27","./isEqual/index.js":"2SQUh","./isExists/index.js":"2CpjD","./isFirstDayOfMonth/index.js":"H9PN2","./isFriday/index.js":"2JAhG","./isFuture/index.js":"1vjOE","./isLastDayOfMonth/index.js":"2GrDk","./isLeapYear/index.js":"4lXxW","./isMatch/index.js":"ddqyt","./isMonday/index.js":"264Do","./isPast/index.js":"6TMzG","./isSameDay/index.js":"1vkyj","./isSameHour/index.js":"76942","./isSameISOWeek/index.js":"16lC0","./isSameISOWeekYear/index.js":"5Vo68","./isSameMinute/index.js":"54ziV","./isSameMonth/index.js":"11kS0","./isSameQuarter/index.js":"2tlAm","./isSameSecond/index.js":"62gax","./isSameWeek/index.js":"10f5R","./isSameYear/index.js":"3yrHh","./isSaturday/index.js":"4HXuX","./isSunday/index.js":"4GQkb","./isThisHour/index.js":"4ATT0","./isThisISOWeek/index.js":"2VLse","./isThisMinute/index.js":"3nALm","./isThisMonth/index.js":"5MSex","./isThisQuarter/index.js":"5fnTt","./isThisSecond/index.js":"3GHlv","./isThisWeek/index.js":"23tWe","./isThisYear/index.js":"4GPNC","./isThursday/index.js":"6MqIs","./isToday/index.js":"gQ0BR","./isTomorrow/index.js":"6aJxi","./isTuesday/index.js":"14P58","./isValid/index.js":"5hUKG","./isWednesday/index.js":"GwE7L","./isWeekend/index.js":"5AKej","./isWithinInterval/index.js":"44tZa","./isYesterday/index.js":"713YH","./lastDayOfDecade/index.js":"6S1JS","./lastDayOfISOWeek/index.js":"47odk","./lastDayOfISOWeekYear/index.js":"7AdMS","./lastDayOfMonth/index.js":"3QI1i","./lastDayOfQuarter/index.js":"4VEoX","./lastDayOfWeek/index.js":"5NmMD","./lastDayOfYear/index.js":"Lb4nv","./lightFormat/index.js":"3t1F7","./max/index.js":"1XjiL","./min/index.js":"2vLvh","./parse/index.js":"1IZMe","./parseISO/index.js":"4MIVQ","./parseJSON/index.js":"5vM10","./roundToNearestMinutes/index.js":"4a9Si","./set/index.js":"2koTT","./setDate/index.js":"4F0jl","./setDay/index.js":"656BC","./setDayOfYear/index.js":"5pKUD","./setHours/index.js":"70bfz","./setISODay/index.js":"2KCvI","./setISOWeek/index.js":"3vu4u","./setISOWeekYear/index.js":"39Fzz","./setMilliseconds/index.js":"2zQjB","./setMinutes/index.js":"75hu8","./setMonth/index.js":"6ywPJ","./setQuarter/index.js":"6DQtN","./setSeconds/index.js":"45SSI","./setWeek/index.js":"7CfCB","./setWeekYear/index.js":"2yJQn","./setYear/index.js":"1l7li","./startOfDay/index.js":"6zbSQ","./startOfDecade/index.js":"1t0ZG","./startOfHour/index.js":"1TsdS","./startOfISOWeek/index.js":"22t8q","./startOfISOWeekYear/index.js":"7EzGQ","./startOfMinute/index.js":"2AJwM","./startOfMonth/index.js":"6czQw","./startOfQuarter/index.js":"6sGyU","./startOfSecond/index.js":"C7NpE","./startOfToday/index.js":"4Eral","./startOfTomorrow/index.js":"7DllR","./startOfWeek/index.js":"538bJ","./startOfWeekYear/index.js":"2NLrF","./startOfYear/index.js":"1iJaH","./startOfYesterday/index.js":"3aGuH","./sub/index.js":"1sOiz","./subBusinessDays/index.js":"6z9U0","./subDays/index.js":"5ldrP","./subHours/index.js":"52ibs","./subISOWeekYears/index.js":"5x8m3","./subMilliseconds/index.js":"7jtwm","./subMinutes/index.js":"2KGlc","./subMonths/index.js":"6AhCJ","./subQuarters/index.js":"Js2n6","./subSeconds/index.js":"30XQ2","./subWeeks/index.js":"3psCi","./subYears/index.js":"2J4RY","./toDate/index.js":"1V5iu","./constants/index.js":"5nPDX"}],"3vcH3":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6563,7 +2900,7 @@ function add(dirtyDate, duration) {
 }
 
 module.exports = exports.default;
-},{"../addDays/index.js":"5fdec9afb4e5b1ea71ca3db109ea4b4a","../addMonths/index.js":"c378d91acb6a81ab70e2f3bf5c6f8f0b","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e"}],"5fdec9afb4e5b1ea71ca3db109ea4b4a":[function(require,module,exports) {
+},{"../addDays/index.js":"6YmUH","../addMonths/index.js":"40ufh","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd","../_lib/toInteger/index.js":"3hTAe"}],"6YmUH":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6620,7 +2957,7 @@ function addDays(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"4f12886b17b9e27a855b6b6925f19f6e":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"3hTAe":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6643,7 +2980,7 @@ function toInteger(dirtyNumber) {
 }
 
 module.exports = exports.default;
-},{}],"4d4cbccb04ce5990e942550dfe4cd445":[function(require,module,exports) {
+},{}],"1V5iu":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6707,7 +3044,7 @@ function toDate(argument) {
 }
 
 module.exports = exports.default;
-},{"../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"96233ac16f80ecbe82bbfc9a5dea36d1":[function(require,module,exports) {
+},{"../_lib/requiredArgs/index.js":"6sOBd"}],"6sOBd":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6722,7 +3059,7 @@ function requiredArgs(required, args) {
 }
 
 module.exports = exports.default;
-},{}],"c378d91acb6a81ab70e2f3bf5c6f8f0b":[function(require,module,exports) {
+},{}],"40ufh":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6805,7 +3142,7 @@ function addMonths(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e461bf4ab3d2c090b0e29faa612bfb12":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"8xGLs":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6879,7 +3216,7 @@ function addBusinessDays(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../isWeekend/index.js":"e1bdc4b76a9814a07a461efe9dc25d58","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1","../isSunday/index.js":"3d25d420af4143a09d4b2d3bf8e6338a","../isSaturday/index.js":"ea4d946847e65dcc3b0eceba96bc5b54"}],"e1bdc4b76a9814a07a461efe9dc25d58":[function(require,module,exports) {
+},{"../isWeekend/index.js":"5AKej","../toDate/index.js":"1V5iu","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd","../isSunday/index.js":"4GQkb","../isSaturday/index.js":"4HXuX"}],"5AKej":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6922,7 +3259,7 @@ function isWeekend(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"3d25d420af4143a09d4b2d3bf8e6338a":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"4GQkb":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6963,7 +3300,7 @@ function isSunday(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"ea4d946847e65dcc3b0eceba96bc5b54":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"4HXuX":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7004,7 +3341,7 @@ function isSaturday(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"cd47d6b53a35480fa364f0daccc1ea68":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"1OTbG":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7051,7 +3388,7 @@ function addHours(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addMilliseconds/index.js":"c4e4e6442c21d238185ea6cfbfc467c7","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"c4e4e6442c21d238185ea6cfbfc467c7":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addMilliseconds/index.js":"4Yyce","../_lib/requiredArgs/index.js":"6sOBd"}],"4Yyce":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7097,7 +3434,7 @@ function addMilliseconds(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"0597a676a6f18ebb7f1c8b05acab95aa":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"4zmBY":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7151,7 +3488,7 @@ function addISOWeekYears(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../getISOWeekYear/index.js":"29a61091f03d2559b5ae8dbb8640b0af","../setISOWeekYear/index.js":"20fc0b1cd8ed7eb93f5dd4fef5d1c6e1","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"29a61091f03d2559b5ae8dbb8640b0af":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../getISOWeekYear/index.js":"74tdA","../setISOWeekYear/index.js":"39Fzz","../_lib/requiredArgs/index.js":"6sOBd"}],"74tdA":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7219,7 +3556,7 @@ function getISOWeekYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../startOfISOWeek/index.js":"5cdfef1aaca2ce8eb5f04f653206d691","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"5cdfef1aaca2ce8eb5f04f653206d691":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../startOfISOWeek/index.js":"22t8q","../_lib/requiredArgs/index.js":"6sOBd"}],"22t8q":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7265,7 +3602,7 @@ function startOfISOWeek(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../startOfWeek/index.js":"9773da116ecae709ccce70a09b54431c","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"9773da116ecae709ccce70a09b54431c":[function(require,module,exports) {
+},{"../startOfWeek/index.js":"538bJ","../_lib/requiredArgs/index.js":"6sOBd"}],"538bJ":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7333,7 +3670,7 @@ function startOfWeek(dirtyDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"20fc0b1cd8ed7eb93f5dd4fef5d1c6e1":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"39Fzz":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7397,7 +3734,7 @@ function setISOWeekYear(dirtyDate, dirtyISOWeekYear) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../startOfISOWeekYear/index.js":"8335b930839a50f32d190455599201c0","../differenceInCalendarDays/index.js":"8255b070c42b22dde4ff1d9e2d1f8222","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"8335b930839a50f32d190455599201c0":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../startOfISOWeekYear/index.js":"7EzGQ","../differenceInCalendarDays/index.js":"2QdQz","../_lib/requiredArgs/index.js":"6sOBd"}],"7EzGQ":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7449,7 +3786,7 @@ function startOfISOWeekYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../getISOWeekYear/index.js":"29a61091f03d2559b5ae8dbb8640b0af","../startOfISOWeek/index.js":"5cdfef1aaca2ce8eb5f04f653206d691","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"8255b070c42b22dde4ff1d9e2d1f8222":[function(require,module,exports) {
+},{"../getISOWeekYear/index.js":"74tdA","../startOfISOWeek/index.js":"22t8q","../_lib/requiredArgs/index.js":"6sOBd"}],"2QdQz":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7514,7 +3851,7 @@ function differenceInCalendarDays(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../_lib/getTimezoneOffsetInMilliseconds/index.js":"e1613370c964787e828d6e71e9590bf4","../startOfDay/index.js":"744d936ab12e05d0425f696fac165804","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e1613370c964787e828d6e71e9590bf4":[function(require,module,exports) {
+},{"../_lib/getTimezoneOffsetInMilliseconds/index.js":"7euqA","../startOfDay/index.js":"6zbSQ","../_lib/requiredArgs/index.js":"6sOBd"}],"7euqA":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7549,7 +3886,7 @@ function getTimezoneOffsetInMilliseconds(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{}],"744d936ab12e05d0425f696fac165804":[function(require,module,exports) {
+},{}],"6zbSQ":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7593,7 +3930,7 @@ function startOfDay(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"6add3d9bd711b465b1f3fcfd9dbaacef":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"6I4ae":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7640,7 +3977,7 @@ function addMinutes(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addMilliseconds/index.js":"c4e4e6442c21d238185ea6cfbfc467c7","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"928b02c9289f2a44dc206b85a4f19db0":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addMilliseconds/index.js":"4Yyce","../_lib/requiredArgs/index.js":"6sOBd"}],"9Mqeg":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7686,7 +4023,7 @@ function addQuarters(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addMonths/index.js":"c378d91acb6a81ab70e2f3bf5c6f8f0b","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"06da1dae2be75137482b0934e6a816e4":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addMonths/index.js":"40ufh","../_lib/requiredArgs/index.js":"6sOBd"}],"4OM4T":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7731,7 +4068,7 @@ function addSeconds(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addMilliseconds/index.js":"c4e4e6442c21d238185ea6cfbfc467c7","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"d7f228172dbd1739d5d2624dd7fbb932":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addMilliseconds/index.js":"4Yyce","../_lib/requiredArgs/index.js":"6sOBd"}],"7l07p":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7777,7 +4114,7 @@ function addWeeks(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addDays/index.js":"5fdec9afb4e5b1ea71ca3db109ea4b4a","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e3b1a16fd74a5e331a21f425de5cae3a":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addDays/index.js":"6YmUH","../_lib/requiredArgs/index.js":"6sOBd"}],"1SQq0":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7822,7 +4159,7 @@ function addYears(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addMonths/index.js":"c378d91acb6a81ab70e2f3bf5c6f8f0b","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e47bf185512c165acce5a3741e0c6e04":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addMonths/index.js":"40ufh","../_lib/requiredArgs/index.js":"6sOBd"}],"6cjbw":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7947,7 +4284,7 @@ function areIntervalsOverlapping(dirtyIntervalLeft, dirtyIntervalRight) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"8381fcdddd0fdf1fc4fd28334af2f2aa":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"6VUen":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8033,7 +4370,7 @@ function closestIndexTo(dirtyDateToCompare, dirtyDatesArray) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"7fea8f1ae7de29ba39f17c90da0ea282":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"4I9L6":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8117,7 +4454,7 @@ function closestTo(dirtyDateToCompare, dirtyDatesArray) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"b04482b11d51799a5c68a70b87615149":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"1Gup7":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8183,7 +4520,7 @@ function compareAsc(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e02fecb119e20fe80086932a10da9ed7":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"6OIOq":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8249,7 +4586,7 @@ function compareDesc(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"eddd240809e8fee5af7f8f5bad8ac998":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"1MfbT":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8321,7 +4658,7 @@ function differenceInBusinessDays(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../isValid/index.js":"e498f8242893901cb098193d741d5e7a","../isWeekend/index.js":"e1bdc4b76a9814a07a461efe9dc25d58","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../differenceInCalendarDays/index.js":"8255b070c42b22dde4ff1d9e2d1f8222","../addDays/index.js":"5fdec9afb4e5b1ea71ca3db109ea4b4a","../isSameDay/index.js":"444d26f8c29e5f455146d915b97fd66d","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e498f8242893901cb098193d741d5e7a":[function(require,module,exports) {
+},{"../isValid/index.js":"5hUKG","../isWeekend/index.js":"5AKej","../toDate/index.js":"1V5iu","../differenceInCalendarDays/index.js":"2QdQz","../addDays/index.js":"6YmUH","../isSameDay/index.js":"1vkyj","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"5hUKG":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8399,7 +4736,7 @@ function isValid(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"444d26f8c29e5f455146d915b97fd66d":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"1vkyj":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8443,7 +4780,7 @@ function isSameDay(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../startOfDay/index.js":"744d936ab12e05d0425f696fac165804","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"18c16c5332fa4f63b09e67b9c7a7fc1b":[function(require,module,exports) {
+},{"../startOfDay/index.js":"6zbSQ","../_lib/requiredArgs/index.js":"6sOBd"}],"VUPPK":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8495,7 +4832,7 @@ function differenceInCalendarISOWeekYears(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../getISOWeekYear/index.js":"29a61091f03d2559b5ae8dbb8640b0af","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"ec76ab77b7bb44461e431771fb94f6fc":[function(require,module,exports) {
+},{"../getISOWeekYear/index.js":"74tdA","../_lib/requiredArgs/index.js":"6sOBd"}],"zOk71":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8553,7 +4890,7 @@ function differenceInCalendarISOWeeks(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../_lib/getTimezoneOffsetInMilliseconds/index.js":"e1613370c964787e828d6e71e9590bf4","../startOfISOWeek/index.js":"5cdfef1aaca2ce8eb5f04f653206d691","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e984a378c181216f952d3092b443aafe":[function(require,module,exports) {
+},{"../_lib/getTimezoneOffsetInMilliseconds/index.js":"7euqA","../startOfISOWeek/index.js":"22t8q","../_lib/requiredArgs/index.js":"6sOBd"}],"6qkbr":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8602,7 +4939,7 @@ function differenceInCalendarMonths(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"8e1087f3fd86a7da0e03c6c28d4e4212":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"6lpZ1":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8653,7 +4990,7 @@ function differenceInCalendarQuarters(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../getQuarter/index.js":"648826ec24a33d43dc7a7aae676df432","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"648826ec24a33d43dc7a7aae676df432":[function(require,module,exports) {
+},{"../getQuarter/index.js":"4mGel","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"4mGel":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8696,7 +5033,7 @@ function getQuarter(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"d4d5352b34b5aee15bb4569fd972b1cf":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"38Pkj":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8766,7 +5103,7 @@ function differenceInCalendarWeeks(dirtyDateLeft, dirtyDateRight, dirtyOptions) 
 }
 
 module.exports = exports.default;
-},{"../startOfWeek/index.js":"9773da116ecae709ccce70a09b54431c","../_lib/getTimezoneOffsetInMilliseconds/index.js":"e1613370c964787e828d6e71e9590bf4","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"b1fe2f7d039a16b07bc71fa8afb3fb98":[function(require,module,exports) {
+},{"../startOfWeek/index.js":"538bJ","../_lib/getTimezoneOffsetInMilliseconds/index.js":"7euqA","../_lib/requiredArgs/index.js":"6sOBd"}],"3u47g":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8813,7 +5150,7 @@ function differenceInCalendarYears(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e72a5837ea1f56123b018d801f470db5":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2MBLV":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8915,7 +5252,7 @@ function differenceInDays(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../differenceInCalendarDays/index.js":"8255b070c42b22dde4ff1d9e2d1f8222","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"92048a9d588a87285c40d130e50b6b68":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../differenceInCalendarDays/index.js":"2QdQz","../_lib/requiredArgs/index.js":"6sOBd"}],"141V5":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8963,7 +5300,7 @@ function differenceInHours(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../differenceInMilliseconds/index.js":"26b72fa6011e59ec2ab4f8e75a9c84f5","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"26b72fa6011e59ec2ab4f8e75a9c84f5":[function(require,module,exports) {
+},{"../differenceInMilliseconds/index.js":"5YAL2","../_lib/requiredArgs/index.js":"6sOBd"}],"5YAL2":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9011,7 +5348,7 @@ function differenceInMilliseconds(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"9b4375424ff0357c135ad7ef30291ee6":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2xLM9":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9080,7 +5417,7 @@ function differenceInISOWeekYears(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../differenceInCalendarISOWeekYears/index.js":"18c16c5332fa4f63b09e67b9c7a7fc1b","../compareAsc/index.js":"b04482b11d51799a5c68a70b87615149","../subISOWeekYears/index.js":"090345afe34fd3cbc75d5a7eb0f96431","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"090345afe34fd3cbc75d5a7eb0f96431":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../differenceInCalendarISOWeekYears/index.js":"VUPPK","../compareAsc/index.js":"1Gup7","../subISOWeekYears/index.js":"5x8m3","../_lib/requiredArgs/index.js":"6sOBd"}],"5x8m3":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9132,7 +5469,7 @@ function subISOWeekYears(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addISOWeekYears/index.js":"0597a676a6f18ebb7f1c8b05acab95aa","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"77e3eae59cf68a6fdb8fa98359c05325":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addISOWeekYears/index.js":"4zmBY","../_lib/requiredArgs/index.js":"6sOBd"}],"2JO1P":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9188,7 +5525,7 @@ function differenceInMinutes(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../differenceInMilliseconds/index.js":"26b72fa6011e59ec2ab4f8e75a9c84f5","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"cb69a5f4f1d92f10394e57b4ab1bcbd0":[function(require,module,exports) {
+},{"../differenceInMilliseconds/index.js":"5YAL2","../_lib/requiredArgs/index.js":"6sOBd"}],"73jva":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9244,7 +5581,7 @@ function differenceInMonths(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../differenceInCalendarMonths/index.js":"e984a378c181216f952d3092b443aafe","../compareAsc/index.js":"b04482b11d51799a5c68a70b87615149","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"a02a8f0f2afe250f4823662a268803f7":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../differenceInCalendarMonths/index.js":"6qkbr","../compareAsc/index.js":"1Gup7","../_lib/requiredArgs/index.js":"6sOBd"}],"2jP0o":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9287,7 +5624,7 @@ function differenceInQuarters(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../differenceInMonths/index.js":"cb69a5f4f1d92f10394e57b4ab1bcbd0","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e36bd3db1290140be285bef03e3cf595":[function(require,module,exports) {
+},{"../differenceInMonths/index.js":"73jva","../_lib/requiredArgs/index.js":"6sOBd"}],"25GaE":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9334,7 +5671,7 @@ function differenceInSeconds(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../differenceInMilliseconds/index.js":"26b72fa6011e59ec2ab4f8e75a9c84f5","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"a53a705bac8f744f6a4547bde44bebc8":[function(require,module,exports) {
+},{"../differenceInMilliseconds/index.js":"5YAL2","../_lib/requiredArgs/index.js":"6sOBd"}],"7sCrz":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9398,7 +5735,7 @@ function differenceInWeeks(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../differenceInDays/index.js":"e72a5837ea1f56123b018d801f470db5","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"3cb153d4a0f49dc0186870c197a4b734":[function(require,module,exports) {
+},{"../differenceInDays/index.js":"2MBLV","../_lib/requiredArgs/index.js":"6sOBd"}],"EghjJ":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9457,7 +5794,7 @@ function differenceInYears(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../differenceInCalendarYears/index.js":"b1fe2f7d039a16b07bc71fa8afb3fb98","../compareAsc/index.js":"b04482b11d51799a5c68a70b87615149","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"30e84481553b98cf72d4cbc1fc8c0e2b":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../differenceInCalendarYears/index.js":"3u47g","../compareAsc/index.js":"1Gup7","../_lib/requiredArgs/index.js":"6sOBd"}],"334sZ":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9559,7 +5896,7 @@ function eachDayOfInterval(dirtyInterval, options) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"923eb1ebe3e1942ce41572286f2fe691":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"31krq":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9632,7 +5969,7 @@ function eachHourOfInterval(dirtyInterval, options) {
 }
 
 module.exports = exports.default;
-},{"../addHours/index.js":"cd47d6b53a35480fa364f0daccc1ea68","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"946da497007277cb7e59a6b9a12d31c2":[function(require,module,exports) {
+},{"../addHours/index.js":"1OTbG","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"1soMQ":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9701,7 +6038,7 @@ function eachMonthOfInterval(dirtyInterval) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"0b98245e34fffb5cd9e6bd82d29b63b2":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"16NiI":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9771,7 +6108,7 @@ function eachQuarterOfInterval(dirtyInterval) {
 }
 
 module.exports = exports.default;
-},{"../addQuarters/index.js":"928b02c9289f2a44dc206b85a4f19db0","../startOfQuarter/index.js":"169a2e7964834756211ffaa78256e0de","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"169a2e7964834756211ffaa78256e0de":[function(require,module,exports) {
+},{"../addQuarters/index.js":"9Mqeg","../startOfQuarter/index.js":"6sGyU","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"6sGyU":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9818,7 +6155,7 @@ function startOfQuarter(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"6870f81cf26a7c18a8196bcedfc05685":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"24UuS":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9906,7 +6243,7 @@ function eachWeekOfInterval(dirtyInterval, options) {
 }
 
 module.exports = exports.default;
-},{"../addWeeks/index.js":"d7f228172dbd1739d5d2624dd7fbb932","../startOfWeek/index.js":"9773da116ecae709ccce70a09b54431c","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"394859bd13016bd8353d2891dcaab335":[function(require,module,exports) {
+},{"../addWeeks/index.js":"7l07p","../startOfWeek/index.js":"538bJ","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"3IHce":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9970,7 +6307,7 @@ function eachWeekendOfInterval(interval) {
 }
 
 module.exports = exports.default;
-},{"../eachDayOfInterval/index.js":"30e84481553b98cf72d4cbc1fc8c0e2b","../isSunday/index.js":"3d25d420af4143a09d4b2d3bf8e6338a","../isWeekend/index.js":"e1bdc4b76a9814a07a461efe9dc25d58","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"8e0966d62adce416522ef62832c07b2a":[function(require,module,exports) {
+},{"../eachDayOfInterval/index.js":"334sZ","../isSunday/index.js":"4GQkb","../isWeekend/index.js":"5AKej","../_lib/requiredArgs/index.js":"6sOBd"}],"gXwer":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10027,7 +6364,7 @@ function eachWeekendOfMonth(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../eachWeekendOfInterval/index.js":"394859bd13016bd8353d2891dcaab335","../startOfMonth/index.js":"7ab6abfabd43021d3a26e7331311a7cb","../endOfMonth/index.js":"13de8359936822f10aa6792c9ec3415b","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"7ab6abfabd43021d3a26e7331311a7cb":[function(require,module,exports) {
+},{"../eachWeekendOfInterval/index.js":"3IHce","../startOfMonth/index.js":"6czQw","../endOfMonth/index.js":"6XQ7a","../_lib/requiredArgs/index.js":"6sOBd"}],"6czQw":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10072,7 +6409,7 @@ function startOfMonth(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"13de8359936822f10aa6792c9ec3415b":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"6XQ7a":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10118,7 +6455,7 @@ function endOfMonth(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"25254f6429c18f2c8bb810591eaea380":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"3xdZ9":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10172,7 +6509,7 @@ function eachWeekendOfYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../eachWeekendOfInterval/index.js":"394859bd13016bd8353d2891dcaab335","../startOfYear/index.js":"655a08231b6bc1822e7a69e1372d74f9","../endOfYear/index.js":"1af7d1321e39f626a1be376833fa51fa","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"655a08231b6bc1822e7a69e1372d74f9":[function(require,module,exports) {
+},{"../eachWeekendOfInterval/index.js":"3IHce","../startOfYear/index.js":"1iJaH","../endOfYear/index.js":"2UK33","../_lib/requiredArgs/index.js":"6sOBd"}],"1iJaH":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10218,7 +6555,7 @@ function startOfYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"1af7d1321e39f626a1be376833fa51fa":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2UK33":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10264,7 +6601,7 @@ function endOfYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"d4d34126fc2fa29ea78e984c22e374b9":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2tJkE":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10330,7 +6667,7 @@ function eachYearOfInterval(dirtyInterval) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"ad0eb03bd09a3bb13c3ba6ca29582aac":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"64Jhj":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10374,7 +6711,7 @@ function endOfDay(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"675e51ca6e9a18bbb85b85a48291192d":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"4XZd3":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10423,7 +6760,7 @@ function endOfDecade(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"99c14fbb29ece220627d0b749c9b69a0":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"7arq3":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10467,7 +6804,7 @@ function endOfHour(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"1f67ae1ce17426b004656e0d42115075":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2V1CI":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10513,7 +6850,7 @@ function endOfISOWeek(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../endOfWeek/index.js":"0dbe9973f377852a567dffa03a94feb5","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"0dbe9973f377852a567dffa03a94feb5":[function(require,module,exports) {
+},{"../endOfWeek/index.js":"6KrcQ","../_lib/requiredArgs/index.js":"6sOBd"}],"6KrcQ":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10581,7 +6918,7 @@ function endOfWeek(dirtyDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"2702e02bbede1ff194db4b63f3c6d5f4":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"6mFPj":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10639,7 +6976,7 @@ function endOfISOWeekYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../getISOWeekYear/index.js":"29a61091f03d2559b5ae8dbb8640b0af","../startOfISOWeek/index.js":"5cdfef1aaca2ce8eb5f04f653206d691","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"f2c85f2643486d739872940cb479184c":[function(require,module,exports) {
+},{"../getISOWeekYear/index.js":"74tdA","../startOfISOWeek/index.js":"22t8q","../_lib/requiredArgs/index.js":"6sOBd"}],"7mcmS":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10683,7 +7020,7 @@ function endOfMinute(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"5829e3cbf279671a678ef447081faf9e":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"NnYNs":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10730,7 +7067,7 @@ function endOfQuarter(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"fe443b00c99bb183746141467747d68c":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"7bOfC":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10774,7 +7111,7 @@ function endOfSecond(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"99273d15b894708ed794b2508b31d46c":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"ebBBd":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10814,7 +7151,7 @@ function endOfToday() {
 }
 
 module.exports = exports.default;
-},{"../endOfDay/index.js":"ad0eb03bd09a3bb13c3ba6ca29582aac"}],"8e495b2d2946155bce8800c44171ff02":[function(require,module,exports) {
+},{"../endOfDay/index.js":"64Jhj"}],"1zCVv":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10857,7 +7194,7 @@ function endOfTomorrow() {
 }
 
 module.exports = exports.default;
-},{}],"76fefa545970aabab7afa8b654656a2b":[function(require,module,exports) {
+},{}],"7pyot":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10900,7 +7237,7 @@ function endOfYesterday() {
 }
 
 module.exports = exports.default;
-},{}],"c217462ea1c04722fbe0db40230d04da":[function(require,module,exports) {
+},{}],"51r1m":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11353,7 +7690,7 @@ function cleanEscapedString(input) {
 }
 
 module.exports = exports.default;
-},{"../isValid/index.js":"e498f8242893901cb098193d741d5e7a","../locale/en-US/index.js":"64a45174a7b8aab2ebedcd537506623f","../subMilliseconds/index.js":"d4c3fa7c1a401b98fc12fd2f31ab3db4","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/format/formatters/index.js":"5eb6591d96df20705f2987008b01aaf9","../_lib/format/longFormatters/index.js":"c5cae08211bae46f320f6578b64023ec","../_lib/getTimezoneOffsetInMilliseconds/index.js":"e1613370c964787e828d6e71e9590bf4","../_lib/protectedTokens/index.js":"c72cd04215458e3a41ee275d842547f7","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"64a45174a7b8aab2ebedcd537506623f":[function(require,module,exports) {
+},{"../isValid/index.js":"5hUKG","../locale/en-US/index.js":"3veaj","../subMilliseconds/index.js":"7jtwm","../toDate/index.js":"1V5iu","../_lib/format/formatters/index.js":"N918d","../_lib/format/longFormatters/index.js":"1D4Af","../_lib/getTimezoneOffsetInMilliseconds/index.js":"7euqA","../_lib/protectedTokens/index.js":"6t8PA","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"3veaj":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11399,7 +7736,7 @@ var locale = {
 var _default = locale;
 exports.default = _default;
 module.exports = exports.default;
-},{"./_lib/formatDistance/index.js":"44144112559fb20b0cf4a05e4d258eb3","./_lib/formatLong/index.js":"7f209cd9dfb309c9d4e57b391275fb3b","./_lib/formatRelative/index.js":"79a20a0b41d122ec288e649d45bdd430","./_lib/localize/index.js":"4d4c339e40e8b942f34303a245d072b5","./_lib/match/index.js":"50ae0991387ba6b912b4cf5ceea95ea0"}],"44144112559fb20b0cf4a05e4d258eb3":[function(require,module,exports) {
+},{"./_lib/formatDistance/index.js":"4m40F","./_lib/formatLong/index.js":"TjkUx","./_lib/formatRelative/index.js":"1Lnqa","./_lib/localize/index.js":"cZwwn","./_lib/match/index.js":"7lWte"}],"4m40F":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11494,7 +7831,7 @@ function formatDistance(token, count, options) {
 }
 
 module.exports = exports.default;
-},{}],"7f209cd9dfb309c9d4e57b391275fb3b":[function(require,module,exports) {
+},{}],"TjkUx":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11541,7 +7878,7 @@ var formatLong = {
 var _default = formatLong;
 exports.default = _default;
 module.exports = exports.default;
-},{"../../../_lib/buildFormatLongFn/index.js":"b571d15f97b80c26f7eb16935408a770"}],"b571d15f97b80c26f7eb16935408a770":[function(require,module,exports) {
+},{"../../../_lib/buildFormatLongFn/index.js":"1pxE5"}],"1pxE5":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11559,7 +7896,7 @@ function buildFormatLongFn(args) {
 }
 
 module.exports = exports.default;
-},{}],"79a20a0b41d122ec288e649d45bdd430":[function(require,module,exports) {
+},{}],"1Lnqa":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11580,7 +7917,7 @@ function formatRelative(token, _date, _baseDate, _options) {
 }
 
 module.exports = exports.default;
-},{}],"4d4c339e40e8b942f34303a245d072b5":[function(require,module,exports) {
+},{}],"cZwwn":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11742,7 +8079,7 @@ var localize = {
 var _default = localize;
 exports.default = _default;
 module.exports = exports.default;
-},{"../../../_lib/buildLocalizeFn/index.js":"8f7ddafaf95fdd3e695c193a0102c4ab"}],"8f7ddafaf95fdd3e695c193a0102c4ab":[function(require,module,exports) {
+},{"../../../_lib/buildLocalizeFn/index.js":"1TQ3s"}],"1TQ3s":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11774,7 +8111,7 @@ function buildLocalizeFn(args) {
 }
 
 module.exports = exports.default;
-},{}],"50ae0991387ba6b912b4cf5ceea95ea0":[function(require,module,exports) {
+},{}],"7lWte":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11886,7 +8223,7 @@ var match = {
 var _default = match;
 exports.default = _default;
 module.exports = exports.default;
-},{"../../../_lib/buildMatchPatternFn/index.js":"3a8f4ca505b26393d3253bdaf88126ff","../../../_lib/buildMatchFn/index.js":"f0ef253011215a7078936954aa1782c8"}],"3a8f4ca505b26393d3253bdaf88126ff":[function(require,module,exports) {
+},{"../../../_lib/buildMatchPatternFn/index.js":"6fVGa","../../../_lib/buildMatchFn/index.js":"3xPva"}],"6fVGa":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11921,7 +8258,7 @@ function buildMatchPatternFn(args) {
 }
 
 module.exports = exports.default;
-},{}],"f0ef253011215a7078936954aa1782c8":[function(require,module,exports) {
+},{}],"3xPva":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11981,7 +8318,7 @@ function findIndex(array, predicate) {
 }
 
 module.exports = exports.default;
-},{}],"d4c3fa7c1a401b98fc12fd2f31ab3db4":[function(require,module,exports) {
+},{}],"7jtwm":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12026,7 +8363,7 @@ function subMilliseconds(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addMilliseconds/index.js":"c4e4e6442c21d238185ea6cfbfc467c7","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"5eb6591d96df20705f2987008b01aaf9":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addMilliseconds/index.js":"4Yyce","../_lib/requiredArgs/index.js":"6sOBd"}],"N918d":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12901,7 +9238,7 @@ function formatTimezone(offset, dirtyDelimiter) {
 var _default = formatters;
 exports.default = _default;
 module.exports = exports.default;
-},{"../lightFormatters/index.js":"edad03f1fca5010f453d69b051a500b3","../../../_lib/getUTCDayOfYear/index.js":"224d57fbd02b4abaaac54238bd46266c","../../../_lib/getUTCISOWeek/index.js":"f3613635cc9fc7efad7d22c854caed92","../../../_lib/getUTCISOWeekYear/index.js":"2244a9608e49ef256b18052f7e49c694","../../../_lib/getUTCWeek/index.js":"e3d3aa3003176186fc43148b0c87d694","../../../_lib/getUTCWeekYear/index.js":"7f365d2185f29a314f6b1bff3c47a7b4","../../addLeadingZeros/index.js":"8cff01970fca5c94e1d816ad5c2aa104"}],"edad03f1fca5010f453d69b051a500b3":[function(require,module,exports) {
+},{"../lightFormatters/index.js":"4Ptmc","../../../_lib/getUTCDayOfYear/index.js":"1EWOf","../../../_lib/getUTCISOWeek/index.js":"27jqg","../../../_lib/getUTCISOWeekYear/index.js":"4bJVr","../../../_lib/getUTCWeek/index.js":"MUJQq","../../../_lib/getUTCWeekYear/index.js":"3KF6o","../../addLeadingZeros/index.js":"7BObO"}],"4Ptmc":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12995,7 +9332,7 @@ var formatters = {
 var _default = formatters;
 exports.default = _default;
 module.exports = exports.default;
-},{"../../addLeadingZeros/index.js":"8cff01970fca5c94e1d816ad5c2aa104"}],"8cff01970fca5c94e1d816ad5c2aa104":[function(require,module,exports) {
+},{"../../addLeadingZeros/index.js":"7BObO"}],"7BObO":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13015,7 +9352,7 @@ function addLeadingZeros(number, targetLength) {
 }
 
 module.exports = exports.default;
-},{}],"224d57fbd02b4abaaac54238bd46266c":[function(require,module,exports) {
+},{}],"1EWOf":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13044,7 +9381,7 @@ function getUTCDayOfYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"f3613635cc9fc7efad7d22c854caed92":[function(require,module,exports) {
+},{"../../toDate/index.js":"1V5iu","../requiredArgs/index.js":"6sOBd"}],"27jqg":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13076,7 +9413,7 @@ function getUTCISOWeek(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../startOfUTCISOWeek/index.js":"1b7c3193f71ebe9277f9bc6bc4f40cbe","../startOfUTCISOWeekYear/index.js":"dee4c2bbd2900d81637454612074d77c","../requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"1b7c3193f71ebe9277f9bc6bc4f40cbe":[function(require,module,exports) {
+},{"../../toDate/index.js":"1V5iu","../startOfUTCISOWeek/index.js":"2RU1x","../startOfUTCISOWeekYear/index.js":"43BTc","../requiredArgs/index.js":"6sOBd"}],"2RU1x":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13104,7 +9441,7 @@ function startOfUTCISOWeek(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"dee4c2bbd2900d81637454612074d77c":[function(require,module,exports) {
+},{"../../toDate/index.js":"1V5iu","../requiredArgs/index.js":"6sOBd"}],"43BTc":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13133,7 +9470,7 @@ function startOfUTCISOWeekYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../getUTCISOWeekYear/index.js":"2244a9608e49ef256b18052f7e49c694","../startOfUTCISOWeek/index.js":"1b7c3193f71ebe9277f9bc6bc4f40cbe","../requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"2244a9608e49ef256b18052f7e49c694":[function(require,module,exports) {
+},{"../getUTCISOWeekYear/index.js":"4bJVr","../startOfUTCISOWeek/index.js":"2RU1x","../requiredArgs/index.js":"6sOBd"}],"4bJVr":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13174,7 +9511,7 @@ function getUTCISOWeekYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../startOfUTCISOWeek/index.js":"1b7c3193f71ebe9277f9bc6bc4f40cbe","../requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e3d3aa3003176186fc43148b0c87d694":[function(require,module,exports) {
+},{"../../toDate/index.js":"1V5iu","../startOfUTCISOWeek/index.js":"2RU1x","../requiredArgs/index.js":"6sOBd"}],"MUJQq":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13206,7 +9543,7 @@ function getUTCWeek(dirtyDate, options) {
 }
 
 module.exports = exports.default;
-},{"../../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../startOfUTCWeek/index.js":"c6972dc14416654e45ba64c66596216a","../startOfUTCWeekYear/index.js":"edfd573747c63af6dffafae4aaa06701","../requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"c6972dc14416654e45ba64c66596216a":[function(require,module,exports) {
+},{"../../toDate/index.js":"1V5iu","../startOfUTCWeek/index.js":"3bRtQ","../startOfUTCWeekYear/index.js":"7btl0","../requiredArgs/index.js":"6sOBd"}],"3bRtQ":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13245,7 +9582,7 @@ function startOfUTCWeek(dirtyDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"edfd573747c63af6dffafae4aaa06701":[function(require,module,exports) {
+},{"../toInteger/index.js":"3hTAe","../../toDate/index.js":"1V5iu","../requiredArgs/index.js":"6sOBd"}],"7btl0":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13281,7 +9618,7 @@ function startOfUTCWeekYear(dirtyDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../getUTCWeekYear/index.js":"7f365d2185f29a314f6b1bff3c47a7b4","../startOfUTCWeek/index.js":"c6972dc14416654e45ba64c66596216a","../requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"7f365d2185f29a314f6b1bff3c47a7b4":[function(require,module,exports) {
+},{"../toInteger/index.js":"3hTAe","../getUTCWeekYear/index.js":"3KF6o","../startOfUTCWeek/index.js":"3bRtQ","../requiredArgs/index.js":"6sOBd"}],"3KF6o":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13334,7 +9671,7 @@ function getUTCWeekYear(dirtyDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../startOfUTCWeek/index.js":"c6972dc14416654e45ba64c66596216a","../requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"c5cae08211bae46f320f6578b64023ec":[function(require,module,exports) {
+},{"../toInteger/index.js":"3hTAe","../../toDate/index.js":"1V5iu","../startOfUTCWeek/index.js":"3bRtQ","../requiredArgs/index.js":"6sOBd"}],"1D4Af":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13440,7 +9777,7 @@ var longFormatters = {
 var _default = longFormatters;
 exports.default = _default;
 module.exports = exports.default;
-},{}],"c72cd04215458e3a41ee275d842547f7":[function(require,module,exports) {
+},{}],"6t8PA":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13471,7 +9808,7 @@ function throwProtectedError(token, format, input) {
     throw new RangeError("Use `dd` instead of `DD` (in `".concat(format, "`) for formatting days of the month to the input `").concat(input, "`; see: https://git.io/fxCyr"));
   }
 }
-},{}],"f26f2bc96ec50f6f32d2e74132053377":[function(require,module,exports) {
+},{}],"7e3Qi":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13704,7 +10041,7 @@ function formatDistance(dirtyDate, dirtyBaseDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../compareAsc/index.js":"b04482b11d51799a5c68a70b87615149","../differenceInMonths/index.js":"cb69a5f4f1d92f10394e57b4ab1bcbd0","../differenceInSeconds/index.js":"e36bd3db1290140be285bef03e3cf595","../locale/en-US/index.js":"64a45174a7b8aab2ebedcd537506623f","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/cloneObject/index.js":"97dd7e714d3db78e47931eba030ebbc5","../_lib/getTimezoneOffsetInMilliseconds/index.js":"e1613370c964787e828d6e71e9590bf4","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"97dd7e714d3db78e47931eba030ebbc5":[function(require,module,exports) {
+},{"../compareAsc/index.js":"1Gup7","../differenceInMonths/index.js":"73jva","../differenceInSeconds/index.js":"25GaE","../locale/en-US/index.js":"3veaj","../toDate/index.js":"1V5iu","../_lib/cloneObject/index.js":"7v9IF","../_lib/getTimezoneOffsetInMilliseconds/index.js":"7euqA","../_lib/requiredArgs/index.js":"6sOBd"}],"7v9IF":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13721,7 +10058,7 @@ function cloneObject(dirtyObject) {
 }
 
 module.exports = exports.default;
-},{"../assign/index.js":"c7bdd937395d9cd7fcc13dedfeb5c069"}],"c7bdd937395d9cd7fcc13dedfeb5c069":[function(require,module,exports) {
+},{"../assign/index.js":"400Yy"}],"400Yy":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13746,7 +10083,7 @@ function assign(target, dirtyObject) {
 }
 
 module.exports = exports.default;
-},{}],"cad7995075a76bac8ef24c788ff855d5":[function(require,module,exports) {
+},{}],"1u1jM":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14012,7 +10349,7 @@ function formatDistanceStrict(dirtyDate, dirtyBaseDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../_lib/getTimezoneOffsetInMilliseconds/index.js":"e1613370c964787e828d6e71e9590bf4","../compareAsc/index.js":"b04482b11d51799a5c68a70b87615149","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../differenceInSeconds/index.js":"e36bd3db1290140be285bef03e3cf595","../_lib/cloneObject/index.js":"97dd7e714d3db78e47931eba030ebbc5","../locale/en-US/index.js":"64a45174a7b8aab2ebedcd537506623f","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e3a91c3d174f69e12f671cb9cbf559d6":[function(require,module,exports) {
+},{"../_lib/getTimezoneOffsetInMilliseconds/index.js":"7euqA","../compareAsc/index.js":"1Gup7","../toDate/index.js":"1V5iu","../differenceInSeconds/index.js":"25GaE","../_lib/cloneObject/index.js":"7v9IF","../locale/en-US/index.js":"3veaj","../_lib/requiredArgs/index.js":"6sOBd"}],"75iKO":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14137,7 +10474,7 @@ function formatDistanceToNow(dirtyDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../formatDistance/index.js":"f26f2bc96ec50f6f32d2e74132053377","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"4287171b502a903b79ebcc55ca87c654":[function(require,module,exports) {
+},{"../formatDistance/index.js":"7e3Qi","../_lib/requiredArgs/index.js":"6sOBd"}],"2k788":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14231,7 +10568,7 @@ function formatDistanceToNowStrict(dirtyDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../formatDistanceStrict/index.js":"cad7995075a76bac8ef24c788ff855d5","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"46046c529c6bfe793a16c15cce52341d":[function(require,module,exports) {
+},{"../formatDistanceStrict/index.js":"1u1jM","../_lib/requiredArgs/index.js":"6sOBd"}],"7w8CX":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14330,7 +10667,7 @@ function formatDuration(duration) {
 }
 
 module.exports = exports.default;
-},{"../locale/en-US/index.js":"64a45174a7b8aab2ebedcd537506623f"}],"cec88e60960d0931b8bb01acad62380a":[function(require,module,exports) {
+},{"../locale/en-US/index.js":"3veaj"}],"4pepN":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14451,7 +10788,7 @@ function formatISO(dirtyDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../isValid/index.js":"e498f8242893901cb098193d741d5e7a","../_lib/addLeadingZeros/index.js":"8cff01970fca5c94e1d816ad5c2aa104"}],"b21ae32a71a4abde22435b4dd50b72a7":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../isValid/index.js":"5hUKG","../_lib/addLeadingZeros/index.js":"7BObO"}],"4tJEg":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14555,7 +10892,7 @@ function formatISO9075(dirtyDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../isValid/index.js":"e498f8242893901cb098193d741d5e7a","../_lib/addLeadingZeros/index.js":"8cff01970fca5c94e1d816ad5c2aa104"}],"9511734b55c82b556eeea741e98b2529":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../isValid/index.js":"5hUKG","../_lib/addLeadingZeros/index.js":"7BObO"}],"YxNIV":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14612,7 +10949,7 @@ function formatISODuration(duration) {
 }
 
 module.exports = exports.default;
-},{"../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"337e1183fe2e777440e0896dc87d149d":[function(require,module,exports) {
+},{"../_lib/requiredArgs/index.js":"6sOBd"}],"7pI4K":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14711,7 +11048,7 @@ function formatRFC3339(dirtyDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../isValid/index.js":"e498f8242893901cb098193d741d5e7a","../_lib/addLeadingZeros/index.js":"8cff01970fca5c94e1d816ad5c2aa104","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e"}],"d23e2348fc30428dcecca286a3cc6302":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../isValid/index.js":"5hUKG","../_lib/addLeadingZeros/index.js":"7BObO","../_lib/toInteger/index.js":"3hTAe"}],"3An1G":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14772,7 +11109,7 @@ function formatRFC7231(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../isValid/index.js":"e498f8242893901cb098193d741d5e7a","../_lib/addLeadingZeros/index.js":"8cff01970fca5c94e1d816ad5c2aa104"}],"32883df9534093463c147e6f123c8121":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../isValid/index.js":"5hUKG","../_lib/addLeadingZeros/index.js":"7BObO"}],"5Asxm":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14881,7 +11218,7 @@ function formatRelative(dirtyDate, dirtyBaseDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../differenceInCalendarDays/index.js":"8255b070c42b22dde4ff1d9e2d1f8222","../format/index.js":"c217462ea1c04722fbe0db40230d04da","../locale/en-US/index.js":"64a45174a7b8aab2ebedcd537506623f","../subMilliseconds/index.js":"d4c3fa7c1a401b98fc12fd2f31ab3db4","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/getTimezoneOffsetInMilliseconds/index.js":"e1613370c964787e828d6e71e9590bf4","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"78bd40dd208b9760ab8804267384e418":[function(require,module,exports) {
+},{"../differenceInCalendarDays/index.js":"2QdQz","../format/index.js":"51r1m","../locale/en-US/index.js":"3veaj","../subMilliseconds/index.js":"7jtwm","../toDate/index.js":"1V5iu","../_lib/getTimezoneOffsetInMilliseconds/index.js":"7euqA","../_lib/requiredArgs/index.js":"6sOBd"}],"2l9Ns":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14925,7 +11262,7 @@ function fromUnixTime(dirtyUnixTime) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"dfdbada56c5e909dbb4dc7f0e91a1072":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"2yUJY":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14968,7 +11305,7 @@ function getDate(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"fe98ca9a7a81ba5cd11fd41eef44d9f6":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"5Gwkw":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15011,7 +11348,7 @@ function getDay(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"9c22dff0a24b471b4a422965091e531c":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"HUkoA":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15059,7 +11396,7 @@ function getDayOfYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../startOfYear/index.js":"655a08231b6bc1822e7a69e1372d74f9","../differenceInCalendarDays/index.js":"8255b070c42b22dde4ff1d9e2d1f8222","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"8298413df5cc7073c82e7242ea292acd":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../startOfYear/index.js":"1iJaH","../differenceInCalendarDays/index.js":"2QdQz","../_lib/requiredArgs/index.js":"6sOBd"}],"4GP2w":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15106,7 +11443,7 @@ function getDaysInMonth(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"41f8ca411898af0bc8fd0b4a36122a99":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"7lNym":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15155,7 +11492,7 @@ function getDaysInYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../isLeapYear/index.js":"ef313748214a21b8b16038e2f5ad1d5e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"ef313748214a21b8b16038e2f5ad1d5e":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../isLeapYear/index.js":"4lXxW","../_lib/requiredArgs/index.js":"6sOBd"}],"4lXxW":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15198,7 +11535,7 @@ function isLeapYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"467843cfb510d5293958569f428acf18":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"1eejr":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15242,7 +11579,7 @@ function getDecade(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"5183d01c6c581da2f9fe2961fef70b2f":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2Ooz1":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15285,7 +11622,7 @@ function getHours(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"6a3e0610b347e6c8e6f76863aab4f479":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"424GV":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15336,7 +11673,7 @@ function getISODay(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"71883f1860b86a189ef2fc77e755a732":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"34YB0":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15390,7 +11727,7 @@ function getISOWeek(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../startOfISOWeek/index.js":"5cdfef1aaca2ce8eb5f04f653206d691","../startOfISOWeekYear/index.js":"8335b930839a50f32d190455599201c0","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e971f00d9a879791052a9d3649e54b73":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../startOfISOWeek/index.js":"22t8q","../startOfISOWeekYear/index.js":"7EzGQ","../_lib/requiredArgs/index.js":"6sOBd"}],"3989S":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15443,7 +11780,7 @@ function getISOWeeksInYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../startOfISOWeekYear/index.js":"8335b930839a50f32d190455599201c0","../addWeeks/index.js":"d7f228172dbd1739d5d2624dd7fbb932","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"535b0a56278f233d449b49867f7c0e19":[function(require,module,exports) {
+},{"../startOfISOWeekYear/index.js":"7EzGQ","../addWeeks/index.js":"7l07p","../_lib/requiredArgs/index.js":"6sOBd"}],"3yHyU":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15486,7 +11823,7 @@ function getMilliseconds(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"feaaedb714ccb9855efd2709a78a5d17":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"3r7Wu":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15529,7 +11866,7 @@ function getMinutes(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"8dee39b68db47d65f6195a33239a626d":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"6zj0Q":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15572,7 +11909,7 @@ function getMonth(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"67ef46684e15271c1e13bd8a9b83443c":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"46tK9":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15679,7 +12016,7 @@ function getOverlappingDaysInIntervals(dirtyIntervalLeft, dirtyIntervalRight) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"7bd5a4d5b46a09bc32809037ff18634b":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"7AAlb":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15722,7 +12059,7 @@ function getSeconds(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"22861e17c251157a65c1c172dec5ec26":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"4fpQQ":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15765,7 +12102,7 @@ function getTime(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"9e48a7ab65268131d9bdb270fabd09d1":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"3J51R":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15806,7 +12143,7 @@ function getUnixTime(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../getTime/index.js":"22861e17c251157a65c1c172dec5ec26","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"a997e8e39a4da3af79e448fa39a525be":[function(require,module,exports) {
+},{"../getTime/index.js":"4fpQQ","../_lib/requiredArgs/index.js":"6sOBd"}],"5HxNL":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15879,7 +12216,7 @@ function getWeek(dirtyDate, options) {
 }
 
 module.exports = exports.default;
-},{"../startOfWeek/index.js":"9773da116ecae709ccce70a09b54431c","../startOfWeekYear/index.js":"78e987916a9f12e1c18744fd944f6014","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"78e987916a9f12e1c18744fd944f6014":[function(require,module,exports) {
+},{"../startOfWeek/index.js":"538bJ","../startOfWeekYear/index.js":"2NLrF","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2NLrF":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15956,7 +12293,7 @@ function startOfWeekYear(dirtyDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../getWeekYear/index.js":"239b765e7843884489fe96ce6a15edf9","../startOfWeek/index.js":"9773da116ecae709ccce70a09b54431c","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"239b765e7843884489fe96ce6a15edf9":[function(require,module,exports) {
+},{"../getWeekYear/index.js":"6aHtM","../startOfWeek/index.js":"538bJ","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"6aHtM":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16050,7 +12387,7 @@ function getWeekYear(dirtyDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../startOfWeek/index.js":"9773da116ecae709ccce70a09b54431c","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"4708f77d239a2a7c12ee8ec587dd8bfa":[function(require,module,exports) {
+},{"../startOfWeek/index.js":"538bJ","../toDate/index.js":"1V5iu","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"55XYL":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16133,7 +12470,7 @@ function getWeekOfMonth(date, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../getDate/index.js":"dfdbada56c5e909dbb4dc7f0e91a1072","../getDay/index.js":"fe98ca9a7a81ba5cd11fd41eef44d9f6","../startOfMonth/index.js":"7ab6abfabd43021d3a26e7331311a7cb","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"675c288b63035ef0f5617ddbc37187e9":[function(require,module,exports) {
+},{"../getDate/index.js":"2yUJY","../getDay/index.js":"5Gwkw","../startOfMonth/index.js":"6czQw","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"4g9mv":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16188,7 +12525,7 @@ function getWeeksInMonth(date, options) {
 }
 
 module.exports = exports.default;
-},{"../differenceInCalendarWeeks/index.js":"d4d5352b34b5aee15bb4569fd972b1cf","../lastDayOfMonth/index.js":"7d2f7158ed0821a6753f961942ce1a0c","../startOfMonth/index.js":"7ab6abfabd43021d3a26e7331311a7cb","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"7d2f7158ed0821a6753f961942ce1a0c":[function(require,module,exports) {
+},{"../differenceInCalendarWeeks/index.js":"38Pkj","../lastDayOfMonth/index.js":"3QI1i","../startOfMonth/index.js":"6czQw","../_lib/requiredArgs/index.js":"6sOBd"}],"3QI1i":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16234,7 +12571,7 @@ function lastDayOfMonth(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"7c62184b9bdaf8d2935707eb39476f0e":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"3u5P4":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16277,7 +12614,7 @@ function getYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"ff55739890702a124dd2f05b3251e692":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2OYr3":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16381,7 +12718,7 @@ function intervalToDuration(_ref) {
 }
 
 module.exports = exports.default;
-},{"../compareAsc/index.js":"b04482b11d51799a5c68a70b87615149","../differenceInYears/index.js":"3cb153d4a0f49dc0186870c197a4b734","../differenceInMonths/index.js":"cb69a5f4f1d92f10394e57b4ab1bcbd0","../differenceInDays/index.js":"e72a5837ea1f56123b018d801f470db5","../differenceInHours/index.js":"92048a9d588a87285c40d130e50b6b68","../differenceInMinutes/index.js":"77e3eae59cf68a6fdb8fa98359c05325","../differenceInSeconds/index.js":"e36bd3db1290140be285bef03e3cf595","../isValid/index.js":"e498f8242893901cb098193d741d5e7a","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../sub/index.js":"03521e77eb3ab73dd1ae4b9e11f0d7a1"}],"03521e77eb3ab73dd1ae4b9e11f0d7a1":[function(require,module,exports) {
+},{"../compareAsc/index.js":"1Gup7","../differenceInYears/index.js":"EghjJ","../differenceInMonths/index.js":"73jva","../differenceInDays/index.js":"2MBLV","../differenceInHours/index.js":"141V5","../differenceInMinutes/index.js":"2JO1P","../differenceInSeconds/index.js":"25GaE","../isValid/index.js":"5hUKG","../_lib/requiredArgs/index.js":"6sOBd","../toDate/index.js":"1V5iu","../sub/index.js":"1sOiz"}],"1sOiz":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16463,7 +12800,7 @@ function sub(dirtyDate, duration) {
 }
 
 module.exports = exports.default;
-},{"../subDays/index.js":"70eaf93ad7b28e364c9f707a17d69bcf","../subMonths/index.js":"6e33148d4a1d84362d717b05a63adcee","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e"}],"70eaf93ad7b28e364c9f707a17d69bcf":[function(require,module,exports) {
+},{"../subDays/index.js":"5ldrP","../subMonths/index.js":"6AhCJ","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd","../_lib/toInteger/index.js":"3hTAe"}],"5ldrP":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16508,7 +12845,7 @@ function subDays(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addDays/index.js":"5fdec9afb4e5b1ea71ca3db109ea4b4a","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"6e33148d4a1d84362d717b05a63adcee":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addDays/index.js":"6YmUH","../_lib/requiredArgs/index.js":"6sOBd"}],"6AhCJ":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16553,7 +12890,7 @@ function subMonths(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addMonths/index.js":"c378d91acb6a81ab70e2f3bf5c6f8f0b","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"18372d0b3b61759ba962b2a2b35f5459":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addMonths/index.js":"40ufh","../_lib/requiredArgs/index.js":"6sOBd"}],"7gMIo":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16597,7 +12934,7 @@ function isAfter(dirtyDate, dirtyDateToCompare) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"64fead70a1ae27ab94c3936da1f68966":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"syi9x":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16641,7 +12978,7 @@ function isBefore(dirtyDate, dirtyDateToCompare) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"f8dc856ec7b070a9064f46eabc655589":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"5GC27":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16695,7 +13032,7 @@ function isDate(value) {
 }
 
 module.exports = exports.default;
-},{"../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"9002389ff04dcbcee3da6f5309c67e46":[function(require,module,exports) {
+},{"../_lib/requiredArgs/index.js":"6sOBd"}],"2SQUh":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16742,7 +13079,7 @@ function isEqual(dirtyLeftDate, dirtyRightDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"000b6b2ea0c996a6d63a91aa1dea72a7":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2CpjD":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16784,7 +13121,7 @@ function isExists(year, month, day) {
 }
 
 module.exports = exports.default;
-},{}],"44499fe204134bb46a09d8a800c23d5f":[function(require,module,exports) {
+},{}],"H9PN2":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16825,7 +13162,7 @@ function isFirstDayOfMonth(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"b8df0f14e0bb3af5f063c737dc50dfc6":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2JAhG":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16866,7 +13203,7 @@ function isFriday(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"7d8dfa1d074c1b4d18ac0018d57ff445":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"1vjOE":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16911,7 +13248,7 @@ function isFuture(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"edc74cad19c0b41205865fb2a8829ffc":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2GrDk":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16957,7 +13294,7 @@ function isLastDayOfMonth(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../endOfDay/index.js":"ad0eb03bd09a3bb13c3ba6ca29582aac","../endOfMonth/index.js":"13de8359936822f10aa6792c9ec3415b","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"74b61f0febcdecdbee0d218835e2ff92":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../endOfDay/index.js":"64Jhj","../endOfMonth/index.js":"6XQ7a","../_lib/requiredArgs/index.js":"6sOBd"}],"ddqyt":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17271,7 +13608,7 @@ function isMatch(dateString, formatString, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../parse/index.js":"74f434cfff03493e820ee532b0e3d2f2","../isValid/index.js":"e498f8242893901cb098193d741d5e7a","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"74f434cfff03493e820ee532b0e3d2f2":[function(require,module,exports) {
+},{"../parse/index.js":"1IZMe","../isValid/index.js":"5hUKG","../_lib/requiredArgs/index.js":"6sOBd"}],"1IZMe":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -17843,7 +14180,7 @@ function cleanEscapedString(input) {
 }
 
 module.exports = exports.default;
-},{"../locale/en-US/index.js":"64a45174a7b8aab2ebedcd537506623f","../subMilliseconds/index.js":"d4c3fa7c1a401b98fc12fd2f31ab3db4","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/assign/index.js":"c7bdd937395d9cd7fcc13dedfeb5c069","../_lib/format/longFormatters/index.js":"c5cae08211bae46f320f6578b64023ec","../_lib/getTimezoneOffsetInMilliseconds/index.js":"e1613370c964787e828d6e71e9590bf4","../_lib/protectedTokens/index.js":"c72cd04215458e3a41ee275d842547f7","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","./_lib/parsers/index.js":"4d935aea9f2bb4d26048131480150efb","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"4d935aea9f2bb4d26048131480150efb":[function(require,module,exports) {
+},{"../locale/en-US/index.js":"3veaj","../subMilliseconds/index.js":"7jtwm","../toDate/index.js":"1V5iu","../_lib/assign/index.js":"400Yy","../_lib/format/longFormatters/index.js":"1D4Af","../_lib/getTimezoneOffsetInMilliseconds/index.js":"7euqA","../_lib/protectedTokens/index.js":"6t8PA","../_lib/toInteger/index.js":"3hTAe","./_lib/parsers/index.js":"4MNtC","../_lib/requiredArgs/index.js":"6sOBd"}],"4MNtC":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19365,7 +15702,7 @@ var parsers = {
 var _default = parsers;
 exports.default = _default;
 module.exports = exports.default;
-},{"../../../_lib/getUTCWeekYear/index.js":"7f365d2185f29a314f6b1bff3c47a7b4","../../../_lib/setUTCDay/index.js":"9b89a52d02567ced769df852948f6a9b","../../../_lib/setUTCISODay/index.js":"f1a74909068367ac58ab8f1ca89101a6","../../../_lib/setUTCISOWeek/index.js":"67e3637bd4537ac8ef005d1fcc9400f0","../../../_lib/setUTCWeek/index.js":"d0df60588186cd36361a1f24b77f7488","../../../_lib/startOfUTCISOWeek/index.js":"1b7c3193f71ebe9277f9bc6bc4f40cbe","../../../_lib/startOfUTCWeek/index.js":"c6972dc14416654e45ba64c66596216a"}],"9b89a52d02567ced769df852948f6a9b":[function(require,module,exports) {
+},{"../../../_lib/getUTCWeekYear/index.js":"3KF6o","../../../_lib/setUTCDay/index.js":"3GE6l","../../../_lib/setUTCISODay/index.js":"7BgQ0","../../../_lib/setUTCISOWeek/index.js":"2voda","../../../_lib/setUTCWeek/index.js":"3cq0G","../../../_lib/startOfUTCISOWeek/index.js":"2RU1x","../../../_lib/startOfUTCWeek/index.js":"3bRtQ"}],"3GE6l":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19406,7 +15743,7 @@ function setUTCDay(dirtyDate, dirtyDay, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"f1a74909068367ac58ab8f1ca89101a6":[function(require,module,exports) {
+},{"../toInteger/index.js":"3hTAe","../../toDate/index.js":"1V5iu","../requiredArgs/index.js":"6sOBd"}],"7BgQ0":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19443,7 +15780,7 @@ function setUTCISODay(dirtyDate, dirtyDay) {
 }
 
 module.exports = exports.default;
-},{"../toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"67e3637bd4537ac8ef005d1fcc9400f0":[function(require,module,exports) {
+},{"../toInteger/index.js":"3hTAe","../../toDate/index.js":"1V5iu","../requiredArgs/index.js":"6sOBd"}],"2voda":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19473,7 +15810,7 @@ function setUTCISOWeek(dirtyDate, dirtyISOWeek) {
 }
 
 module.exports = exports.default;
-},{"../toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../getUTCISOWeek/index.js":"f3613635cc9fc7efad7d22c854caed92","../requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"d0df60588186cd36361a1f24b77f7488":[function(require,module,exports) {
+},{"../toInteger/index.js":"3hTAe","../../toDate/index.js":"1V5iu","../getUTCISOWeek/index.js":"27jqg","../requiredArgs/index.js":"6sOBd"}],"3cq0G":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19503,7 +15840,7 @@ function setUTCWeek(dirtyDate, dirtyWeek, options) {
 }
 
 module.exports = exports.default;
-},{"../toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../getUTCWeek/index.js":"e3d3aa3003176186fc43148b0c87d694","../requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"f6bfe08b8d7d7835d9bc8e62d80794da":[function(require,module,exports) {
+},{"../toInteger/index.js":"3hTAe","../../toDate/index.js":"1V5iu","../getUTCWeek/index.js":"MUJQq","../requiredArgs/index.js":"6sOBd"}],"264Do":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19544,7 +15881,7 @@ function isMonday(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"7a24ae0b780d99bc22ba24757009f9dc":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"6TMzG":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19589,7 +15926,7 @@ function isPast(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"385f6ac118e285619ea9712563b8988e":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"76942":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19633,7 +15970,7 @@ function isSameHour(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../startOfHour/index.js":"1459963c5acd6a374d91d4ff8b87d166","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"1459963c5acd6a374d91d4ff8b87d166":[function(require,module,exports) {
+},{"../startOfHour/index.js":"1TsdS","../_lib/requiredArgs/index.js":"6sOBd"}],"1TsdS":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19677,7 +16014,7 @@ function startOfHour(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"2db3ddd96ca94f2bf32fb95a4587cea7":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"16lC0":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19723,7 +16060,7 @@ function isSameISOWeek(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../isSameWeek/index.js":"37fe8e6e10ab49bef0bdb83d65177d66","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"37fe8e6e10ab49bef0bdb83d65177d66":[function(require,module,exports) {
+},{"../isSameWeek/index.js":"10f5R","../_lib/requiredArgs/index.js":"6sOBd"}],"10f5R":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19779,7 +16116,7 @@ function isSameWeek(dirtyDateLeft, dirtyDateRight, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../startOfWeek/index.js":"9773da116ecae709ccce70a09b54431c","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"ba3c0e6f36d971c15ee11f326eaf6d42":[function(require,module,exports) {
+},{"../startOfWeek/index.js":"538bJ","../_lib/requiredArgs/index.js":"6sOBd"}],"5Vo68":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19830,7 +16167,7 @@ function isSameISOWeekYear(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../startOfISOWeekYear/index.js":"8335b930839a50f32d190455599201c0","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"150dcf88a9186e501c8ddc097bd1e7d7":[function(require,module,exports) {
+},{"../startOfISOWeekYear/index.js":"7EzGQ","../_lib/requiredArgs/index.js":"6sOBd"}],"54ziV":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19878,7 +16215,7 @@ function isSameMinute(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../startOfMinute/index.js":"fcee0c3b3244d2626be2d438770da43b","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"fcee0c3b3244d2626be2d438770da43b":[function(require,module,exports) {
+},{"../startOfMinute/index.js":"2AJwM","../_lib/requiredArgs/index.js":"6sOBd"}],"2AJwM":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19922,7 +16259,7 @@ function startOfMinute(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"81adb2ef01aae27ad4ce057c66c2656f":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"11kS0":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -19966,7 +16303,7 @@ function isSameMonth(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"dd61663df2ab7c3c09a5cc1f7f46b2f7":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2tlAm":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20010,7 +16347,7 @@ function isSameQuarter(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../startOfQuarter/index.js":"169a2e7964834756211ffaa78256e0de","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"6fcb80b72940c3561a7d273d878bd881":[function(require,module,exports) {
+},{"../startOfQuarter/index.js":"6sGyU","../_lib/requiredArgs/index.js":"6sOBd"}],"62gax":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20058,7 +16395,7 @@ function isSameSecond(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../startOfSecond/index.js":"df63f10981bee5473694888e5f813faf","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"df63f10981bee5473694888e5f813faf":[function(require,module,exports) {
+},{"../startOfSecond/index.js":"C7NpE","../_lib/requiredArgs/index.js":"6sOBd"}],"C7NpE":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20102,7 +16439,7 @@ function startOfSecond(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"5e947007c9aa91445703fa03c1fa3743":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"3yrHh":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20146,7 +16483,7 @@ function isSameYear(dirtyDateLeft, dirtyDateRight) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"06d531dbcb1f239580b8e59d2daa1438":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"4ATT0":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20192,7 +16529,7 @@ function isThisHour(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../isSameHour/index.js":"385f6ac118e285619ea9712563b8988e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"578b008b8d5483a0a10d855f18efb76c":[function(require,module,exports) {
+},{"../isSameHour/index.js":"76942","../_lib/requiredArgs/index.js":"6sOBd"}],"2VLse":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20239,7 +16576,7 @@ function isThisISOWeek(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../isSameISOWeek/index.js":"2db3ddd96ca94f2bf32fb95a4587cea7","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"ffd6095abe07ffd1e01d843dfd3fde95":[function(require,module,exports) {
+},{"../isSameISOWeek/index.js":"16lC0","../_lib/requiredArgs/index.js":"6sOBd"}],"3nALm":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20285,7 +16622,7 @@ function isThisMinute(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../isSameMinute/index.js":"150dcf88a9186e501c8ddc097bd1e7d7","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"f4724bc521b4e96fc16503c3a3bb9f12":[function(require,module,exports) {
+},{"../isSameMinute/index.js":"54ziV","../_lib/requiredArgs/index.js":"6sOBd"}],"5MSex":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20330,7 +16667,7 @@ function isThisMonth(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../isSameMonth/index.js":"81adb2ef01aae27ad4ce057c66c2656f","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"ecad26fa72313a4252b2b48f631d73f7":[function(require,module,exports) {
+},{"../isSameMonth/index.js":"11kS0","../_lib/requiredArgs/index.js":"6sOBd"}],"5fnTt":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20375,7 +16712,7 @@ function isThisQuarter(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../isSameQuarter/index.js":"dd61663df2ab7c3c09a5cc1f7f46b2f7","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"01600f408c7ba656a6e61c717093b0c8":[function(require,module,exports) {
+},{"../isSameQuarter/index.js":"2tlAm","../_lib/requiredArgs/index.js":"6sOBd"}],"3GHlv":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20421,7 +16758,7 @@ function isThisSecond(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../isSameSecond/index.js":"6fcb80b72940c3561a7d273d878bd881","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"9aa0211e673af75e1f5ee48c8e7dd507":[function(require,module,exports) {
+},{"../isSameSecond/index.js":"62gax","../_lib/requiredArgs/index.js":"6sOBd"}],"23tWe":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20476,7 +16813,7 @@ function isThisWeek(dirtyDate, options) {
 }
 
 module.exports = exports.default;
-},{"../isSameWeek/index.js":"37fe8e6e10ab49bef0bdb83d65177d66","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"8c1de84ae5a9d09a635123ebc2c64ab6":[function(require,module,exports) {
+},{"../isSameWeek/index.js":"10f5R","../_lib/requiredArgs/index.js":"6sOBd"}],"4GPNC":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20521,7 +16858,7 @@ function isThisYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../isSameYear/index.js":"5e947007c9aa91445703fa03c1fa3743","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"9607416ea3b170ae8d77a290847d4c0d":[function(require,module,exports) {
+},{"../isSameYear/index.js":"3yrHh","../_lib/requiredArgs/index.js":"6sOBd"}],"6MqIs":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20562,7 +16899,7 @@ function isThursday(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"67da3cd3ca238e192c0dd11d2aacf172":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"gQ0BR":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20607,7 +16944,7 @@ function isToday(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../isSameDay/index.js":"444d26f8c29e5f455146d915b97fd66d","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"3c07555b1dde6eabeabfa153d2487167":[function(require,module,exports) {
+},{"../isSameDay/index.js":"1vkyj","../_lib/requiredArgs/index.js":"6sOBd"}],"6aJxi":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20654,7 +16991,7 @@ function isTomorrow(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../addDays/index.js":"5fdec9afb4e5b1ea71ca3db109ea4b4a","../isSameDay/index.js":"444d26f8c29e5f455146d915b97fd66d","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"be83b9b29cf0fedd047879f7c1bdec85":[function(require,module,exports) {
+},{"../addDays/index.js":"6YmUH","../isSameDay/index.js":"1vkyj","../_lib/requiredArgs/index.js":"6sOBd"}],"14P58":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20695,7 +17032,7 @@ function isTuesday(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"a3d7529edfe734998e30f5539a2f9ee7":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"GwE7L":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20736,7 +17073,7 @@ function isWednesday(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"3509ac09a6c7f1f41ad82e411146add7":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"44tZa":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20838,7 +17175,7 @@ function isWithinInterval(dirtyDate, dirtyInterval) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"656d68e013180585a56e31ee3cd32d59":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"713YH":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20885,7 +17222,7 @@ function isYesterday(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../isSameDay/index.js":"444d26f8c29e5f455146d915b97fd66d","../subDays/index.js":"70eaf93ad7b28e364c9f707a17d69bcf","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"83d6b22b1d0086d1798a4a6e965c8d2f":[function(require,module,exports) {
+},{"../isSameDay/index.js":"1vkyj","../subDays/index.js":"5ldrP","../_lib/requiredArgs/index.js":"6sOBd"}],"6S1JS":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20931,7 +17268,7 @@ function lastDayOfDecade(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"644b3635fcb0200454813043b0300ebb":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"47odk":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20977,7 +17314,7 @@ function lastDayOfISOWeek(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../lastDayOfWeek/index.js":"a133e2aa766515de6db672ba39771a2c","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"a133e2aa766515de6db672ba39771a2c":[function(require,module,exports) {
+},{"../lastDayOfWeek/index.js":"5NmMD","../_lib/requiredArgs/index.js":"6sOBd"}],"5NmMD":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21045,7 +17382,7 @@ function lastDayOfWeek(dirtyDate, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"5d7ff489623578ef313254fc1dd72f21":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"7AdMS":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21103,7 +17440,7 @@ function lastDayOfISOWeekYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../getISOWeekYear/index.js":"29a61091f03d2559b5ae8dbb8640b0af","../startOfISOWeek/index.js":"5cdfef1aaca2ce8eb5f04f653206d691","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"599f8b744c992cbaa64ec474a44a1a2f":[function(require,module,exports) {
+},{"../getISOWeekYear/index.js":"74tdA","../startOfISOWeek/index.js":"22t8q","../_lib/requiredArgs/index.js":"6sOBd"}],"4VEoX":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21153,7 +17490,7 @@ function lastDayOfQuarter(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"fc9356a5267f529004b5ac5c2d12fa63":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"Lb4nv":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21199,7 +17536,7 @@ function lastDayOfYear(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e4ee3c1b701234b1d31f1584ebaf8850":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"3t1F7":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21336,7 +17673,7 @@ function cleanEscapedString(input) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/format/lightFormatters/index.js":"edad03f1fca5010f453d69b051a500b3","../_lib/getTimezoneOffsetInMilliseconds/index.js":"e1613370c964787e828d6e71e9590bf4","../isValid/index.js":"e498f8242893901cb098193d741d5e7a","../subMilliseconds/index.js":"d4c3fa7c1a401b98fc12fd2f31ab3db4","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"85f164c93466a8032b1e63dd8dffdd5e":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/format/lightFormatters/index.js":"4Ptmc","../_lib/getTimezoneOffsetInMilliseconds/index.js":"7euqA","../isValid/index.js":"5hUKG","../subMilliseconds/index.js":"7jtwm","../_lib/requiredArgs/index.js":"6sOBd"}],"1XjiL":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21414,7 +17751,7 @@ function max(dirtyDatesArray) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"cb9968590348c3277d9086ce2d814ccf":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2vLvh":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21492,7 +17829,7 @@ function min(dirtyDatesArray) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"39723a78eb8b374467405e532e310d94":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"4MIVQ":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21796,7 +18133,7 @@ function validateTimezone(_hours, minutes) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"16d5412446adeb40a9cf7840c93ec114":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"5vM10":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21860,7 +18197,7 @@ function parseJSON(argument) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"b0061c9fe342923672da62c452cf1904":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"4a9Si":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21927,7 +18264,7 @@ function roundToNearestMinutes(dirtyDate, options) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e"}],"3aeb2a4c24eb0b0b0f160a8dc94f667c":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/toInteger/index.js":"3hTAe"}],"2koTT":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22028,7 +18365,7 @@ function set(dirtyDate, values) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../setMonth/index.js":"f1c5ebb39c2a668d3a445d46f935ca2c","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"f1c5ebb39c2a668d3a445d46f935ca2c":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../setMonth/index.js":"6ywPJ","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"6ywPJ":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22085,7 +18422,7 @@ function setMonth(dirtyDate, dirtyMonth) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../getDaysInMonth/index.js":"8298413df5cc7073c82e7242ea292acd","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"e2dec063b4e5f7e9cbe7696b5d6e9666":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../getDaysInMonth/index.js":"4GP2w","../_lib/requiredArgs/index.js":"6sOBd"}],"4F0jl":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22132,7 +18469,7 @@ function setDate(dirtyDate, dirtyDayOfMonth) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"a71fd34e1ecfa7761719202ba566a403":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"656BC":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22204,7 +18541,7 @@ function setDay(dirtyDate, dirtyDay, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../addDays/index.js":"5fdec9afb4e5b1ea71ca3db109ea4b4a","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"cedb3d267a5636728a65550cf793b5f5":[function(require,module,exports) {
+},{"../addDays/index.js":"6YmUH","../toDate/index.js":"1V5iu","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"5pKUD":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22252,7 +18589,7 @@ function setDayOfYear(dirtyDate, dirtyDayOfYear) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"8ceafa0198583670c2bccf4454f38794":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"70bfz":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22299,7 +18636,7 @@ function setHours(dirtyDate, dirtyHours) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"a3624be2c4911b06b3fa58307fce5f0d":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"2KCvI":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22353,7 +18690,7 @@ function setISODay(dirtyDate, dirtyDay) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../addDays/index.js":"5fdec9afb4e5b1ea71ca3db109ea4b4a","../getISODay/index.js":"6a3e0610b347e6c8e6f76863aab4f479","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"050399cd697636cd8e914dbc6186d831":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../addDays/index.js":"6YmUH","../getISODay/index.js":"424GV","../_lib/requiredArgs/index.js":"6sOBd"}],"3vu4u":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22405,7 +18742,7 @@ function setISOWeek(dirtyDate, dirtyISOWeek) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../getISOWeek/index.js":"71883f1860b86a189ef2fc77e755a732","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"dca6009831992d9318e40f1684915140":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../getISOWeek/index.js":"34YB0","../_lib/requiredArgs/index.js":"6sOBd"}],"2zQjB":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22452,7 +18789,7 @@ function setMilliseconds(dirtyDate, dirtyMilliseconds) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"09cd966935083291ac9970913055f927":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"75hu8":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22499,7 +18836,7 @@ function setMinutes(dirtyDate, dirtyMinutes) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"21b5f859c69ef4933710126207ae21ab":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"6DQtN":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22549,7 +18886,7 @@ function setQuarter(dirtyDate, dirtyQuarter) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../setMonth/index.js":"f1c5ebb39c2a668d3a445d46f935ca2c","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"614a3436499e906c08b869cdb16370ce":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../setMonth/index.js":"6ywPJ","../_lib/requiredArgs/index.js":"6sOBd"}],"45SSI":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22596,7 +18933,7 @@ function setSeconds(dirtyDate, dirtySeconds) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"f6718bd87379ed600a0e516621879633":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"7CfCB":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22668,7 +19005,7 @@ function setWeek(dirtyDate, dirtyWeek, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../getWeek/index.js":"a997e8e39a4da3af79e448fa39a525be","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"0a9036a4faff0278acde0c3bf4523d30":[function(require,module,exports) {
+},{"../getWeek/index.js":"5HxNL","../toDate/index.js":"1V5iu","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"2yJQn":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22752,7 +19089,7 @@ function setWeekYear(dirtyDate, dirtyWeekYear, dirtyOptions) {
 }
 
 module.exports = exports.default;
-},{"../differenceInCalendarDays/index.js":"8255b070c42b22dde4ff1d9e2d1f8222","../startOfWeekYear/index.js":"78e987916a9f12e1c18744fd944f6014","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"0980643c559e7cff77f6ce2c5d6034b4":[function(require,module,exports) {
+},{"../differenceInCalendarDays/index.js":"2QdQz","../startOfWeekYear/index.js":"2NLrF","../toDate/index.js":"1V5iu","../_lib/toInteger/index.js":"3hTAe","../_lib/requiredArgs/index.js":"6sOBd"}],"1l7li":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22804,7 +19141,7 @@ function setYear(dirtyDate, dirtyYear) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"b2f1c99c79182001fe9763c34ffb30f2":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"1t0ZG":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22850,7 +19187,7 @@ function startOfDecade(dirtyDate) {
 }
 
 module.exports = exports.default;
-},{"../toDate/index.js":"4d4cbccb04ce5990e942550dfe4cd445","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"8dfe1c16ea542e8b1c7afa351a4fb2c7":[function(require,module,exports) {
+},{"../toDate/index.js":"1V5iu","../_lib/requiredArgs/index.js":"6sOBd"}],"4Eral":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22890,7 +19227,7 @@ function startOfToday() {
 }
 
 module.exports = exports.default;
-},{"../startOfDay/index.js":"744d936ab12e05d0425f696fac165804"}],"74fdb0c4bed6fd0542b5cca829f14bc1":[function(require,module,exports) {
+},{"../startOfDay/index.js":"6zbSQ"}],"7DllR":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22933,7 +19270,7 @@ function startOfTomorrow() {
 }
 
 module.exports = exports.default;
-},{}],"ad75d97f335f78ab3d3c0a0961f50744":[function(require,module,exports) {
+},{}],"3aGuH":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22976,7 +19313,7 @@ function startOfYesterday() {
 }
 
 module.exports = exports.default;
-},{}],"5fde211b45ae5d3c2c4fdc7c1e19477c":[function(require,module,exports) {
+},{}],"6z9U0":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23017,7 +19354,7 @@ function subBusinessDays(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addBusinessDays/index.js":"e461bf4ab3d2c090b0e29faa612bfb12","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"a9708b84504bdd67663413519bc924d0":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addBusinessDays/index.js":"8xGLs","../_lib/requiredArgs/index.js":"6sOBd"}],"52ibs":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23062,7 +19399,7 @@ function subHours(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addHours/index.js":"cd47d6b53a35480fa364f0daccc1ea68","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"c9b4820f62efa127bead6974eb642f14":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addHours/index.js":"1OTbG","../_lib/requiredArgs/index.js":"6sOBd"}],"2KGlc":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23107,7 +19444,7 @@ function subMinutes(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addMinutes/index.js":"6add3d9bd711b465b1f3fcfd9dbaacef","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"afaa74b055749afcfe4234604fc159af":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addMinutes/index.js":"6I4ae","../_lib/requiredArgs/index.js":"6sOBd"}],"Js2n6":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23152,7 +19489,7 @@ function subQuarters(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addQuarters/index.js":"928b02c9289f2a44dc206b85a4f19db0","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"49ca86ad057e050f8cebdd01a06d5bfa":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addQuarters/index.js":"9Mqeg","../_lib/requiredArgs/index.js":"6sOBd"}],"30XQ2":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23197,7 +19534,7 @@ function subSeconds(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addSeconds/index.js":"06da1dae2be75137482b0934e6a816e4","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"aee1d441e5f850d2ec745c4c6098dd09":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addSeconds/index.js":"4OM4T","../_lib/requiredArgs/index.js":"6sOBd"}],"3psCi":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23242,7 +19579,7 @@ function subWeeks(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addWeeks/index.js":"d7f228172dbd1739d5d2624dd7fbb932","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"35538a1800388d694d4ef9c863fea581":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addWeeks/index.js":"7l07p","../_lib/requiredArgs/index.js":"6sOBd"}],"2J4RY":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23287,7 +19624,7 @@ function subYears(dirtyDate, dirtyAmount) {
 }
 
 module.exports = exports.default;
-},{"../_lib/toInteger/index.js":"4f12886b17b9e27a855b6b6925f19f6e","../addYears/index.js":"e3b1a16fd74a5e331a21f425de5cae3a","../_lib/requiredArgs/index.js":"96233ac16f80ecbe82bbfc9a5dea36d1"}],"fd3e1097ec67f3d6a19982ca02550c0a":[function(require,module,exports) {
+},{"../_lib/toInteger/index.js":"3hTAe","../addYears/index.js":"1SQq0","../_lib/requiredArgs/index.js":"6sOBd"}],"5nPDX":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23312,7 +19649,7 @@ var maxTime = Math.pow(10, 8) * 24 * 60 * 60 * 1000;
 exports.maxTime = maxTime;
 var minTime = -maxTime;
 exports.minTime = minTime;
-},{}],"e01b06873970098a24800651e0ccce10":[function(require,module,exports) {
+},{}],"mgcsp":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23360,7 +19697,7 @@ var locale = {
 };
 var _default = locale;
 exports.default = _default;
-},{"./_lib/formatDistance/index.js":"5689956a6b4ffad009b72cbd9d86174e","./_lib/formatLong/index.js":"c522ffd41e580f613b1e3b1d91debc78","./_lib/formatRelative/index.js":"722d4342c6975e58eae6c39804c8c059","./_lib/localize/index.js":"e3dcde37e03d985c4f43e3a37baeb5a1","./_lib/match/index.js":"fc2f092bf18653a7fd109fe772c149fd"}],"5689956a6b4ffad009b72cbd9d86174e":[function(require,module,exports) {
+},{"./_lib/formatDistance/index.js":"7ki8g","./_lib/formatLong/index.js":"1Ok6k","./_lib/formatRelative/index.js":"4Mm7d","./_lib/localize/index.js":"5bS7C","./_lib/match/index.js":"3uQkS"}],"7ki8g":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23465,7 +19802,7 @@ function formatDistance(token, count, options) {
 
   return result;
 }
-},{}],"c522ffd41e580f613b1e3b1d91debc78":[function(require,module,exports) {
+},{}],"1Ok6k":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23511,7 +19848,7 @@ var formatLong = {
 };
 var _default = formatLong;
 exports.default = _default;
-},{"../../../_lib/buildFormatLongFn/index.js":"cbef255c644a728fb304b481e26634d0"}],"cbef255c644a728fb304b481e26634d0":[function(require,module,exports) {
+},{"../../../_lib/buildFormatLongFn/index.js":"5uPS5"}],"5uPS5":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23527,7 +19864,7 @@ function buildFormatLongFn(args) {
     return format;
   };
 }
-},{}],"722d4342c6975e58eae6c39804c8c059":[function(require,module,exports) {
+},{}],"4Mm7d":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23546,7 +19883,7 @@ var formatRelativeLocale = {
 function formatRelative(token, _date, _baseDate, _options) {
   return formatRelativeLocale[token];
 }
-},{}],"e3dcde37e03d985c4f43e3a37baeb5a1":[function(require,module,exports) {
+},{}],"5bS7C":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23695,7 +20032,7 @@ var localize = {
 };
 var _default = localize;
 exports.default = _default;
-},{"../../../_lib/buildLocalizeFn/index.js":"78b5d48c2048fa772959d16a420315cf"}],"78b5d48c2048fa772959d16a420315cf":[function(require,module,exports) {
+},{"../../../_lib/buildLocalizeFn/index.js":"3ESV8"}],"3ESV8":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23725,7 +20062,7 @@ function buildLocalizeFn(args) {
     return valuesArray[index];
   };
 }
-},{}],"fc2f092bf18653a7fd109fe772c149fd":[function(require,module,exports) {
+},{}],"3uQkS":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23834,7 +20171,7 @@ var match = {
 };
 var _default = match;
 exports.default = _default;
-},{"../../../_lib/buildMatchPatternFn/index.js":"132027be8a7c2059b0e86ad1df8a3d35","../../../_lib/buildMatchFn/index.js":"2b8fa5150aeb8637dae61fd315d048ac"}],"132027be8a7c2059b0e86ad1df8a3d35":[function(require,module,exports) {
+},{"../../../_lib/buildMatchPatternFn/index.js":"2kenK","../../../_lib/buildMatchFn/index.js":"4Cs88"}],"2kenK":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23867,7 +20204,7 @@ function buildMatchPatternFn(args) {
     };
   };
 }
-},{}],"2b8fa5150aeb8637dae61fd315d048ac":[function(require,module,exports) {
+},{}],"4Cs88":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23925,6 +20262,3710 @@ function findIndex(array, predicate) {
     }
   }
 }
-},{}]},{},["2075bdda7f3d1179ab1798efa7bdc0f0","f9d1fdab4daafc675f509edfcc40bc23"], null)
+},{}],"2j2BB":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var browser_core_1 = require("@datadog/browser-core");
+exports.Datacenter = browser_core_1.Datacenter;
+var logger_1 = require("./domain/logger");
+exports.StatusType = logger_1.StatusType;
+exports.HandlerType = logger_1.HandlerType;
+exports.Logger = logger_1.Logger;
+var logs_entry_1 = require("./boot/logs.entry");
+exports.datadogLogs = logs_entry_1.datadogLogs;
 
-//# sourceMappingURL=run-in-browser.9bcdf207.js.map
+},{"@datadog/browser-core":"4FRJa","./domain/logger":"1Gn4x","./boot/logs.entry":"6iMA3"}],"4FRJa":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = require("tslib");
+var configuration_1 = require("./domain/configuration");
+exports.DEFAULT_CONFIGURATION = configuration_1.DEFAULT_CONFIGURATION;
+exports.isIntakeRequest = configuration_1.isIntakeRequest;
+exports.buildCookieOptions = configuration_1.buildCookieOptions;
+var automaticErrorCollection_1 = require("./domain/automaticErrorCollection");
+exports.startAutomaticErrorCollection = automaticErrorCollection_1.startAutomaticErrorCollection;
+var tracekit_1 = require("./domain/tracekit");
+exports.computeStackTrace = tracekit_1.computeStackTrace;
+var init_1 = require("./boot/init");
+exports.BuildMode = init_1.BuildMode;
+exports.Datacenter = init_1.Datacenter;
+exports.defineGlobal = init_1.defineGlobal;
+exports.makeGlobal = init_1.makeGlobal;
+exports.commonInit = init_1.commonInit;
+exports.checkCookiesAuthorized = init_1.checkCookiesAuthorized;
+exports.checkIsNotLocalFile = init_1.checkIsNotLocalFile;
+var internalMonitoring_1 = require("./domain/internalMonitoring");
+exports.monitored = internalMonitoring_1.monitored;
+exports.monitor = internalMonitoring_1.monitor;
+exports.addMonitoringMessage = internalMonitoring_1.addMonitoringMessage;
+var observable_1 = require("./tools/observable");
+exports.Observable = observable_1.Observable;
+var sessionManagement_1 = require("./domain/sessionManagement");
+exports.startSessionManagement = sessionManagement_1.startSessionManagement;
+exports.SESSION_TIME_OUT_DELAY = sessionManagement_1.SESSION_TIME_OUT_DELAY;
+// Exposed for tests
+exports.SESSION_COOKIE_NAME = sessionManagement_1.SESSION_COOKIE_NAME;
+exports.stopSessionManagement = sessionManagement_1.stopSessionManagement;
+var transport_1 = require("./transport/transport");
+exports.HttpRequest = transport_1.HttpRequest;
+exports.Batch = transport_1.Batch;
+tslib_1.__exportStar(require("./tools/urlPolyfill"), exports);
+tslib_1.__exportStar(require("./tools/utils"), exports);
+var error_1 = require("./tools/error");
+exports.ErrorSource = error_1.ErrorSource;
+exports.formatUnknownError = error_1.formatUnknownError;
+var context_1 = require("./tools/context");
+exports.combine = context_1.combine;
+exports.deepClone = context_1.deepClone;
+exports.withSnakeCaseKeys = context_1.withSnakeCaseKeys;
+var cookie_1 = require("./browser/cookie");
+exports.areCookiesAuthorized = cookie_1.areCookiesAuthorized;
+exports.getCookie = cookie_1.getCookie;
+exports.setCookie = cookie_1.setCookie;
+exports.COOKIE_ACCESS_DELAY = cookie_1.COOKIE_ACCESS_DELAY;
+var xhrProxy_1 = require("./browser/xhrProxy");
+exports.startXhrProxy = xhrProxy_1.startXhrProxy;
+exports.resetXhrProxy = xhrProxy_1.resetXhrProxy;
+var fetchProxy_1 = require("./browser/fetchProxy");
+exports.startFetchProxy = fetchProxy_1.startFetchProxy;
+exports.resetFetchProxy = fetchProxy_1.resetFetchProxy;
+var boundedBuffer_1 = require("./tools/boundedBuffer");
+exports.BoundedBuffer = boundedBuffer_1.BoundedBuffer;
+var contextManager_1 = require("./tools/contextManager");
+exports.createContextManager = contextManager_1.createContextManager;
+tslib_1.__exportStar(require("./tools/specHelper"), exports);
+
+},{"tslib":"1HNh1","./domain/configuration":"4jZH0","./domain/automaticErrorCollection":"53ljR","./domain/tracekit":"6sYSi","./boot/init":"3669G","./domain/internalMonitoring":"6aOch","./tools/observable":"3fI3y","./domain/sessionManagement":"6d6tu","./transport/transport":"pLJuV","./tools/urlPolyfill":"2AjnY","./tools/utils":"1WfUQ","./tools/error":"3YCTH","./tools/context":"zLRL2","./browser/cookie":"5eo0G","./browser/xhrProxy":"CBu8R","./browser/fetchProxy":"5CFD8","./tools/boundedBuffer":"5s7rp","./tools/contextManager":"1veVv","./tools/specHelper":"5IBzO"}],"1HNh1":[function(require,module,exports) {
+var global = arguments[3];
+var define;
+
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+
+/* global global, define, System, Reflect, Promise */
+var __extends;
+
+var __assign;
+
+var __rest;
+
+var __decorate;
+
+var __param;
+
+var __metadata;
+
+var __awaiter;
+
+var __generator;
+
+var __exportStar;
+
+var __values;
+
+var __read;
+
+var __spread;
+
+var __spreadArrays;
+
+var __await;
+
+var __asyncGenerator;
+
+var __asyncDelegator;
+
+var __asyncValues;
+
+var __makeTemplateObject;
+
+var __importStar;
+
+var __importDefault;
+
+var __classPrivateFieldGet;
+
+var __classPrivateFieldSet;
+
+var __createBinding;
+
+(function (factory) {
+  var root = typeof global === "object" ? global : typeof self === "object" ? self : typeof this === "object" ? this : {};
+
+  if (typeof define === "function" && define.amd) {
+    define("tslib", ["exports"], function (exports) {
+      factory(createExporter(root, createExporter(exports)));
+    });
+  } else if (typeof module === "object" && typeof module.exports === "object") {
+    factory(createExporter(root, createExporter(module.exports)));
+  } else {
+    factory(createExporter(root));
+  }
+
+  function createExporter(exports, previous) {
+    if (exports !== root) {
+      if (typeof Object.create === "function") {
+        Object.defineProperty(exports, "__esModule", {
+          value: true
+        });
+      } else {
+        exports.__esModule = true;
+      }
+    }
+
+    return function (id, v) {
+      return exports[id] = previous ? previous(id, v) : v;
+    };
+  }
+})(function (exporter) {
+  var extendStatics = Object.setPrototypeOf || {
+    __proto__: []
+  } instanceof Array && function (d, b) {
+    d.__proto__ = b;
+  } || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+  };
+
+  __extends = function (d, b) {
+    extendStatics(d, b);
+
+    function __() {
+      this.constructor = d;
+    }
+
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
+
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+
+    return t;
+  };
+
+  __rest = function (s, e) {
+    var t = {};
+
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+
+    if (s != null && typeof Object.getOwnPropertySymbols === "function") for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+      if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+    }
+    return t;
+  };
+
+  __decorate = function (decorators, target, key, desc) {
+    var c = arguments.length,
+        r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
+        d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+  };
+
+  __param = function (paramIndex, decorator) {
+    return function (target, key) {
+      decorator(target, key, paramIndex);
+    };
+  };
+
+  __metadata = function (metadataKey, metadataValue) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+  };
+
+  __awaiter = function (thisArg, _arguments, P, generator) {
+    function adopt(value) {
+      return value instanceof P ? value : new P(function (resolve) {
+        resolve(value);
+      });
+    }
+
+    return new (P || (P = Promise))(function (resolve, reject) {
+      function fulfilled(value) {
+        try {
+          step(generator.next(value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+
+      function rejected(value) {
+        try {
+          step(generator["throw"](value));
+        } catch (e) {
+          reject(e);
+        }
+      }
+
+      function step(result) {
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+      }
+
+      step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+  };
+
+  __generator = function (thisArg, body) {
+    var _ = {
+      label: 0,
+      sent: function () {
+        if (t[0] & 1) throw t[1];
+        return t[1];
+      },
+      trys: [],
+      ops: []
+    },
+        f,
+        y,
+        t,
+        g;
+    return g = {
+      next: verb(0),
+      "throw": verb(1),
+      "return": verb(2)
+    }, typeof Symbol === "function" && (g[Symbol.iterator] = function () {
+      return this;
+    }), g;
+
+    function verb(n) {
+      return function (v) {
+        return step([n, v]);
+      };
+    }
+
+    function step(op) {
+      if (f) throw new TypeError("Generator is already executing.");
+
+      while (_) try {
+        if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+        if (y = 0, t) op = [op[0] & 2, t.value];
+
+        switch (op[0]) {
+          case 0:
+          case 1:
+            t = op;
+            break;
+
+          case 4:
+            _.label++;
+            return {
+              value: op[1],
+              done: false
+            };
+
+          case 5:
+            _.label++;
+            y = op[1];
+            op = [0];
+            continue;
+
+          case 7:
+            op = _.ops.pop();
+
+            _.trys.pop();
+
+            continue;
+
+          default:
+            if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+              _ = 0;
+              continue;
+            }
+
+            if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+              _.label = op[1];
+              break;
+            }
+
+            if (op[0] === 6 && _.label < t[1]) {
+              _.label = t[1];
+              t = op;
+              break;
+            }
+
+            if (t && _.label < t[2]) {
+              _.label = t[2];
+
+              _.ops.push(op);
+
+              break;
+            }
+
+            if (t[2]) _.ops.pop();
+
+            _.trys.pop();
+
+            continue;
+        }
+
+        op = body.call(thisArg, _);
+      } catch (e) {
+        op = [6, e];
+        y = 0;
+      } finally {
+        f = t = 0;
+      }
+
+      if (op[0] & 5) throw op[1];
+      return {
+        value: op[0] ? op[1] : void 0,
+        done: true
+      };
+    }
+  };
+
+  __createBinding = function (o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+  };
+
+  __exportStar = function (m, exports) {
+    for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) exports[p] = m[p];
+  };
+
+  __values = function (o) {
+    var s = typeof Symbol === "function" && Symbol.iterator,
+        m = s && o[s],
+        i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+      next: function () {
+        if (o && i >= o.length) o = void 0;
+        return {
+          value: o && o[i++],
+          done: !o
+        };
+      }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+  };
+
+  __read = function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o),
+        r,
+        ar = [],
+        e;
+
+    try {
+      while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    } catch (error) {
+      e = {
+        error: error
+      };
+    } finally {
+      try {
+        if (r && !r.done && (m = i["return"])) m.call(i);
+      } finally {
+        if (e) throw e.error;
+      }
+    }
+
+    return ar;
+  };
+
+  __spread = function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+
+    return ar;
+  };
+
+  __spreadArrays = function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+
+    for (var r = Array(s), k = 0, i = 0; i < il; i++) for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++) r[k] = a[j];
+
+    return r;
+  };
+
+  __await = function (v) {
+    return this instanceof __await ? (this.v = v, this) : new __await(v);
+  };
+
+  __asyncGenerator = function (thisArg, _arguments, generator) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var g = generator.apply(thisArg, _arguments || []),
+        i,
+        q = [];
+    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () {
+      return this;
+    }, i;
+
+    function verb(n) {
+      if (g[n]) i[n] = function (v) {
+        return new Promise(function (a, b) {
+          q.push([n, v, a, b]) > 1 || resume(n, v);
+        });
+      };
+    }
+
+    function resume(n, v) {
+      try {
+        step(g[n](v));
+      } catch (e) {
+        settle(q[0][3], e);
+      }
+    }
+
+    function step(r) {
+      r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
+    }
+
+    function fulfill(value) {
+      resume("next", value);
+    }
+
+    function reject(value) {
+      resume("throw", value);
+    }
+
+    function settle(f, v) {
+      if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]);
+    }
+  };
+
+  __asyncDelegator = function (o) {
+    var i, p;
+    return i = {}, verb("next"), verb("throw", function (e) {
+      throw e;
+    }), verb("return"), i[Symbol.iterator] = function () {
+      return this;
+    }, i;
+
+    function verb(n, f) {
+      i[n] = o[n] ? function (v) {
+        return (p = !p) ? {
+          value: __await(o[n](v)),
+          done: n === "return"
+        } : f ? f(v) : v;
+      } : f;
+    }
+  };
+
+  __asyncValues = function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator],
+        i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () {
+      return this;
+    }, i);
+
+    function verb(n) {
+      i[n] = o[n] && function (v) {
+        return new Promise(function (resolve, reject) {
+          v = o[n](v), settle(resolve, reject, v.done, v.value);
+        });
+      };
+    }
+
+    function settle(resolve, reject, d, v) {
+      Promise.resolve(v).then(function (v) {
+        resolve({
+          value: v,
+          done: d
+        });
+      }, reject);
+    }
+  };
+
+  __makeTemplateObject = function (cooked, raw) {
+    if (Object.defineProperty) {
+      Object.defineProperty(cooked, "raw", {
+        value: raw
+      });
+    } else {
+      cooked.raw = raw;
+    }
+
+    return cooked;
+  };
+
+  __importStar = function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+  };
+
+  __importDefault = function (mod) {
+    return mod && mod.__esModule ? mod : {
+      "default": mod
+    };
+  };
+
+  __classPrivateFieldGet = function (receiver, privateMap) {
+    if (!privateMap.has(receiver)) {
+      throw new TypeError("attempted to get private field on non-instance");
+    }
+
+    return privateMap.get(receiver);
+  };
+
+  __classPrivateFieldSet = function (receiver, privateMap, value) {
+    if (!privateMap.has(receiver)) {
+      throw new TypeError("attempted to set private field on non-instance");
+    }
+
+    privateMap.set(receiver, value);
+    return value;
+  };
+
+  exporter("__extends", __extends);
+  exporter("__assign", __assign);
+  exporter("__rest", __rest);
+  exporter("__decorate", __decorate);
+  exporter("__param", __param);
+  exporter("__metadata", __metadata);
+  exporter("__awaiter", __awaiter);
+  exporter("__generator", __generator);
+  exporter("__exportStar", __exportStar);
+  exporter("__createBinding", __createBinding);
+  exporter("__values", __values);
+  exporter("__read", __read);
+  exporter("__spread", __spread);
+  exporter("__spreadArrays", __spreadArrays);
+  exporter("__await", __await);
+  exporter("__asyncGenerator", __asyncGenerator);
+  exporter("__asyncDelegator", __asyncDelegator);
+  exporter("__asyncValues", __asyncValues);
+  exporter("__makeTemplateObject", __makeTemplateObject);
+  exporter("__importStar", __importStar);
+  exporter("__importDefault", __importDefault);
+  exporter("__classPrivateFieldGet", __classPrivateFieldGet);
+  exporter("__classPrivateFieldSet", __classPrivateFieldSet);
+});
+},{}],"4jZH0":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = require("tslib");
+var init_1 = require("../boot/init");
+var cookie_1 = require("../browser/cookie");
+var urlPolyfill_1 = require("../tools/urlPolyfill");
+var utils_1 = require("../tools/utils");
+exports.DEFAULT_CONFIGURATION = {
+    allowedTracingOrigins: [],
+    maxErrorsByMinute: 3000,
+    maxInternalMonitoringMessagesPerPage: 15,
+    resourceSampleRate: 100,
+    sampleRate: 100,
+    silentMultipleInit: false,
+    trackInteractions: false,
+    /**
+     * arbitrary value, byte precision not needed
+     */
+    requestErrorResponseLengthLimit: 32 * utils_1.ONE_KILO_BYTE,
+    /**
+     * flush automatically, aim to be lower than ALB connection timeout
+     * to maximize connection reuse.
+     */
+    flushTimeout: 30 * utils_1.ONE_SECOND,
+    /**
+     * Logs intake limit
+     */
+    maxBatchSize: 50,
+    maxMessageSize: 256 * utils_1.ONE_KILO_BYTE,
+    /**
+     * beacon payload max queue size implementation is 64kb
+     * ensure that we leave room for logs, rum and potential other users
+     */
+    batchBytesLimit: 16 * utils_1.ONE_KILO_BYTE,
+};
+function buildConfiguration(userConfiguration, buildEnv) {
+    var transportConfiguration = {
+        applicationId: userConfiguration.applicationId,
+        buildMode: buildEnv.buildMode,
+        clientToken: userConfiguration.clientToken,
+        env: userConfiguration.env,
+        proxyHost: userConfiguration.proxyHost,
+        sdkVersion: buildEnv.sdkVersion,
+        service: userConfiguration.service,
+        site: userConfiguration.site || init_1.INTAKE_SITE[userConfiguration.datacenter || buildEnv.datacenter],
+        version: userConfiguration.version,
+    };
+    var enableExperimentalFeatures = Array.isArray(userConfiguration.enableExperimentalFeatures)
+        ? userConfiguration.enableExperimentalFeatures
+        : [];
+    var configuration = tslib_1.__assign({ cookieOptions: buildCookieOptions(userConfiguration), isEnabled: function (feature) {
+            return utils_1.includes(enableExperimentalFeatures, feature);
+        }, logsEndpoint: getEndpoint('browser', transportConfiguration), proxyHost: userConfiguration.proxyHost, rumEndpoint: getEndpoint('rum', transportConfiguration), service: userConfiguration.service, traceEndpoint: getEndpoint('public-trace', transportConfiguration) }, exports.DEFAULT_CONFIGURATION);
+    if (userConfiguration.internalMonitoringApiKey) {
+        configuration.internalMonitoringEndpoint = getEndpoint('browser', transportConfiguration, 'browser-agent-internal-monitoring');
+    }
+    if ('allowedTracingOrigins' in userConfiguration) {
+        configuration.allowedTracingOrigins = userConfiguration.allowedTracingOrigins;
+    }
+    if ('sampleRate' in userConfiguration) {
+        configuration.sampleRate = userConfiguration.sampleRate;
+    }
+    if ('resourceSampleRate' in userConfiguration) {
+        configuration.resourceSampleRate = userConfiguration.resourceSampleRate;
+    }
+    if ('trackInteractions' in userConfiguration) {
+        configuration.trackInteractions = !!userConfiguration.trackInteractions;
+    }
+    if (transportConfiguration.buildMode === init_1.BuildMode.E2E_TEST) {
+        configuration.internalMonitoringEndpoint = '<<< E2E INTERNAL MONITORING ENDPOINT >>>';
+        configuration.logsEndpoint = '<<< E2E LOGS ENDPOINT >>>';
+        configuration.rumEndpoint = '<<< E2E RUM ENDPOINT >>>';
+    }
+    if (transportConfiguration.buildMode === init_1.BuildMode.STAGING) {
+        if (userConfiguration.replica !== undefined) {
+            var replicaTransportConfiguration = tslib_1.__assign(tslib_1.__assign({}, transportConfiguration), { applicationId: userConfiguration.replica.applicationId, clientToken: userConfiguration.replica.clientToken, site: init_1.INTAKE_SITE[init_1.Datacenter.US] });
+            configuration.replica = {
+                applicationId: userConfiguration.replica.applicationId,
+                internalMonitoringEndpoint: getEndpoint('browser', replicaTransportConfiguration, 'browser-agent-internal-monitoring'),
+                logsEndpoint: getEndpoint('browser', replicaTransportConfiguration),
+                rumEndpoint: getEndpoint('rum', replicaTransportConfiguration),
+            };
+        }
+    }
+    return configuration;
+}
+exports.buildConfiguration = buildConfiguration;
+function buildCookieOptions(userConfiguration) {
+    var cookieOptions = {};
+    cookieOptions.secure = mustUseSecureCookie(userConfiguration);
+    cookieOptions.crossSite = !!userConfiguration.useCrossSiteSessionCookie;
+    if (!!userConfiguration.trackSessionAcrossSubdomains) {
+        cookieOptions.domain = cookie_1.getCurrentSite();
+    }
+    return cookieOptions;
+}
+exports.buildCookieOptions = buildCookieOptions;
+function getEndpoint(type, conf, source) {
+    var tags = "sdk_version:" + conf.sdkVersion +
+        ("" + (conf.env ? ",env:" + conf.env : '')) +
+        ("" + (conf.service ? ",service:" + conf.service : '')) +
+        ("" + (conf.version ? ",version:" + conf.version : ''));
+    var datadogHost = type + "-http-intake.logs." + conf.site;
+    var host = conf.proxyHost ? conf.proxyHost : datadogHost;
+    var proxyParameter = conf.proxyHost ? "ddhost=" + datadogHost + "&" : '';
+    var applicationIdParameter = conf.applicationId ? "_dd.application_id=" + conf.applicationId + "&" : '';
+    var parameters = "" + applicationIdParameter + proxyParameter + "ddsource=" + (source || 'browser') + "&ddtags=" + tags;
+    return "https://" + host + "/v1/input/" + conf.clientToken + "?" + parameters;
+}
+function isIntakeRequest(url, configuration) {
+    return (urlPolyfill_1.getPathName(url).indexOf('/v1/input/') !== -1 &&
+        (urlPolyfill_1.haveSameOrigin(url, configuration.logsEndpoint) ||
+            urlPolyfill_1.haveSameOrigin(url, configuration.rumEndpoint) ||
+            urlPolyfill_1.haveSameOrigin(url, configuration.traceEndpoint) ||
+            (!!configuration.internalMonitoringEndpoint && urlPolyfill_1.haveSameOrigin(url, configuration.internalMonitoringEndpoint)) ||
+            (!!configuration.replica &&
+                (urlPolyfill_1.haveSameOrigin(url, configuration.replica.logsEndpoint) ||
+                    urlPolyfill_1.haveSameOrigin(url, configuration.replica.rumEndpoint) ||
+                    urlPolyfill_1.haveSameOrigin(url, configuration.replica.internalMonitoringEndpoint)))));
+}
+exports.isIntakeRequest = isIntakeRequest;
+function mustUseSecureCookie(userConfiguration) {
+    return !!userConfiguration.useSecureSessionCookie || !!userConfiguration.useCrossSiteSessionCookie;
+}
+
+},{"tslib":"1HNh1","../boot/init":"3669G","../browser/cookie":"5eo0G","../tools/urlPolyfill":"2AjnY","../tools/utils":"1WfUQ"}],"3669G":[function(require,module,exports) {
+"use strict";
+
+var _a;
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var tslib_1 = require("tslib");
+
+var cookie_1 = require("../browser/cookie");
+
+var configuration_1 = require("../domain/configuration");
+
+var internalMonitoring_1 = require("../domain/internalMonitoring");
+
+function makeGlobal(stub) {
+  var global = tslib_1.__assign(tslib_1.__assign({}, stub), {
+    // This API method is intentionally not monitored, since the only thing executed is the
+    // user-provided 'callback'.  All SDK usages executed in the callback should be monitored, and
+    // we don't want to interfer with the user uncaught exceptions.
+    onReady: function (callback) {
+      callback();
+    }
+  }); // Add an "hidden" property to set debug mode. We define it that way to hide it
+  // as much as possible but of course it's not a real protection.
+
+
+  Object.defineProperty(global, '_setDebug', {
+    get: function () {
+      return internalMonitoring_1.setDebugMode;
+    },
+    enumerable: false
+  });
+  return global;
+}
+
+exports.makeGlobal = makeGlobal;
+
+function defineGlobal(global, name, api) {
+  var existingGlobalVariable = global[name];
+  global[name] = api;
+
+  if (existingGlobalVariable && existingGlobalVariable.q) {
+    existingGlobalVariable.q.forEach(function (fn) {
+      return fn();
+    });
+  }
+}
+
+exports.defineGlobal = defineGlobal;
+var Datacenter;
+
+(function (Datacenter) {
+  Datacenter["US"] = "us";
+  Datacenter["EU"] = "eu";
+})(Datacenter = exports.Datacenter || (exports.Datacenter = {}));
+
+exports.INTAKE_SITE = (_a = {}, _a[Datacenter.EU] = 'datadoghq.eu', _a[Datacenter.US] = 'datadoghq.com', _a);
+var BuildMode;
+
+(function (BuildMode) {
+  BuildMode["RELEASE"] = "release";
+  BuildMode["STAGING"] = "staging";
+  BuildMode["E2E_TEST"] = "e2e-test";
+})(BuildMode = exports.BuildMode || (exports.BuildMode = {}));
+
+function commonInit(userConfiguration, buildEnv) {
+  var configuration = configuration_1.buildConfiguration(userConfiguration, buildEnv);
+  var internalMonitoring = internalMonitoring_1.startInternalMonitoring(configuration);
+  return {
+    configuration: configuration,
+    internalMonitoring: internalMonitoring
+  };
+}
+
+exports.commonInit = commonInit;
+
+function checkCookiesAuthorized(options) {
+  if (!cookie_1.areCookiesAuthorized(options)) {
+    console.warn('Cookies are not authorized, we will not send any data.');
+    return false;
+  }
+
+  return true;
+}
+
+exports.checkCookiesAuthorized = checkCookiesAuthorized;
+
+function checkIsNotLocalFile() {
+  if (isLocalFile()) {
+    console.error('Execution is not allowed in the current context.');
+    return false;
+  }
+
+  return true;
+}
+
+exports.checkIsNotLocalFile = checkIsNotLocalFile;
+
+function isLocalFile() {
+  return window.location.protocol === 'file:';
+}
+},{"tslib":"1HNh1","../browser/cookie":"5eo0G","../domain/configuration":"4jZH0","../domain/internalMonitoring":"6aOch"}],"5eo0G":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var utils_1 = require("../tools/utils");
+exports.COOKIE_ACCESS_DELAY = utils_1.ONE_SECOND;
+function cacheCookieAccess(name, options) {
+    var timeout;
+    var cache;
+    var hasCache = false;
+    var cacheAccess = function () {
+        hasCache = true;
+        window.clearTimeout(timeout);
+        timeout = window.setTimeout(function () {
+            hasCache = false;
+        }, exports.COOKIE_ACCESS_DELAY);
+    };
+    return {
+        get: function () {
+            if (hasCache) {
+                return cache;
+            }
+            cache = getCookie(name);
+            cacheAccess();
+            return cache;
+        },
+        set: function (value, expireDelay) {
+            setCookie(name, value, expireDelay, options);
+            cache = value;
+            cacheAccess();
+        },
+    };
+}
+exports.cacheCookieAccess = cacheCookieAccess;
+function setCookie(name, value, expireDelay, options) {
+    var date = new Date();
+    date.setTime(date.getTime() + expireDelay);
+    var expires = "expires=" + date.toUTCString();
+    var sameSite = options && options.crossSite ? 'none' : 'strict';
+    var domain = options && options.domain ? ";domain=" + options.domain : '';
+    var secure = options && options.secure ? ";secure" : '';
+    document.cookie = name + "=" + value + ";" + expires + ";path=/;samesite=" + sameSite + domain + secure;
+}
+exports.setCookie = setCookie;
+function getCookie(name) {
+    return utils_1.findCommaSeparatedValue(document.cookie, name);
+}
+exports.getCookie = getCookie;
+function areCookiesAuthorized(options) {
+    if (document.cookie === undefined || document.cookie === null) {
+        return false;
+    }
+    try {
+        // Use a unique cookie name to avoid issues when the SDK is initialized multiple times during
+        // the test cookie lifetime
+        var testCookieName = "dd_cookie_test_" + utils_1.generateUUID();
+        var testCookieValue = 'test';
+        setCookie(testCookieName, testCookieValue, utils_1.ONE_SECOND, options);
+        return getCookie(testCookieName) === testCookieValue;
+    }
+    catch (error) {
+        console.error(error);
+        return false;
+    }
+}
+exports.areCookiesAuthorized = areCookiesAuthorized;
+/**
+ * No API to retrieve it, number of levels for subdomain and suffix are unknown
+ * strategy: find the minimal domain on which cookies are allowed to be set
+ * https://web.dev/same-site-same-origin/#site
+ */
+var getCurrentSiteCache;
+function getCurrentSite() {
+    if (getCurrentSiteCache === undefined) {
+        // Use a unique cookie name to avoid issues when the SDK is initialized multiple times during
+        // the test cookie lifetime
+        var testCookieName = "dd_site_test_" + utils_1.generateUUID();
+        var testCookieValue = 'test';
+        var domainLevels = window.location.hostname.split('.');
+        var candidateDomain = domainLevels.pop();
+        while (domainLevels.length && !getCookie(testCookieName)) {
+            candidateDomain = domainLevels.pop() + "." + candidateDomain;
+            setCookie(testCookieName, testCookieValue, utils_1.ONE_SECOND, { domain: candidateDomain });
+        }
+        getCurrentSiteCache = candidateDomain;
+    }
+    return getCurrentSiteCache;
+}
+exports.getCurrentSite = getCurrentSite;
+
+},{"../tools/utils":"1WfUQ"}],"1WfUQ":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var internalMonitoring_1 = require("../domain/internalMonitoring");
+exports.ONE_SECOND = 1000;
+exports.ONE_MINUTE = 60 * exports.ONE_SECOND;
+exports.ONE_HOUR = 60 * exports.ONE_MINUTE;
+exports.ONE_KILO_BYTE = 1024;
+var DOM_EVENT;
+(function (DOM_EVENT) {
+    DOM_EVENT["BEFORE_UNLOAD"] = "beforeunload";
+    DOM_EVENT["CLICK"] = "click";
+    DOM_EVENT["KEY_DOWN"] = "keydown";
+    DOM_EVENT["LOAD"] = "load";
+    DOM_EVENT["POP_STATE"] = "popstate";
+    DOM_EVENT["SCROLL"] = "scroll";
+    DOM_EVENT["TOUCH_START"] = "touchstart";
+    DOM_EVENT["VISIBILITY_CHANGE"] = "visibilitychange";
+    DOM_EVENT["DOM_CONTENT_LOADED"] = "DOMContentLoaded";
+    DOM_EVENT["POINTER_DOWN"] = "pointerdown";
+    DOM_EVENT["POINTER_UP"] = "pointerup";
+    DOM_EVENT["POINTER_CANCEL"] = "pointercancel";
+    DOM_EVENT["HASH_CHANGE"] = "hashchange";
+    DOM_EVENT["PAGE_HIDE"] = "pagehide";
+    DOM_EVENT["MOUSE_DOWN"] = "mousedown";
+})(DOM_EVENT = exports.DOM_EVENT || (exports.DOM_EVENT = {}));
+var ResourceType;
+(function (ResourceType) {
+    ResourceType["DOCUMENT"] = "document";
+    ResourceType["XHR"] = "xhr";
+    ResourceType["BEACON"] = "beacon";
+    ResourceType["FETCH"] = "fetch";
+    ResourceType["CSS"] = "css";
+    ResourceType["JS"] = "js";
+    ResourceType["IMAGE"] = "image";
+    ResourceType["FONT"] = "font";
+    ResourceType["MEDIA"] = "media";
+    ResourceType["OTHER"] = "other";
+})(ResourceType = exports.ResourceType || (exports.ResourceType = {}));
+var RequestType;
+(function (RequestType) {
+    RequestType["FETCH"] = "fetch";
+    RequestType["XHR"] = "xhr";
+})(RequestType = exports.RequestType || (exports.RequestType = {}));
+// use lodash API
+function throttle(fn, wait, options) {
+    var needLeadingExecution = options && options.leading !== undefined ? options.leading : true;
+    var needTrailingExecution = options && options.trailing !== undefined ? options.trailing : true;
+    var inWaitPeriod = false;
+    var hasPendingExecution = false;
+    var pendingTimeoutId;
+    return {
+        throttled: function () {
+            var _this = this;
+            if (inWaitPeriod) {
+                hasPendingExecution = true;
+                return;
+            }
+            if (needLeadingExecution) {
+                fn.apply(this);
+            }
+            else {
+                hasPendingExecution = true;
+            }
+            inWaitPeriod = true;
+            pendingTimeoutId = window.setTimeout(function () {
+                if (needTrailingExecution && hasPendingExecution) {
+                    fn.apply(_this);
+                }
+                inWaitPeriod = false;
+                hasPendingExecution = false;
+            }, wait);
+        },
+        cancel: function () {
+            window.clearTimeout(pendingTimeoutId);
+            inWaitPeriod = false;
+            hasPendingExecution = false;
+        },
+    };
+}
+exports.throttle = throttle;
+function assign(target) {
+    var toAssign = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        toAssign[_i - 1] = arguments[_i];
+    }
+    toAssign.forEach(function (source) {
+        for (var key in source) {
+            if (Object.prototype.hasOwnProperty.call(source, key)) {
+                target[key] = source[key];
+            }
+        }
+    });
+}
+exports.assign = assign;
+/**
+ * UUID v4
+ * from https://gist.github.com/jed/982883
+ */
+function generateUUID(placeholder) {
+    return placeholder
+        ? // tslint:disable-next-line no-bitwise
+            (parseInt(placeholder, 10) ^ ((Math.random() * 16) >> (parseInt(placeholder, 10) / 4))).toString(16)
+        : (1e7 + "-" + 1e3 + "-" + 4e3 + "-" + 8e3 + "-" + 1e11).replace(/[018]/g, generateUUID);
+}
+exports.generateUUID = generateUUID;
+/**
+ * Return true if the draw is successful
+ * @param threshold between 0 and 100
+ */
+function performDraw(threshold) {
+    return threshold !== 0 && Math.random() * 100 <= threshold;
+}
+exports.performDraw = performDraw;
+function round(num, decimals) {
+    return +num.toFixed(decimals);
+}
+exports.round = round;
+function msToNs(duration) {
+    if (typeof duration !== 'number') {
+        return duration;
+    }
+    return round(duration * 1e6, 0);
+}
+exports.msToNs = msToNs;
+// tslint:disable-next-line:no-empty
+function noop() { }
+exports.noop = noop;
+/**
+ * Custom implementation of JSON.stringify that ignores value.toJSON.
+ * We need to do that because some sites badly override toJSON on certain objects.
+ * Note this still supposes that JSON.stringify is correct...
+ */
+function jsonStringify(value, replacer, space) {
+    if (value === null || value === undefined) {
+        return JSON.stringify(value);
+    }
+    var originalToJSON = [false, undefined];
+    if (hasToJSON(value)) {
+        // We need to add a flag and not rely on the truthiness of value.toJSON
+        // because it can be set but undefined and that's actually significant.
+        originalToJSON = [true, value.toJSON];
+        delete value.toJSON;
+    }
+    var originalProtoToJSON = [false, undefined];
+    var prototype;
+    if (typeof value === 'object') {
+        prototype = Object.getPrototypeOf(value);
+        if (hasToJSON(prototype)) {
+            originalProtoToJSON = [true, prototype.toJSON];
+            delete prototype.toJSON;
+        }
+    }
+    var result;
+    try {
+        result = JSON.stringify(value, undefined, space);
+    }
+    catch (_a) {
+        result = '<error: unable to serialize object>';
+    }
+    finally {
+        if (originalToJSON[0]) {
+            ;
+            value.toJSON = originalToJSON[1];
+        }
+        if (originalProtoToJSON[0]) {
+            ;
+            prototype.toJSON = originalProtoToJSON[1];
+        }
+    }
+    return result;
+}
+exports.jsonStringify = jsonStringify;
+function hasToJSON(value) {
+    return typeof value === 'object' && value !== null && value.hasOwnProperty('toJSON');
+}
+function includes(candidate, search) {
+    // tslint:disable-next-line: no-unsafe-any
+    return candidate.indexOf(search) !== -1;
+}
+exports.includes = includes;
+function find(array, predicate) {
+    for (var i = 0; i < array.length; i += 1) {
+        var item = array[i];
+        if (predicate(item, i, array)) {
+            return item;
+        }
+    }
+    return undefined;
+}
+exports.find = find;
+function isPercentage(value) {
+    return isNumber(value) && value >= 0 && value <= 100;
+}
+exports.isPercentage = isPercentage;
+function isNumber(value) {
+    return typeof value === 'number';
+}
+exports.isNumber = isNumber;
+/**
+ * Get the time since the navigation was started.
+ *
+ * Note: this does not use `performance.timeOrigin` because it doesn't seem to reflect the actual
+ * time on which the navigation has started: it may be much farther in the past, at least in Firefox 71.
+ * Related issue in Firefox: https://bugzilla.mozilla.org/show_bug.cgi?id=1429926
+ */
+function getRelativeTime(timestamp) {
+    return timestamp - getNavigationStart();
+}
+exports.getRelativeTime = getRelativeTime;
+function getTimestamp(relativeTime) {
+    return Math.floor(getNavigationStart() + relativeTime);
+}
+exports.getTimestamp = getTimestamp;
+/**
+ * Navigation start slightly change on some rare cases
+ */
+var navigationStart;
+function getNavigationStart() {
+    if (navigationStart === undefined) {
+        navigationStart = performance.timing.navigationStart;
+    }
+    return navigationStart;
+}
+exports.getNavigationStart = getNavigationStart;
+function objectValues(object) {
+    var values = [];
+    Object.keys(object).forEach(function (key) {
+        values.push(object[key]);
+    });
+    return values;
+}
+exports.objectValues = objectValues;
+function objectEntries(object) {
+    return Object.keys(object).map(function (key) { return [key, object[key]]; });
+}
+exports.objectEntries = objectEntries;
+function isEmptyObject(object) {
+    return Object.keys(object).length === 0;
+}
+exports.isEmptyObject = isEmptyObject;
+/**
+ * inspired by https://mathiasbynens.be/notes/globalthis
+ */
+function getGlobalObject() {
+    if (typeof globalThis === 'object') {
+        return globalThis;
+    }
+    Object.defineProperty(Object.prototype, '_dd_temp_', {
+        get: function () {
+            return this;
+        },
+        configurable: true,
+    });
+    // @ts-ignore
+    var globalObject = _dd_temp_;
+    // @ts-ignore
+    delete Object.prototype._dd_temp_;
+    if (typeof globalObject !== 'object') {
+        // on safari _dd_temp_ is available on window but not globally
+        // fallback on other browser globals check
+        if (typeof self === 'object') {
+            globalObject = self;
+        }
+        else if (typeof window === 'object') {
+            globalObject = window;
+        }
+        else {
+            globalObject = {};
+        }
+    }
+    return globalObject;
+}
+exports.getGlobalObject = getGlobalObject;
+function getLocationOrigin() {
+    return getLinkElementOrigin(window.location);
+}
+exports.getLocationOrigin = getLocationOrigin;
+/**
+ * IE fallback
+ * https://developer.mozilla.org/en-US/docs/Web/API/HTMLHyperlinkElementUtils/origin
+ */
+function getLinkElementOrigin(element) {
+    if (element.origin) {
+        return element.origin;
+    }
+    var sanitizedHost = element.host.replace(/(:80|:443)$/, '');
+    return element.protocol + "//" + sanitizedHost;
+}
+exports.getLinkElementOrigin = getLinkElementOrigin;
+function findCommaSeparatedValue(rawString, name) {
+    var matches = rawString.match("(?:^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
+    return matches ? matches[1] : undefined;
+}
+exports.findCommaSeparatedValue = findCommaSeparatedValue;
+function safeTruncate(candidate, length) {
+    var lastChar = candidate.charCodeAt(length - 1);
+    // check if it is the high part of a surrogate pair
+    if (lastChar >= 0xd800 && lastChar <= 0xdbff) {
+        return candidate.slice(0, length + 1);
+    }
+    return candidate.slice(0, length);
+}
+exports.safeTruncate = safeTruncate;
+/**
+ * Add an event listener to an event emitter object (Window, Element, mock object...).  This provides
+ * a few conveniences compared to using `element.addEventListener` directly:
+ *
+ * * supports IE11 by:
+ *   * using an option object only if needed
+ *   * emulating the `once` option
+ *
+ * * wraps the listener with a `monitor` function
+ *
+ * * returns a `stop` function to remove the listener
+ */
+function addEventListener(emitter, event, listener, options) {
+    return addEventListeners(emitter, [event], listener, options);
+}
+exports.addEventListener = addEventListener;
+/**
+ * Add event listeners to an event emitter object (Window, Element, mock object...).  This provides
+ * a few conveniences compared to using `element.addEventListener` directly:
+ *
+ * * supports IE11 by:
+ *   * using an option object only if needed
+ *   * emulating the `once` option
+ *
+ * * wraps the listener with a `monitor` function
+ *
+ * * returns a `stop` function to remove the listener
+ *
+ * * with `once: true`, the listener will be called at most once, even if different events are
+ *   listened
+ */
+function addEventListeners(emitter, events, listener, _a) {
+    var _b = _a === void 0 ? {} : _a, once = _b.once, capture = _b.capture, passive = _b.passive;
+    var wrapedListener = internalMonitoring_1.monitor(once
+        ? function (event) {
+            stop();
+            listener(event);
+        }
+        : listener);
+    var options = passive ? { capture: capture, passive: passive } : capture;
+    events.forEach(function (event) { return emitter.addEventListener(event, wrapedListener, options); });
+    var stop = function () { return events.forEach(function (event) { return emitter.removeEventListener(event, wrapedListener, options); }); };
+    return {
+        stop: stop,
+    };
+}
+exports.addEventListeners = addEventListeners;
+
+},{"../domain/internalMonitoring":"6aOch"}],"6aOch":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = require("tslib");
+// tslint:disable ban-types
+var context_1 = require("../tools/context");
+var error_1 = require("../tools/error");
+var utils = tslib_1.__importStar(require("../tools/utils"));
+var transport_1 = require("../transport/transport");
+var tracekit_1 = require("./tracekit");
+var StatusType;
+(function (StatusType) {
+    StatusType["info"] = "info";
+    StatusType["error"] = "error";
+})(StatusType || (StatusType = {}));
+var monitoringConfiguration = { maxMessagesPerPage: 0, sentMessageCount: 0 };
+var externalContextProvider;
+function startInternalMonitoring(configuration) {
+    if (configuration.internalMonitoringEndpoint) {
+        var batch = startMonitoringBatch(configuration);
+        utils.assign(monitoringConfiguration, {
+            batch: batch,
+            maxMessagesPerPage: configuration.maxInternalMonitoringMessagesPerPage,
+            sentMessageCount: 0,
+        });
+    }
+    return {
+        setExternalContextProvider: function (provider) {
+            externalContextProvider = provider;
+        },
+    };
+}
+exports.startInternalMonitoring = startInternalMonitoring;
+function startMonitoringBatch(configuration) {
+    var primaryBatch = createMonitoringBatch(configuration.internalMonitoringEndpoint);
+    var replicaBatch;
+    if (configuration.replica !== undefined) {
+        replicaBatch = createMonitoringBatch(configuration.replica.internalMonitoringEndpoint);
+    }
+    function createMonitoringBatch(endpointUrl) {
+        return new transport_1.Batch(new transport_1.HttpRequest(endpointUrl, configuration.batchBytesLimit), configuration.maxBatchSize, configuration.batchBytesLimit, configuration.maxMessageSize, configuration.flushTimeout);
+    }
+    function withContext(message) {
+        return context_1.combine({
+            date: new Date().getTime(),
+            view: {
+                referrer: document.referrer,
+                url: window.location.href,
+            },
+        }, externalContextProvider !== undefined ? externalContextProvider() : {}, message);
+    }
+    return {
+        add: function (message) {
+            var contextualizedMessage = withContext(message);
+            primaryBatch.add(contextualizedMessage);
+            if (replicaBatch) {
+                replicaBatch.add(contextualizedMessage);
+            }
+        },
+    };
+}
+function resetInternalMonitoring() {
+    monitoringConfiguration.batch = undefined;
+}
+exports.resetInternalMonitoring = resetInternalMonitoring;
+function monitored(_, __, descriptor) {
+    var originalMethod = descriptor.value;
+    descriptor.value = function () {
+        var decorated = (monitoringConfiguration.batch ? monitor(originalMethod) : originalMethod);
+        return decorated.apply(this, arguments);
+    };
+}
+exports.monitored = monitored;
+function monitor(fn) {
+    return function () {
+        try {
+            return fn.apply(this, arguments);
+        }
+        catch (e) {
+            logErrorIfDebug(e);
+            try {
+                addErrorToMonitoringBatch(e);
+            }
+            catch (e) {
+                logErrorIfDebug(e);
+            }
+        }
+    }; // consider output type has input type
+}
+exports.monitor = monitor;
+function addMonitoringMessage(message, context) {
+    logMessageIfDebug(message);
+    addToMonitoringBatch(tslib_1.__assign(tslib_1.__assign({ message: message }, context), { status: StatusType.info }));
+}
+exports.addMonitoringMessage = addMonitoringMessage;
+function addErrorToMonitoringBatch(e) {
+    addToMonitoringBatch(tslib_1.__assign(tslib_1.__assign({}, formatError(e)), { status: StatusType.error }));
+}
+function addToMonitoringBatch(message) {
+    if (monitoringConfiguration.batch &&
+        monitoringConfiguration.sentMessageCount < monitoringConfiguration.maxMessagesPerPage) {
+        monitoringConfiguration.sentMessageCount += 1;
+        monitoringConfiguration.batch.add(message);
+    }
+}
+function formatError(e) {
+    if (e instanceof Error) {
+        var stackTrace = tracekit_1.computeStackTrace(e);
+        return {
+            error: {
+                kind: stackTrace.name,
+                stack: error_1.toStackTraceString(stackTrace),
+            },
+            message: stackTrace.message,
+        };
+    }
+    return {
+        error: {
+            stack: 'Not an instance of error',
+        },
+        message: "Uncaught " + utils.jsonStringify(e),
+    };
+}
+function setDebugMode(debugMode) {
+    monitoringConfiguration.debugMode = debugMode;
+}
+exports.setDebugMode = setDebugMode;
+function logErrorIfDebug(e) {
+    if (monitoringConfiguration.debugMode) {
+        // Log as warn to not forward the logs.
+        console.warn('[INTERNAL ERROR]', e);
+    }
+}
+function logMessageIfDebug(message) {
+    if (monitoringConfiguration.debugMode) {
+        console.log('[MONITORING MESSAGE]', message);
+    }
+}
+
+},{"tslib":"1HNh1","../tools/context":"zLRL2","../tools/error":"3YCTH","../tools/utils":"1WfUQ","../transport/transport":"pLJuV","./tracekit":"6sYSi"}],"zLRL2":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function withSnakeCaseKeys(candidate) {
+    var result = {};
+    Object.keys(candidate).forEach(function (key) {
+        result[toSnakeCase(key)] = deepSnakeCase(candidate[key]);
+    });
+    return result;
+}
+exports.withSnakeCaseKeys = withSnakeCaseKeys;
+function deepSnakeCase(candidate) {
+    if (Array.isArray(candidate)) {
+        return candidate.map(function (value) { return deepSnakeCase(value); });
+    }
+    if (typeof candidate === 'object' && candidate !== null) {
+        return withSnakeCaseKeys(candidate);
+    }
+    return candidate;
+}
+exports.deepSnakeCase = deepSnakeCase;
+function toSnakeCase(word) {
+    return word
+        .replace(/[A-Z]/g, function (uppercaseLetter, index) { return "" + (index !== 0 ? '_' : '') + uppercaseLetter.toLowerCase(); })
+        .replace(/-/g, '_');
+}
+exports.toSnakeCase = toSnakeCase;
+var isContextArray = function (value) { return Array.isArray(value); };
+var isContext = function (value) {
+    return !Array.isArray(value) && typeof value === 'object' && value !== null;
+};
+function combine() {
+    var sources = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        sources[_i] = arguments[_i];
+    }
+    var destination;
+    for (var _a = 0, sources_1 = sources; _a < sources_1.length; _a++) {
+        var source = sources_1[_a];
+        // Ignore any undefined or null sources.
+        if (source === undefined || source === null) {
+            continue;
+        }
+        destination = mergeInto(destination, source, createCircularReferenceChecker());
+    }
+    return destination;
+}
+exports.combine = combine;
+/*
+ * Performs a deep clone of objects and arrays.
+ * - Circular references are replaced by 'undefined'
+ */
+function deepClone(context) {
+    return mergeInto(undefined, context, createCircularReferenceChecker());
+}
+exports.deepClone = deepClone;
+function createCircularReferenceChecker() {
+    if (typeof WeakSet !== 'undefined') {
+        var set_1 = new WeakSet();
+        return {
+            hasAlreadyBeenSeen: function (value) {
+                var has = set_1.has(value);
+                if (!has) {
+                    set_1.add(value);
+                }
+                return has;
+            },
+        };
+    }
+    var array = [];
+    return {
+        hasAlreadyBeenSeen: function (value) {
+            var has = array.indexOf(value) >= 0;
+            if (!has) {
+                array.push(value);
+            }
+            return has;
+        },
+    };
+}
+exports.createCircularReferenceChecker = createCircularReferenceChecker;
+/**
+ * Iterate over 'source' and affect its subvalues into 'destination', recursively.  If the 'source'
+ * and 'destination' can't be merged, return 'source'.
+ */
+function mergeInto(destination, source, circularReferenceChecker) {
+    // Ignore the 'source' if it is undefined
+    if (source === undefined) {
+        return destination;
+    }
+    // If the 'source' is not an object or array, it can't be merged with 'destination' in any way, so
+    // return it directly.
+    if (!isContext(source) && !isContextArray(source)) {
+        return source;
+    }
+    // Return 'undefined' if we already iterated over this 'source' to avoid infinite recursion
+    if (circularReferenceChecker.hasAlreadyBeenSeen(source)) {
+        return undefined;
+    }
+    // 'source' and 'destination' are objects, merge them together
+    if (isContext(source) && (destination === undefined || isContext(destination))) {
+        var finalDestination = destination || {};
+        for (var key in source) {
+            if (Object.prototype.hasOwnProperty.call(source, key)) {
+                finalDestination[key] = mergeInto(finalDestination[key], source[key], circularReferenceChecker);
+            }
+        }
+        return finalDestination;
+    }
+    // 'source' and 'destination' are arrays, merge them together
+    if (isContextArray(source) && (destination === undefined || isContextArray(destination))) {
+        var finalDestination = destination || [];
+        finalDestination.length = Math.max(finalDestination.length, source.length);
+        for (var index = 0; index < source.length; index += 1) {
+            finalDestination[index] = mergeInto(finalDestination[index], source[index], circularReferenceChecker);
+        }
+        return finalDestination;
+    }
+    // The destination in not an array nor an object, so we can't merge it
+    return source;
+}
+exports.mergeInto = mergeInto;
+
+},{}],"3YCTH":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var utils_1 = require("./utils");
+var ErrorSource;
+(function (ErrorSource) {
+    ErrorSource["AGENT"] = "agent";
+    ErrorSource["CONSOLE"] = "console";
+    ErrorSource["NETWORK"] = "network";
+    ErrorSource["SOURCE"] = "source";
+    ErrorSource["LOGGER"] = "logger";
+    ErrorSource["CUSTOM"] = "custom";
+})(ErrorSource = exports.ErrorSource || (exports.ErrorSource = {}));
+function formatUnknownError(stackTrace, errorObject, nonErrorPrefix) {
+    if (!stackTrace || (stackTrace.message === undefined && !(errorObject instanceof Error))) {
+        return {
+            message: nonErrorPrefix + " " + utils_1.jsonStringify(errorObject),
+            stack: 'No stack, consider using an instance of Error',
+            type: stackTrace && stackTrace.name,
+        };
+    }
+    return {
+        message: stackTrace.message || 'Empty message',
+        stack: toStackTraceString(stackTrace),
+        type: stackTrace.name,
+    };
+}
+exports.formatUnknownError = formatUnknownError;
+function toStackTraceString(stack) {
+    var result = (stack.name || 'Error') + ": " + stack.message;
+    stack.stack.forEach(function (frame) {
+        var func = frame.func === '?' ? '<anonymous>' : frame.func;
+        var args = frame.args && frame.args.length > 0 ? "(" + frame.args.join(', ') + ")" : '';
+        var line = frame.line ? ":" + frame.line : '';
+        var column = frame.line && frame.column ? ":" + frame.column : '';
+        result += "\n  at " + func + args + " @ " + frame.url + line + column;
+    });
+    return result;
+}
+exports.toStackTraceString = toStackTraceString;
+
+},{"./utils":"1WfUQ"}],"pLJuV":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = require("tslib");
+var utils_1 = require("../tools/utils");
+// https://en.wikipedia.org/wiki/UTF-8
+var HAS_MULTI_BYTES_CHARACTERS = /[^\u0000-\u007F]/;
+/**
+ * Use POST request without content type to:
+ * - avoid CORS preflight requests
+ * - allow usage of sendBeacon
+ *
+ * multiple elements are sent separated by \n in order
+ * to be parsed correctly without content type header
+ */
+var HttpRequest = /** @class */ (function () {
+    function HttpRequest(endpointUrl, bytesLimit, withBatchTime) {
+        if (withBatchTime === void 0) { withBatchTime = false; }
+        this.endpointUrl = endpointUrl;
+        this.bytesLimit = bytesLimit;
+        this.withBatchTime = withBatchTime;
+    }
+    HttpRequest.prototype.send = function (data, size) {
+        var url = this.withBatchTime ? addBatchTime(this.endpointUrl) : this.endpointUrl;
+        if (navigator.sendBeacon && size < this.bytesLimit) {
+            var isQueued = navigator.sendBeacon(url, data);
+            if (isQueued) {
+                return;
+            }
+        }
+        var request = new XMLHttpRequest();
+        request.open('POST', url, true);
+        request.send(data);
+    };
+    return HttpRequest;
+}());
+exports.HttpRequest = HttpRequest;
+function addBatchTime(url) {
+    return "" + url + (url.indexOf('?') === -1 ? '?' : '&') + "batch_time=" + new Date().getTime();
+}
+var Batch = /** @class */ (function () {
+    function Batch(request, maxSize, bytesLimit, maxMessageSize, flushTimeout, beforeUnloadCallback) {
+        if (beforeUnloadCallback === void 0) { beforeUnloadCallback = utils_1.noop; }
+        this.request = request;
+        this.maxSize = maxSize;
+        this.bytesLimit = bytesLimit;
+        this.maxMessageSize = maxMessageSize;
+        this.flushTimeout = flushTimeout;
+        this.beforeUnloadCallback = beforeUnloadCallback;
+        this.pushOnlyBuffer = [];
+        this.upsertBuffer = {};
+        this.bufferBytesSize = 0;
+        this.bufferMessageCount = 0;
+        this.flushOnVisibilityHidden();
+        this.flushPeriodically();
+    }
+    Batch.prototype.add = function (message) {
+        this.addOrUpdate(message);
+    };
+    Batch.prototype.upsert = function (message, key) {
+        this.addOrUpdate(message, key);
+    };
+    Batch.prototype.flush = function () {
+        if (this.bufferMessageCount !== 0) {
+            var messages = tslib_1.__spreadArrays(this.pushOnlyBuffer, utils_1.objectValues(this.upsertBuffer));
+            this.request.send(messages.join('\n'), this.bufferBytesSize);
+            this.pushOnlyBuffer = [];
+            this.upsertBuffer = {};
+            this.bufferBytesSize = 0;
+            this.bufferMessageCount = 0;
+        }
+    };
+    Batch.prototype.sizeInBytes = function (candidate) {
+        // Accurate byte size computations can degrade performances when there is a lot of events to process
+        if (!HAS_MULTI_BYTES_CHARACTERS.test(candidate)) {
+            return candidate.length;
+        }
+        if (window.TextEncoder !== undefined) {
+            return new TextEncoder().encode(candidate).length;
+        }
+        return new Blob([candidate]).size;
+    };
+    Batch.prototype.addOrUpdate = function (message, key) {
+        var _a = this.process(message), processedMessage = _a.processedMessage, messageBytesSize = _a.messageBytesSize;
+        if (messageBytesSize >= this.maxMessageSize) {
+            console.warn("Discarded a message whose size was bigger than the maximum allowed size " + this.maxMessageSize + "KB.");
+            return;
+        }
+        if (this.hasMessageFor(key)) {
+            this.remove(key);
+        }
+        if (this.willReachedBytesLimitWith(messageBytesSize)) {
+            this.flush();
+        }
+        this.push(processedMessage, messageBytesSize, key);
+        if (this.isFull()) {
+            this.flush();
+        }
+    };
+    Batch.prototype.process = function (message) {
+        var processedMessage = utils_1.jsonStringify(message);
+        var messageBytesSize = this.sizeInBytes(processedMessage);
+        return { processedMessage: processedMessage, messageBytesSize: messageBytesSize };
+    };
+    Batch.prototype.push = function (processedMessage, messageBytesSize, key) {
+        if (this.bufferMessageCount > 0) {
+            // \n separator at serialization
+            this.bufferBytesSize += 1;
+        }
+        if (key !== undefined) {
+            this.upsertBuffer[key] = processedMessage;
+        }
+        else {
+            this.pushOnlyBuffer.push(processedMessage);
+        }
+        this.bufferBytesSize += messageBytesSize;
+        this.bufferMessageCount += 1;
+    };
+    Batch.prototype.remove = function (key) {
+        var removedMessage = this.upsertBuffer[key];
+        delete this.upsertBuffer[key];
+        var messageBytesSize = this.sizeInBytes(removedMessage);
+        this.bufferBytesSize -= messageBytesSize;
+        this.bufferMessageCount -= 1;
+        if (this.bufferMessageCount > 0) {
+            this.bufferBytesSize -= 1;
+        }
+    };
+    Batch.prototype.hasMessageFor = function (key) {
+        return key !== undefined && this.upsertBuffer[key] !== undefined;
+    };
+    Batch.prototype.willReachedBytesLimitWith = function (messageBytesSize) {
+        // byte of the separator at the end of the message
+        return this.bufferBytesSize + messageBytesSize + 1 >= this.bytesLimit;
+    };
+    Batch.prototype.isFull = function () {
+        return this.bufferMessageCount === this.maxSize || this.bufferBytesSize >= this.bytesLimit;
+    };
+    Batch.prototype.flushPeriodically = function () {
+        var _this = this;
+        setTimeout(function () {
+            _this.flush();
+            _this.flushPeriodically();
+        }, this.flushTimeout);
+    };
+    Batch.prototype.flushOnVisibilityHidden = function () {
+        var _this = this;
+        /**
+         * With sendBeacon, requests are guaranteed to be successfully sent during document unload
+         */
+        // @ts-ignore this function is not always defined
+        if (navigator.sendBeacon) {
+            /**
+             * beforeunload is called before visibilitychange
+             * register first to be sure to be called before flush on beforeunload
+             * caveat: unload can still be canceled by another listener
+             */
+            utils_1.addEventListener(window, utils_1.DOM_EVENT.BEFORE_UNLOAD, this.beforeUnloadCallback);
+            /**
+             * Only event that guarantee to fire on mobile devices when the page transitions to background state
+             * (e.g. when user switches to a different application, goes to homescreen, etc), or is being unloaded.
+             */
+            utils_1.addEventListener(document, utils_1.DOM_EVENT.VISIBILITY_CHANGE, function () {
+                if (document.visibilityState === 'hidden') {
+                    _this.flush();
+                }
+            });
+            /**
+             * Safari does not support yet to send a request during:
+             * - a visibility change during doc unload (cf: https://bugs.webkit.org/show_bug.cgi?id=194897)
+             * - a page hide transition (cf: https://bugs.webkit.org/show_bug.cgi?id=188329)
+             */
+            utils_1.addEventListener(window, utils_1.DOM_EVENT.BEFORE_UNLOAD, function () { return _this.flush(); });
+        }
+    };
+    return Batch;
+}());
+exports.Batch = Batch;
+
+},{"tslib":"1HNh1","../tools/utils":"1WfUQ"}],"6sYSi":[function(require,module,exports) {
+"use strict";
+// tslint:disable no-unsafe-any
+Object.defineProperty(exports, "__esModule", { value: true });
+var internalMonitoring_1 = require("./internalMonitoring");
+var UNKNOWN_FUNCTION = '?';
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#Error_types
+// tslint:disable-next-line max-line-length
+var ERROR_TYPES_RE = /^(?:[Uu]ncaught (?:exception: )?)?(?:((?:Eval|Internal|Range|Reference|Syntax|Type|URI|)Error): )?(.*)$/;
+/**
+ * A better form of hasOwnProperty<br/>
+ * Example: `has(MainHostObject, property) === true/false`
+ *
+ * @param {Object} object to check property
+ * @param {string} key to check
+ * @return {Boolean} true if the object has the key and it is not inherited
+ */
+function has(object, key) {
+    return Object.prototype.hasOwnProperty.call(object, key);
+}
+/**
+ * Returns true if the parameter is undefined<br/>
+ * Example: `isUndefined(val) === true/false`
+ *
+ * @param {*} what Value to check
+ * @return {Boolean} true if undefined and false otherwise
+ */
+function isUndefined(what) {
+    return typeof what === 'undefined';
+}
+/**
+ * Wrap any function in a TraceKit reporter<br/>
+ * Example: `func = wrap(func);`
+ *
+ * @param {Function} func Function to be wrapped
+ * @return {Function} The wrapped func
+ * @memberof TraceKit
+ */
+// tslint:disable-next-line ban-types
+function wrap(func) {
+    function wrapped() {
+        try {
+            return func.apply(this, arguments);
+        }
+        catch (e) {
+            exports.report(e);
+            throw e;
+        }
+    }
+    return wrapped;
+}
+exports.wrap = wrap;
+/**
+ * Cross-browser processing of unhandled exceptions
+ *
+ * Syntax:
+ * ```js
+ *   report.subscribe(function(stackInfo) { ... })
+ *   report.unsubscribe(function(stackInfo) { ... })
+ *   report(exception)
+ *   try { ...code... } catch(ex) { report(ex); }
+ * ```
+ *
+ * Supports:
+ *   - Firefox: full stack trace with line numbers, plus column number
+ *     on top frame; column number is not guaranteed
+ *   - Opera: full stack trace with line and column numbers
+ *   - Chrome: full stack trace with line and column numbers
+ *   - Safari: line and column number for the top frame only; some frames
+ *     may be missing, and column number is not guaranteed
+ *   - IE: line and column number for the top frame only; some frames
+ *     may be missing, and column number is not guaranteed
+ *
+ * In theory, TraceKit should work on all of the following versions:
+ *   - IE5.5+ (only 8.0 tested)
+ *   - Firefox 0.9+ (only 3.5+ tested)
+ *   - Opera 7+ (only 10.50 tested; versions 9 and earlier may require
+ *     Exceptions Have Stacktrace to be enabled in opera:config)
+ *   - Safari 3+ (only 4+ tested)
+ *   - Chrome 1+ (only 5+ tested)
+ *   - Konqueror 3.5+ (untested)
+ *
+ * Requires computeStackTrace.
+ *
+ * Tries to catch all unhandled exceptions and report them to the
+ * subscribed handlers. Please note that report will rethrow the
+ * exception. This is REQUIRED in order to get a useful stack trace in IE.
+ * If the exception does not reach the top of the browser, you will only
+ * get a stack trace from the point where report was called.
+ *
+ * Handlers receive a StackTrace object as described in the
+ * computeStackTrace docs.
+ *
+ * @memberof TraceKit
+ * @namespace
+ */
+exports.report = (function reportModuleWrapper() {
+    var handlers = [];
+    var lastException;
+    var lastExceptionStack;
+    /**
+     * Add a crash handler.
+     * @param {Function} handler
+     * @memberof report
+     */
+    function subscribe(handler) {
+        installGlobalHandler();
+        installGlobalUnhandledRejectionHandler();
+        handlers.push(handler);
+    }
+    /**
+     * Remove a crash handler.
+     * @param {Function} handler
+     * @memberof report
+     */
+    function unsubscribe(handler) {
+        for (var i = handlers.length - 1; i >= 0; i -= 1) {
+            if (handlers[i] === handler) {
+                handlers.splice(i, 1);
+            }
+        }
+        if (handlers.length === 0) {
+            uninstallGlobalHandler();
+            uninstallGlobalUnhandledRejectionHandler();
+        }
+    }
+    /**
+     * Dispatch stack information to all handlers.
+     * @param {StackTrace} stack
+     * @param {boolean} isWindowError Is this a top-level window error?
+     * @param {Error=} error The error that's being handled (if available, null otherwise)
+     * @memberof report
+     * @throws An exception if an error occurs while calling an handler.
+     */
+    function notifyHandlers(stack, isWindowError, error) {
+        var exception;
+        for (var i in handlers) {
+            if (has(handlers, i)) {
+                try {
+                    handlers[i](stack, isWindowError, error);
+                }
+                catch (inner) {
+                    exception = inner;
+                }
+            }
+        }
+        if (exception) {
+            throw exception;
+        }
+    }
+    var oldOnerrorHandler;
+    var onErrorHandlerInstalled;
+    var oldOnunhandledrejectionHandler;
+    var onUnhandledRejectionHandlerInstalled;
+    /**
+     * Ensures all global unhandled exceptions are recorded.
+     * Supported by Gecko and IE.
+     * @param {Event|string} message Error message.
+     * @param {string=} url URL of script that generated the exception.
+     * @param {(number|string)=} lineNo The line number at which the error occurred.
+     * @param {(number|string)=} columnNo The column number at which the error occurred.
+     * @param {Error=} errorObj The actual Error object.
+     * @memberof report
+     */
+    function traceKitWindowOnError(message, url, lineNo, columnNo, errorObj) {
+        var stack;
+        if (lastExceptionStack) {
+            exports.computeStackTrace.augmentStackTraceWithInitialElement(lastExceptionStack, url, lineNo, "" + message);
+            processLastException();
+        }
+        else if (errorObj) {
+            stack = exports.computeStackTrace(errorObj);
+            notifyHandlers(stack, true, errorObj);
+        }
+        else {
+            var location_1 = {
+                url: url,
+                column: columnNo,
+                line: lineNo,
+            };
+            var name_1;
+            var msg = message;
+            if ({}.toString.call(message) === '[object String]') {
+                var groups = msg.match(ERROR_TYPES_RE);
+                if (groups) {
+                    name_1 = groups[1];
+                    msg = groups[2];
+                }
+            }
+            stack = {
+                name: name_1,
+                message: msg,
+                stack: [location_1],
+            };
+            notifyHandlers(stack, true);
+        }
+        if (oldOnerrorHandler) {
+            return oldOnerrorHandler.apply(this, arguments);
+        }
+        return false;
+    }
+    /**
+     * Ensures all unhandled rejections are recorded.
+     * @param {PromiseRejectionEvent} e event.
+     * @memberof report
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onunhandledrejection
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/PromiseRejectionEvent
+     */
+    function traceKitWindowOnUnhandledRejection(e) {
+        var reason = e.reason || 'Empty reason';
+        var stack = exports.computeStackTrace(reason);
+        notifyHandlers(stack, true, reason);
+    }
+    /**
+     * Install a global onerror handler
+     * @memberof report
+     */
+    function installGlobalHandler() {
+        if (onErrorHandlerInstalled) {
+            return;
+        }
+        oldOnerrorHandler = window.onerror;
+        window.onerror = internalMonitoring_1.monitor(traceKitWindowOnError);
+        onErrorHandlerInstalled = true;
+    }
+    /**
+     * Uninstall the global onerror handler
+     * @memberof report
+     */
+    function uninstallGlobalHandler() {
+        if (onErrorHandlerInstalled) {
+            window.onerror = oldOnerrorHandler;
+            onErrorHandlerInstalled = false;
+        }
+    }
+    /**
+     * Install a global onunhandledrejection handler
+     * @memberof report
+     */
+    function installGlobalUnhandledRejectionHandler() {
+        if (onUnhandledRejectionHandlerInstalled) {
+            return;
+        }
+        oldOnunhandledrejectionHandler = window.onunhandledrejection !== null ? window.onunhandledrejection : undefined;
+        window.onunhandledrejection = internalMonitoring_1.monitor(traceKitWindowOnUnhandledRejection);
+        onUnhandledRejectionHandlerInstalled = true;
+    }
+    /**
+     * Uninstall the global onunhandledrejection handler
+     * @memberof report
+     */
+    function uninstallGlobalUnhandledRejectionHandler() {
+        if (onUnhandledRejectionHandlerInstalled) {
+            window.onunhandledrejection = oldOnunhandledrejectionHandler;
+            onUnhandledRejectionHandlerInstalled = false;
+        }
+    }
+    /**
+     * Process the most recent exception
+     * @memberof report
+     */
+    function processLastException() {
+        var currentLastExceptionStack = lastExceptionStack;
+        var currentLastException = lastException;
+        lastExceptionStack = undefined;
+        lastException = undefined;
+        notifyHandlers(currentLastExceptionStack, false, currentLastException);
+    }
+    /**
+     * Reports an unhandled Error.
+     * @param {Error} ex
+     * @memberof report
+     * @throws An exception if an incomplete stack trace is detected (old IE browsers).
+     */
+    function doReport(ex) {
+        if (lastExceptionStack) {
+            if (lastException === ex) {
+                return; // already caught by an inner catch block, ignore
+            }
+            processLastException();
+        }
+        var stack = exports.computeStackTrace(ex);
+        lastExceptionStack = stack;
+        lastException = ex;
+        // If the stack trace is incomplete, wait for 2 seconds for
+        // slow slow IE to see if onerror occurs or not before reporting
+        // this exception; otherwise, we will end up with an incomplete
+        // stack trace
+        setTimeout(function () {
+            if (lastException === ex) {
+                processLastException();
+            }
+        }, stack.incomplete ? 2000 : 0);
+        throw ex; // re-throw to propagate to the top level (and cause window.onerror)
+    }
+    doReport.subscribe = subscribe;
+    doReport.unsubscribe = unsubscribe;
+    doReport.traceKitWindowOnError = traceKitWindowOnError;
+    return doReport;
+})();
+/**
+ * computeStackTrace: cross-browser stack traces in JavaScript
+ *
+ * Syntax:
+ *   ```js
+ *   s = computeStackTrace.ofCaller([depth])
+ *   s = computeStackTrace(exception) // consider using report instead (see below)
+ *   ```
+ *
+ * Supports:
+ *   - Firefox:  full stack trace with line numbers and unreliable column
+ *               number on top frame
+ *   - Opera 10: full stack trace with line and column numbers
+ *   - Opera 9-: full stack trace with line numbers
+ *   - Chrome:   full stack trace with line and column numbers
+ *   - Safari:   line and column number for the topmost stacktrace element
+ *               only
+ *   - IE:       no line numbers whatsoever
+ *
+ * Tries to guess names of anonymous functions by looking for assignments
+ * in the source code. In IE and Safari, we have to guess source file names
+ * by searching for function bodies inside all page scripts. This will not
+ * work for scripts that are loaded cross-domain.
+ * Here be dragons: some function names may be guessed incorrectly, and
+ * duplicate functions may be mismatched.
+ *
+ * computeStackTrace should only be used for tracing purposes.
+ * Logging of unhandled exceptions should be done with report,
+ * which builds on top of computeStackTrace and provides better
+ * IE support by utilizing the window.onerror event to retrieve information
+ * about the top of the stack.
+ *
+ * Note: In IE and Safari, no stack trace is recorded on the Error object,
+ * so computeStackTrace instead walks its *own* chain of callers.
+ * This means that:
+ *  * in Safari, some methods may be missing from the stack trace;
+ *  * in IE, the topmost function in the stack trace will always be the
+ *    caller of computeStackTrace.
+ *
+ * This is okay for tracing (because you are likely to be calling
+ * computeStackTrace from the function you want to be the topmost element
+ * of the stack trace anyway), but not okay for logging unhandled
+ * exceptions (because your catch block will likely be far away from the
+ * inner function that actually caused the exception).
+ *
+ * Tracing example:
+ *  ```js
+ *     function trace(message) {
+ *         let stackInfo = computeStackTrace.ofCaller();
+ *         let data = message + "\n";
+ *         for(let i in stackInfo.stack) {
+ *             let item = stackInfo.stack[i];
+ *             data += (item.func || '[anonymous]') + "() in " + item.url + ":" + (item.line || '0') + "\n";
+ *         }
+ *         if (window.console)
+ *             console.info(data);
+ *         else
+ *             alert(data);
+ *     }
+ * ```
+ * @memberof TraceKit
+ * @namespace
+ */
+exports.computeStackTrace = (function computeStackTraceWrapper() {
+    var debug = false;
+    // Contents of Exception in various browsers.
+    //
+    // SAFARI:
+    // ex.message = Can't find variable: qq
+    // ex.line = 59
+    // ex.sourceId = 580238192
+    // ex.sourceURL = http://...
+    // ex.expressionBeginOffset = 96
+    // ex.expressionCaretOffset = 98
+    // ex.expressionEndOffset = 98
+    // ex.name = ReferenceError
+    //
+    // FIREFOX:
+    // ex.message = qq is not defined
+    // ex.fileName = http://...
+    // ex.lineNumber = 59
+    // ex.columnNumber = 69
+    // ex.stack = ...stack trace... (see the example below)
+    // ex.name = ReferenceError
+    //
+    // CHROME:
+    // ex.message = qq is not defined
+    // ex.name = ReferenceError
+    // ex.type = not_defined
+    // ex.arguments = ['aa']
+    // ex.stack = ...stack trace...
+    //
+    // INTERNET EXPLORER:
+    // ex.message = ...
+    // ex.name = ReferenceError
+    //
+    // OPERA:
+    // ex.message = ...message... (see the example below)
+    // ex.name = ReferenceError
+    // ex.opera#sourceloc = 11  (pretty much useless, duplicates the info in ex.message)
+    // ex.stacktrace = n/a; see 'opera:config#UserPrefs|Exceptions Have Stacktrace'
+    /**
+     * Computes stack trace information from the stack property.
+     * Chrome and Gecko use this property.
+     * @param {Error} ex
+     * @return {?StackTrace} Stack trace information.
+     * @memberof computeStackTrace
+     */
+    function computeStackTraceFromStackProp(ex) {
+        if (!ex.stack) {
+            return;
+        }
+        // tslint:disable-next-line max-line-length
+        var chrome = /^\s*at (.*?) ?\(((?:file|https?|blob|chrome-extension|native|eval|webpack|<anonymous>|\/).*?)(?::(\d+))?(?::(\d+))?\)?\s*$/i;
+        // tslint:disable-next-line max-line-length
+        var gecko = /^\s*(.*?)(?:\((.*?)\))?(?:^|@)((?:file|https?|blob|chrome|webpack|resource|\[native).*?|[^@]*bundle)(?::(\d+))?(?::(\d+))?\s*$/i;
+        // tslint:disable-next-line max-line-length
+        var winjs = /^\s*at (?:((?:\[object object\])?.+) )?\(?((?:file|ms-appx|https?|webpack|blob):.*?):(\d+)(?::(\d+))?\)?\s*$/i;
+        // Used to additionally parse URL/line/column from eval frames
+        var isEval;
+        var geckoEval = /(\S+) line (\d+)(?: > eval line \d+)* > eval/i;
+        var chromeEval = /\((\S*)(?::(\d+))(?::(\d+))\)/;
+        var lines = ex.stack.split('\n');
+        var stack = [];
+        var submatch;
+        var parts;
+        var element;
+        for (var i = 0, j = lines.length; i < j; i += 1) {
+            if (chrome.exec(lines[i])) {
+                parts = chrome.exec(lines[i]);
+                var isNative = parts[2] && parts[2].indexOf('native') === 0; // start of line
+                isEval = parts[2] && parts[2].indexOf('eval') === 0; // start of line
+                submatch = chromeEval.exec(parts[2]);
+                if (isEval && submatch) {
+                    // throw out eval line/column and use top-most line/column number
+                    parts[2] = submatch[1]; // url
+                    parts[3] = submatch[2]; // line
+                    parts[4] = submatch[3]; // column
+                }
+                element = {
+                    args: isNative ? [parts[2]] : [],
+                    column: parts[4] ? +parts[4] : undefined,
+                    func: parts[1] || UNKNOWN_FUNCTION,
+                    line: parts[3] ? +parts[3] : undefined,
+                    url: !isNative ? parts[2] : undefined,
+                };
+            }
+            else if (winjs.exec(lines[i])) {
+                parts = winjs.exec(lines[i]);
+                element = {
+                    args: [],
+                    column: parts[4] ? +parts[4] : undefined,
+                    func: parts[1] || UNKNOWN_FUNCTION,
+                    line: +parts[3],
+                    url: parts[2],
+                };
+            }
+            else if (gecko.exec(lines[i])) {
+                parts = gecko.exec(lines[i]);
+                isEval = parts[3] && parts[3].indexOf(' > eval') > -1;
+                submatch = geckoEval.exec(parts[3]);
+                if (isEval && submatch) {
+                    // throw out eval line/column and use top-most line number
+                    parts[3] = submatch[1];
+                    parts[4] = submatch[2];
+                    parts[5] = undefined; // no column when eval
+                }
+                else if (i === 0 && !parts[5] && !isUndefined(ex.columnNumber)) {
+                    // FireFox uses this awesome columnNumber property for its top frame
+                    // Also note, Firefox's column number is 0-based and everything else expects 1-based,
+                    // so adding 1
+                    // NOTE: this hack doesn't work if top-most frame is eval
+                    stack[0].column = ex.columnNumber + 1;
+                }
+                element = {
+                    args: parts[2] ? parts[2].split(',') : [],
+                    column: parts[5] ? +parts[5] : undefined,
+                    func: parts[1] || UNKNOWN_FUNCTION,
+                    line: parts[4] ? +parts[4] : undefined,
+                    url: parts[3],
+                };
+            }
+            else {
+                continue;
+            }
+            if (!element.func && element.line) {
+                element.func = UNKNOWN_FUNCTION;
+            }
+            stack.push(element);
+        }
+        if (!stack.length) {
+            return;
+        }
+        return {
+            stack: stack,
+            message: ex.message,
+            name: ex.name,
+        };
+    }
+    /**
+     * Computes stack trace information from the stacktrace property.
+     * Opera 10+ uses this property.
+     * @param {Error} ex
+     * @return {?StackTrace} Stack trace information.
+     * @memberof computeStackTrace
+     */
+    function computeStackTraceFromStacktraceProp(ex) {
+        // Access and store the stacktrace property before doing ANYTHING
+        // else to it because Opera is not very good at providing it
+        // reliably in other circumstances.
+        var stacktrace = ex.stacktrace;
+        if (!stacktrace) {
+            return;
+        }
+        var opera10Regex = / line (\d+).*script (?:in )?(\S+)(?:: in function (\S+))?$/i;
+        // tslint:disable-next-line max-line-length
+        var opera11Regex = / line (\d+), column (\d+)\s*(?:in (?:<anonymous function: ([^>]+)>|([^\)]+))\((.*)\))? in (.*):\s*$/i;
+        var lines = stacktrace.split('\n');
+        var stack = [];
+        var parts;
+        for (var line = 0; line < lines.length; line += 2) {
+            var element = void 0;
+            if (opera10Regex.exec(lines[line])) {
+                parts = opera10Regex.exec(lines[line]);
+                element = {
+                    args: [],
+                    column: undefined,
+                    func: parts[3],
+                    line: +parts[1],
+                    url: parts[2],
+                };
+            }
+            else if (opera11Regex.exec(lines[line])) {
+                parts = opera11Regex.exec(lines[line]);
+                element = {
+                    args: parts[5] ? parts[5].split(',') : [],
+                    column: +parts[2],
+                    func: parts[3] || parts[4],
+                    line: +parts[1],
+                    url: parts[6],
+                };
+            }
+            if (element) {
+                if (!element.func && element.line) {
+                    element.func = UNKNOWN_FUNCTION;
+                }
+                element.context = [lines[line + 1]];
+                stack.push(element);
+            }
+        }
+        if (!stack.length) {
+            return;
+        }
+        return {
+            stack: stack,
+            message: ex.message,
+            name: ex.name,
+        };
+    }
+    /**
+     * NOT TESTED.
+     * Computes stack trace information from an error message that includes
+     * the stack trace.
+     * Opera 9 and earlier use this method if the option to show stack
+     * traces is turned on in opera:config.
+     * @param {Error} ex
+     * @return {?StackTrace} Stack information.
+     * @memberof computeStackTrace
+     */
+    function computeStackTraceFromOperaMultiLineMessage(ex) {
+        // TODO: Clean this function up
+        // Opera includes a stack trace into the exception message. An example is:
+        //
+        // Statement on line 3: Undefined variable: undefinedFunc
+        // Backtrace:
+        //   Line 3 of linked script file://localhost/Users/andreyvit/Projects/TraceKit/javascript-client/sample.js:
+        //   In function zzz
+        //         undefinedFunc(a);
+        //   Line 7 of inline#1 script in file://localhost/Users/andreyvit/Projects/TraceKit/javascript-client/sample.html:
+        //   In function yyy
+        //           zzz(x, y, z);
+        //   Line 3 of inline#1 script in file://localhost/Users/andreyvit/Projects/TraceKit/javascript-client/sample.html:
+        //   In function xxx
+        //           yyy(a, a, a);
+        //   Line 1 of function script
+        //     try { xxx('hi'); return false; } catch(ex) { report(ex); }
+        //   ...
+        var lines = ex.message.split('\n');
+        if (lines.length < 4) {
+            return;
+        }
+        var lineRE1 = /^\s*Line (\d+) of linked script ((?:file|https?|blob)\S+)(?:: in function (\S+))?\s*$/i;
+        var lineRE2 = /^\s*Line (\d+) of inline#(\d+) script in ((?:file|https?|blob)\S+)(?:: in function (\S+))?\s*$/i;
+        var lineRE3 = /^\s*Line (\d+) of function script\s*$/i;
+        var stack = [];
+        var scripts = window && window.document && window.document.getElementsByTagName('script');
+        var inlineScriptBlocks = [];
+        var parts;
+        for (var s in scripts) {
+            if (has(scripts, s) && !scripts[s].src) {
+                inlineScriptBlocks.push(scripts[s]);
+            }
+        }
+        for (var line = 2; line < lines.length; line += 2) {
+            var item = void 0;
+            if (lineRE1.exec(lines[line])) {
+                parts = lineRE1.exec(lines[line]);
+                item = {
+                    args: [],
+                    column: undefined,
+                    func: parts[3],
+                    line: +parts[1],
+                    url: parts[2],
+                };
+            }
+            else if (lineRE2.exec(lines[line])) {
+                parts = lineRE2.exec(lines[line]);
+                item = {
+                    args: [],
+                    column: undefined,
+                    func: parts[4],
+                    line: +parts[1],
+                    url: parts[3],
+                };
+            }
+            else if (lineRE3.exec(lines[line])) {
+                parts = lineRE3.exec(lines[line]);
+                var url = window.location.href.replace(/#.*$/, '');
+                item = {
+                    url: url,
+                    args: [],
+                    column: undefined,
+                    func: '',
+                    line: +parts[1],
+                };
+            }
+            if (item) {
+                if (!item.func) {
+                    item.func = UNKNOWN_FUNCTION;
+                }
+                item.context = [lines[line + 1]];
+                stack.push(item);
+            }
+        }
+        if (!stack.length) {
+            return; // could not parse multiline exception message as Opera stack trace
+        }
+        return {
+            stack: stack,
+            message: lines[0],
+            name: ex.name,
+        };
+    }
+    /**
+     * Adds information about the first frame to incomplete stack traces.
+     * Safari and IE require this to get complete data on the first frame.
+     * @param {StackTrace} stackInfo Stack trace information from
+     * one of the compute* methods.
+     * @param {string=} url The URL of the script that caused an error.
+     * @param {(number|string)=} lineNo The line number of the script that
+     * caused an error.
+     * @param {string=} message The error generated by the browser, which
+     * hopefully contains the name of the object that caused the error.
+     * @return {boolean} Whether or not the stack information was
+     * augmented.
+     * @memberof computeStackTrace
+     */
+    function augmentStackTraceWithInitialElement(stackInfo, url, lineNo, message) {
+        var initial = {
+            url: url,
+            line: lineNo ? +lineNo : undefined,
+        };
+        if (initial.url && initial.line) {
+            stackInfo.incomplete = false;
+            var stack = stackInfo.stack;
+            if (stack.length > 0) {
+                if (stack[0].url === initial.url) {
+                    if (stack[0].line === initial.line) {
+                        return false; // already in stack trace
+                    }
+                    if (!stack[0].line && stack[0].func === initial.func) {
+                        stack[0].line = initial.line;
+                        stack[0].context = initial.context;
+                        return false;
+                    }
+                }
+            }
+            stack.unshift(initial);
+            stackInfo.partial = true;
+            return true;
+        }
+        stackInfo.incomplete = true;
+        return false;
+    }
+    /**
+     * Computes stack trace information by walking the arguments.caller
+     * chain at the time the exception occurred. This will cause earlier
+     * frames to be missed but is the only way to get any stack trace in
+     * Safari and IE. The top frame is restored by
+     * {@link augmentStackTraceWithInitialElement}.
+     * @param {Error} ex
+     * @param {number} depth
+     * @return {StackTrace} Stack trace information.
+     * @memberof computeStackTrace
+     */
+    function computeStackTraceByWalkingCallerChain(ex, depth) {
+        var functionName = /function\s+([_$a-zA-Z\xA0-\uFFFF][_$a-zA-Z0-9\xA0-\uFFFF]*)?\s*\(/i;
+        var stack = [];
+        var funcs = {};
+        var recursion = false;
+        var parts;
+        var item;
+        for (var curr = computeStackTraceByWalkingCallerChain.caller; curr && !recursion; curr = curr.caller) {
+            if (curr === exports.computeStackTrace || curr === exports.report) {
+                continue;
+            }
+            item = {
+                args: [],
+                column: undefined,
+                func: UNKNOWN_FUNCTION,
+                line: undefined,
+                url: undefined,
+            };
+            parts = functionName.exec(curr.toString());
+            if (curr.name) {
+                item.func = curr.name;
+            }
+            else if (parts) {
+                item.func = parts[1];
+            }
+            if (typeof item.func === 'undefined') {
+                item.func = parts ? parts.input.substring(0, parts.input.indexOf('{')) : undefined;
+            }
+            if (funcs["" + curr]) {
+                recursion = true;
+            }
+            else {
+                funcs["" + curr] = true;
+            }
+            stack.push(item);
+        }
+        if (depth) {
+            stack.splice(0, depth);
+        }
+        var result = {
+            stack: stack,
+            message: ex.message,
+            name: ex.name,
+        };
+        augmentStackTraceWithInitialElement(result, ex.sourceURL || ex.fileName, ex.line || ex.lineNumber, ex.message || ex.description);
+        return result;
+    }
+    /**
+     * Computes a stack trace for an exception.
+     * @param {Error} ex
+     * @param {(string|number)=} depth
+     * @memberof computeStackTrace
+     */
+    function doComputeStackTrace(ex, depth) {
+        var stack;
+        var normalizedDepth = depth === undefined ? 0 : +depth;
+        try {
+            // This must be tried first because Opera 10 *destroys*
+            // its stacktrace property if you try to access the stack
+            // property first!!
+            stack = computeStackTraceFromStacktraceProp(ex);
+            if (stack) {
+                return stack;
+            }
+        }
+        catch (e) {
+            if (debug) {
+                throw e;
+            }
+        }
+        try {
+            stack = computeStackTraceFromStackProp(ex);
+            if (stack) {
+                return stack;
+            }
+        }
+        catch (e) {
+            if (debug) {
+                throw e;
+            }
+        }
+        try {
+            stack = computeStackTraceFromOperaMultiLineMessage(ex);
+            if (stack) {
+                return stack;
+            }
+        }
+        catch (e) {
+            if (debug) {
+                throw e;
+            }
+        }
+        try {
+            stack = computeStackTraceByWalkingCallerChain(ex, normalizedDepth + 1);
+            if (stack) {
+                return stack;
+            }
+        }
+        catch (e) {
+            if (debug) {
+                throw e;
+            }
+        }
+        return {
+            message: ex.message,
+            name: ex.name,
+            stack: [],
+        };
+    }
+    /**
+     * Logs a stacktrace starting from the previous call and working down.
+     * @param {(number|string)=} depth How many frames deep to trace.
+     * @return {StackTrace} Stack trace information.
+     * @memberof computeStackTrace
+     */
+    function computeStackTraceOfCaller(depth) {
+        var currentDepth = (depth === undefined ? 0 : +depth) + 1; // "+ 1" because "ofCaller" should drop one frame
+        try {
+            throw new Error();
+        }
+        catch (ex) {
+            return exports.computeStackTrace(ex, currentDepth + 1);
+        }
+    }
+    doComputeStackTrace.augmentStackTraceWithInitialElement = augmentStackTraceWithInitialElement;
+    doComputeStackTrace.computeStackTraceFromStackProp = computeStackTraceFromStackProp;
+    doComputeStackTrace.ofCaller = computeStackTraceOfCaller;
+    return doComputeStackTrace;
+})();
+/**
+ * Extends support for global error handling for asynchronous browser
+ * functions. Adopted from Closure Library's errorhandler.js
+ * @memberof TraceKit
+ */
+function extendToAsynchronousCallbacks() {
+    function helper(fnName) {
+        var originalFn = window[fnName];
+        window[fnName] = function traceKitAsyncExtension() {
+            // Make a copy of the arguments
+            var args = [].slice.call(arguments);
+            var originalCallback = args[0];
+            if (typeof originalCallback === 'function') {
+                args[0] = wrap(originalCallback);
+            }
+            // IE < 9 doesn't support .call/.apply on setInterval/setTimeout, but it
+            // also only supports 2 argument and doesn't care what "this" is, so we
+            // can just call the original function directly.
+            if (originalFn.apply) {
+                return originalFn.apply(this, args);
+            }
+            return originalFn(args[0], args[1]);
+        };
+    }
+    helper('setTimeout');
+    helper('setInterval');
+}
+exports.extendToAsynchronousCallbacks = extendToAsynchronousCallbacks;
+
+},{"./internalMonitoring":"6aOch"}],"2AjnY":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var utils_1 = require("./utils");
+function normalizeUrl(url) {
+    return buildUrl(url, utils_1.getLocationOrigin()).href;
+}
+exports.normalizeUrl = normalizeUrl;
+function isValidUrl(url) {
+    try {
+        return !!buildUrl(url);
+    }
+    catch (_a) {
+        return false;
+    }
+}
+exports.isValidUrl = isValidUrl;
+function haveSameOrigin(url1, url2) {
+    return getOrigin(url1) === getOrigin(url2);
+}
+exports.haveSameOrigin = haveSameOrigin;
+function getOrigin(url) {
+    return utils_1.getLinkElementOrigin(buildUrl(url));
+}
+exports.getOrigin = getOrigin;
+function getPathName(url) {
+    var pathname = buildUrl(url).pathname;
+    return pathname[0] === '/' ? pathname : "/" + pathname;
+}
+exports.getPathName = getPathName;
+function getSearch(url) {
+    return buildUrl(url).search;
+}
+exports.getSearch = getSearch;
+function getHash(url) {
+    return buildUrl(url).hash;
+}
+exports.getHash = getHash;
+function buildUrl(url, base) {
+    if (checkURLSupported()) {
+        return base !== undefined ? new URL(url, base) : new URL(url);
+    }
+    if (base === undefined && !/:/.test(url)) {
+        throw new Error("Invalid URL: '" + url + "'");
+    }
+    var doc = document;
+    var anchorElement = doc.createElement('a');
+    if (base !== undefined) {
+        doc = document.implementation.createHTMLDocument('');
+        var baseElement = doc.createElement('base');
+        baseElement.href = base;
+        doc.head.appendChild(baseElement);
+        doc.body.appendChild(anchorElement);
+    }
+    anchorElement.href = url;
+    return anchorElement;
+}
+exports.buildUrl = buildUrl;
+var isURLSupported;
+function checkURLSupported() {
+    if (isURLSupported !== undefined) {
+        return isURLSupported;
+    }
+    try {
+        var url = new URL('http://test/path');
+        isURLSupported = url.href === 'http://test/path';
+        return isURLSupported;
+    }
+    catch (_a) {
+        isURLSupported = false;
+    }
+    return isURLSupported;
+}
+
+},{"./utils":"1WfUQ"}],"53ljR":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = require("tslib");
+var fetchProxy_1 = require("../browser/fetchProxy");
+var xhrProxy_1 = require("../browser/xhrProxy");
+var error_1 = require("../tools/error");
+var observable_1 = require("../tools/observable");
+var utils_1 = require("../tools/utils");
+var configuration_1 = require("./configuration");
+var internalMonitoring_1 = require("./internalMonitoring");
+var tracekit_1 = require("./tracekit");
+var filteredErrorsObservable;
+function startAutomaticErrorCollection(configuration) {
+    if (!filteredErrorsObservable) {
+        var errorObservable = new observable_1.Observable();
+        trackNetworkError(configuration, errorObservable);
+        startConsoleTracking(errorObservable);
+        startRuntimeErrorTracking(errorObservable);
+        filteredErrorsObservable = filterErrors(configuration, errorObservable);
+    }
+    return filteredErrorsObservable;
+}
+exports.startAutomaticErrorCollection = startAutomaticErrorCollection;
+function filterErrors(configuration, errorObservable) {
+    var errorCount = 0;
+    var filteredErrorObservable = new observable_1.Observable();
+    errorObservable.subscribe(function (error) {
+        if (errorCount < configuration.maxErrorsByMinute) {
+            errorCount += 1;
+            filteredErrorObservable.notify(error);
+        }
+        else if (errorCount === configuration.maxErrorsByMinute) {
+            errorCount += 1;
+            filteredErrorObservable.notify({
+                message: "Reached max number of errors by minute: " + configuration.maxErrorsByMinute,
+                source: error_1.ErrorSource.AGENT,
+                startTime: performance.now(),
+            });
+        }
+    });
+    setInterval(function () { return (errorCount = 0); }, utils_1.ONE_MINUTE);
+    return filteredErrorObservable;
+}
+exports.filterErrors = filterErrors;
+var originalConsoleError;
+function startConsoleTracking(errorObservable) {
+    originalConsoleError = console.error;
+    console.error = internalMonitoring_1.monitor(function (message) {
+        var optionalParams = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            optionalParams[_i - 1] = arguments[_i];
+        }
+        originalConsoleError.apply(console, tslib_1.__spreadArrays([message], optionalParams));
+        errorObservable.notify({
+            message: tslib_1.__spreadArrays(['console error:', message], optionalParams).map(formatConsoleParameters).join(' '),
+            source: error_1.ErrorSource.CONSOLE,
+            startTime: performance.now(),
+        });
+    });
+}
+exports.startConsoleTracking = startConsoleTracking;
+function stopConsoleTracking() {
+    console.error = originalConsoleError;
+}
+exports.stopConsoleTracking = stopConsoleTracking;
+function formatConsoleParameters(param) {
+    if (typeof param === 'string') {
+        return param;
+    }
+    if (param instanceof Error) {
+        return error_1.toStackTraceString(tracekit_1.computeStackTrace(param));
+    }
+    return utils_1.jsonStringify(param, undefined, 2);
+}
+var traceKitReportHandler;
+function startRuntimeErrorTracking(errorObservable) {
+    traceKitReportHandler = function (stackTrace, _, errorObject) {
+        var _a = error_1.formatUnknownError(stackTrace, errorObject, 'Uncaught'), stack = _a.stack, message = _a.message, type = _a.type;
+        errorObservable.notify({
+            message: message,
+            stack: stack,
+            type: type,
+            source: error_1.ErrorSource.SOURCE,
+            startTime: performance.now(),
+        });
+    };
+    tracekit_1.report.subscribe(traceKitReportHandler);
+}
+exports.startRuntimeErrorTracking = startRuntimeErrorTracking;
+function stopRuntimeErrorTracking() {
+    ;
+    tracekit_1.report.unsubscribe(traceKitReportHandler);
+}
+exports.stopRuntimeErrorTracking = stopRuntimeErrorTracking;
+function trackNetworkError(configuration, errorObservable) {
+    xhrProxy_1.startXhrProxy().onRequestComplete(function (context) { return handleCompleteRequest(utils_1.RequestType.XHR, context); });
+    fetchProxy_1.startFetchProxy().onRequestComplete(function (context) { return handleCompleteRequest(utils_1.RequestType.FETCH, context); });
+    function handleCompleteRequest(type, request) {
+        if (!configuration_1.isIntakeRequest(request.url, configuration) && (isRejected(request) || isServerError(request))) {
+            errorObservable.notify({
+                message: format(type) + " error " + request.method + " " + request.url,
+                resource: {
+                    method: request.method,
+                    statusCode: request.status,
+                    url: request.url,
+                },
+                source: error_1.ErrorSource.NETWORK,
+                stack: truncateResponse(request.response, configuration) || 'Failed to load',
+                startTime: request.startTime,
+            });
+        }
+    }
+    return {
+        stop: function () {
+            xhrProxy_1.resetXhrProxy();
+            fetchProxy_1.resetFetchProxy();
+        },
+    };
+}
+exports.trackNetworkError = trackNetworkError;
+function isRejected(request) {
+    return request.status === 0 && request.responseType !== 'opaque';
+}
+function isServerError(request) {
+    return request.status >= 500;
+}
+function truncateResponse(response, configuration) {
+    if (response && response.length > configuration.requestErrorResponseLengthLimit) {
+        return response.substring(0, configuration.requestErrorResponseLengthLimit) + "...";
+    }
+    return response;
+}
+function format(type) {
+    if (utils_1.RequestType.XHR === type) {
+        return 'XHR';
+    }
+    return 'Fetch';
+}
+
+},{"tslib":"1HNh1","../browser/fetchProxy":"5CFD8","../browser/xhrProxy":"CBu8R","../tools/error":"3YCTH","../tools/observable":"3fI3y","../tools/utils":"1WfUQ","./configuration":"4jZH0","./internalMonitoring":"6aOch","./tracekit":"6sYSi"}],"5CFD8":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = require("tslib");
+var internalMonitoring_1 = require("../domain/internalMonitoring");
+var tracekit_1 = require("../domain/tracekit");
+var error_1 = require("../tools/error");
+var urlPolyfill_1 = require("../tools/urlPolyfill");
+var fetchProxySingleton;
+var originalFetch;
+var beforeSendCallbacks = [];
+var onRequestCompleteCallbacks = [];
+function startFetchProxy() {
+    if (!fetchProxySingleton) {
+        proxyFetch();
+        fetchProxySingleton = {
+            beforeSend: function (callback) {
+                beforeSendCallbacks.push(callback);
+            },
+            onRequestComplete: function (callback) {
+                onRequestCompleteCallbacks.push(callback);
+            },
+        };
+    }
+    return fetchProxySingleton;
+}
+exports.startFetchProxy = startFetchProxy;
+function resetFetchProxy() {
+    if (fetchProxySingleton) {
+        fetchProxySingleton = undefined;
+        beforeSendCallbacks.splice(0, beforeSendCallbacks.length);
+        onRequestCompleteCallbacks.splice(0, onRequestCompleteCallbacks.length);
+        window.fetch = originalFetch;
+    }
+}
+exports.resetFetchProxy = resetFetchProxy;
+function proxyFetch() {
+    if (!window.fetch) {
+        return;
+    }
+    originalFetch = window.fetch;
+    // tslint:disable promise-function-async
+    window.fetch = internalMonitoring_1.monitor(function (input, init) {
+        var _this = this;
+        var method = (init && init.method) || (typeof input === 'object' && input.method) || 'GET';
+        var url = urlPolyfill_1.normalizeUrl((typeof input === 'object' && input.url) || input);
+        var startTime = performance.now();
+        var context = {
+            init: init,
+            method: method,
+            startTime: startTime,
+            url: url,
+        };
+        var reportFetch = function (response) { return tslib_1.__awaiter(_this, void 0, void 0, function () {
+            var text, e_1;
+            return tslib_1.__generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        context.duration = performance.now() - context.startTime;
+                        if (!('stack' in response || response instanceof Error)) return [3 /*break*/, 1];
+                        context.status = 0;
+                        context.response = error_1.toStackTraceString(tracekit_1.computeStackTrace(response));
+                        onRequestCompleteCallbacks.forEach(function (callback) { return callback(context); });
+                        return [3 /*break*/, 6];
+                    case 1:
+                        if (!('status' in response)) return [3 /*break*/, 6];
+                        text = void 0;
+                        _a.label = 2;
+                    case 2:
+                        _a.trys.push([2, 4, , 5]);
+                        return [4 /*yield*/, response.clone().text()];
+                    case 3:
+                        text = _a.sent();
+                        return [3 /*break*/, 5];
+                    case 4:
+                        e_1 = _a.sent();
+                        text = "Unable to retrieve response: " + e_1;
+                        return [3 /*break*/, 5];
+                    case 5:
+                        context.response = text;
+                        context.responseType = response.type;
+                        context.status = response.status;
+                        onRequestCompleteCallbacks.forEach(function (callback) { return callback(context); });
+                        _a.label = 6;
+                    case 6: return [2 /*return*/];
+                }
+            });
+        }); };
+        beforeSendCallbacks.forEach(function (callback) { return callback(context); });
+        var responsePromise = originalFetch.call(this, input, context.init);
+        responsePromise.then(internalMonitoring_1.monitor(reportFetch), internalMonitoring_1.monitor(reportFetch));
+        return responsePromise;
+    });
+}
+
+},{"tslib":"1HNh1","../domain/internalMonitoring":"6aOch","../domain/tracekit":"6sYSi","../tools/error":"3YCTH","../tools/urlPolyfill":"2AjnY"}],"CBu8R":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var internalMonitoring_1 = require("../domain/internalMonitoring");
+var urlPolyfill_1 = require("../tools/urlPolyfill");
+var xhrProxySingleton;
+var beforeSendCallbacks = [];
+var onRequestCompleteCallbacks = [];
+var originalXhrOpen;
+var originalXhrSend;
+function startXhrProxy() {
+    if (!xhrProxySingleton) {
+        proxyXhr();
+        xhrProxySingleton = {
+            beforeSend: function (callback) {
+                beforeSendCallbacks.push(callback);
+            },
+            onRequestComplete: function (callback) {
+                onRequestCompleteCallbacks.push(callback);
+            },
+        };
+    }
+    return xhrProxySingleton;
+}
+exports.startXhrProxy = startXhrProxy;
+function resetXhrProxy() {
+    if (xhrProxySingleton) {
+        xhrProxySingleton = undefined;
+        beforeSendCallbacks.splice(0, beforeSendCallbacks.length);
+        onRequestCompleteCallbacks.splice(0, onRequestCompleteCallbacks.length);
+        XMLHttpRequest.prototype.open = originalXhrOpen;
+        XMLHttpRequest.prototype.send = originalXhrSend;
+    }
+}
+exports.resetXhrProxy = resetXhrProxy;
+function proxyXhr() {
+    originalXhrOpen = XMLHttpRequest.prototype.open;
+    originalXhrSend = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.open = internalMonitoring_1.monitor(function (method, url) {
+        // WARN: since this data structure is tied to the instance, it is shared by both logs and rum
+        // and can be used by different code versions depending on customer setup
+        // so it should stay compatible with older versions
+        this._datadog_xhr = {
+            method: method,
+            startTime: -1,
+            url: urlPolyfill_1.normalizeUrl(url),
+        };
+        return originalXhrOpen.apply(this, arguments);
+    });
+    XMLHttpRequest.prototype.send = internalMonitoring_1.monitor(function (body) {
+        var _this = this;
+        if (this._datadog_xhr) {
+            this._datadog_xhr.startTime = performance.now();
+            var originalOnreadystatechange_1 = this.onreadystatechange;
+            this.onreadystatechange = function () {
+                if (this.readyState === XMLHttpRequest.DONE) {
+                    internalMonitoring_1.monitor(reportXhr_1)();
+                }
+                if (originalOnreadystatechange_1) {
+                    originalOnreadystatechange_1.apply(this, arguments);
+                }
+            };
+            var hasBeenReported_1 = false;
+            var reportXhr_1 = function () {
+                if (hasBeenReported_1) {
+                    return;
+                }
+                hasBeenReported_1 = true;
+                _this._datadog_xhr.duration = performance.now() - _this._datadog_xhr.startTime;
+                _this._datadog_xhr.response = _this.response;
+                _this._datadog_xhr.status = _this.status;
+                onRequestCompleteCallbacks.forEach(function (callback) { return callback(_this._datadog_xhr); });
+            };
+            this.addEventListener('loadend', internalMonitoring_1.monitor(reportXhr_1));
+            beforeSendCallbacks.forEach(function (callback) { return callback(_this._datadog_xhr, _this); });
+        }
+        return originalXhrSend.apply(this, arguments);
+    });
+}
+
+},{"../domain/internalMonitoring":"6aOch","../tools/urlPolyfill":"2AjnY"}],"3fI3y":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var Observable = /** @class */ (function () {
+    function Observable() {
+        this.observers = [];
+    }
+    Observable.prototype.subscribe = function (f) {
+        this.observers.push(f);
+    };
+    Observable.prototype.notify = function (data) {
+        this.observers.forEach(function (observer) { return observer(data); });
+    };
+    return Observable;
+}());
+exports.Observable = Observable;
+
+},{}],"6d6tu":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = require("tslib");
+var cookie_1 = require("../browser/cookie");
+var observable_1 = require("../tools/observable");
+var utils = tslib_1.__importStar(require("../tools/utils"));
+var internalMonitoring_1 = require("./internalMonitoring");
+var oldCookiesMigration_1 = require("./oldCookiesMigration");
+exports.SESSION_COOKIE_NAME = '_dd_s';
+exports.SESSION_EXPIRATION_DELAY = 15 * utils.ONE_MINUTE;
+exports.SESSION_TIME_OUT_DELAY = 4 * utils.ONE_HOUR;
+exports.VISIBILITY_CHECK_DELAY = utils.ONE_MINUTE;
+/**
+ * Limit access to cookie to avoid performance issues
+ */
+function startSessionManagement(options, productKey, computeSessionState) {
+    var sessionCookie = cookie_1.cacheCookieAccess(exports.SESSION_COOKIE_NAME, options);
+    oldCookiesMigration_1.tryOldCookiesMigration(sessionCookie);
+    var renewObservable = new observable_1.Observable();
+    var currentSessionId = retrieveActiveSession(sessionCookie).id;
+    var expandOrRenewSession = utils.throttle(function () {
+        var session = retrieveActiveSession(sessionCookie);
+        var _a = computeSessionState(session[productKey]), trackingType = _a.trackingType, isTracked = _a.isTracked;
+        session[productKey] = trackingType;
+        if (isTracked && !session.id) {
+            session.id = utils.generateUUID();
+            session.created = String(Date.now());
+        }
+        // save changes and expand session duration
+        persistSession(session, sessionCookie);
+        // If the session id has changed, notify that the session has been renewed
+        if (isTracked && currentSessionId !== session.id) {
+            currentSessionId = session.id;
+            renewObservable.notify();
+        }
+    }, cookie_1.COOKIE_ACCESS_DELAY).throttled;
+    var expandSession = function () {
+        var session = retrieveActiveSession(sessionCookie);
+        persistSession(session, sessionCookie);
+    };
+    expandOrRenewSession();
+    trackActivity(expandOrRenewSession);
+    trackVisibility(expandSession);
+    return {
+        getId: function () {
+            return retrieveActiveSession(sessionCookie).id;
+        },
+        getTrackingType: function () {
+            return retrieveActiveSession(sessionCookie)[productKey];
+        },
+        renewObservable: renewObservable,
+    };
+}
+exports.startSessionManagement = startSessionManagement;
+var SESSION_ENTRY_REGEXP = /^([a-z]+)=([a-z0-9-]+)$/;
+var SESSION_ENTRY_SEPARATOR = '&';
+function isValidSessionString(sessionString) {
+    return (sessionString !== undefined &&
+        (sessionString.indexOf(SESSION_ENTRY_SEPARATOR) !== -1 || SESSION_ENTRY_REGEXP.test(sessionString)));
+}
+exports.isValidSessionString = isValidSessionString;
+function retrieveActiveSession(sessionCookie) {
+    var session = retrieveSession(sessionCookie);
+    if (isActiveSession(session)) {
+        return session;
+    }
+    clearSession(sessionCookie);
+    return {};
+}
+function isActiveSession(session) {
+    // created and expire can be undefined for versions which was not storing them
+    // these checks could be removed when older versions will not be available/live anymore
+    return ((session.created === undefined || Date.now() - Number(session.created) < exports.SESSION_TIME_OUT_DELAY) &&
+        (session.expire === undefined || Date.now() < Number(session.expire)));
+}
+function retrieveSession(sessionCookie) {
+    var sessionString = sessionCookie.get();
+    var session = {};
+    if (isValidSessionString(sessionString)) {
+        sessionString.split(SESSION_ENTRY_SEPARATOR).forEach(function (entry) {
+            var matches = SESSION_ENTRY_REGEXP.exec(entry);
+            if (matches !== null) {
+                var key = matches[1], value = matches[2];
+                session[key] = value;
+            }
+        });
+    }
+    return session;
+}
+function persistSession(session, cookie) {
+    if (utils.isEmptyObject(session)) {
+        clearSession(cookie);
+        return;
+    }
+    session.expire = String(Date.now() + exports.SESSION_EXPIRATION_DELAY);
+    var cookieString = utils
+        .objectEntries(session)
+        .map(function (_a) {
+        var key = _a[0], value = _a[1];
+        return key + "=" + value;
+    })
+        .join(SESSION_ENTRY_SEPARATOR);
+    cookie.set(cookieString, exports.SESSION_EXPIRATION_DELAY);
+}
+exports.persistSession = persistSession;
+function clearSession(cookie) {
+    cookie.set('', 0);
+}
+function stopSessionManagement() {
+    stopCallbacks.forEach(function (e) { return e(); });
+    stopCallbacks = [];
+}
+exports.stopSessionManagement = stopSessionManagement;
+var stopCallbacks = [];
+function trackActivity(expandOrRenewSession) {
+    var stop = utils.addEventListeners(window, [utils.DOM_EVENT.CLICK, utils.DOM_EVENT.TOUCH_START, utils.DOM_EVENT.KEY_DOWN, utils.DOM_EVENT.SCROLL], expandOrRenewSession, { capture: true, passive: true }).stop;
+    stopCallbacks.push(stop);
+}
+exports.trackActivity = trackActivity;
+function trackVisibility(expandSession) {
+    var expandSessionWhenVisible = internalMonitoring_1.monitor(function () {
+        if (document.visibilityState === 'visible') {
+            expandSession();
+        }
+    });
+    var stop = utils.addEventListener(document, utils.DOM_EVENT.VISIBILITY_CHANGE, expandSessionWhenVisible).stop;
+    stopCallbacks.push(stop);
+    var visibilityCheckInterval = window.setInterval(expandSessionWhenVisible, exports.VISIBILITY_CHECK_DELAY);
+    stopCallbacks.push(function () {
+        clearInterval(visibilityCheckInterval);
+    });
+}
+
+},{"tslib":"1HNh1","../browser/cookie":"5eo0G","../tools/observable":"3fI3y","../tools/utils":"1WfUQ","./internalMonitoring":"6aOch","./oldCookiesMigration":"4C14P"}],"4C14P":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var cookie_1 = require("../browser/cookie");
+var sessionManagement_1 = require("./sessionManagement");
+exports.OLD_SESSION_COOKIE_NAME = '_dd';
+exports.OLD_RUM_COOKIE_NAME = '_dd_r';
+exports.OLD_LOGS_COOKIE_NAME = '_dd_l';
+// duplicate values to avoid dependency issues
+exports.RUM_SESSION_KEY = 'rum';
+exports.LOGS_SESSION_KEY = 'logs';
+/**
+ * This migration should remain in the codebase as long as older versions are available/live
+ * to allow older sdk versions to be upgraded to newer versions without compatibility issues.
+ */
+function tryOldCookiesMigration(sessionCookie) {
+    var sessionString = sessionCookie.get();
+    var oldSessionId = cookie_1.getCookie(exports.OLD_SESSION_COOKIE_NAME);
+    var oldRumType = cookie_1.getCookie(exports.OLD_RUM_COOKIE_NAME);
+    var oldLogsType = cookie_1.getCookie(exports.OLD_LOGS_COOKIE_NAME);
+    if (!sessionString) {
+        var session = {};
+        if (oldSessionId) {
+            session.id = oldSessionId;
+        }
+        if (oldLogsType && /^[01]$/.test(oldLogsType)) {
+            session[exports.LOGS_SESSION_KEY] = oldLogsType;
+        }
+        if (oldRumType && /^[012]$/.test(oldRumType)) {
+            session[exports.RUM_SESSION_KEY] = oldRumType;
+        }
+        sessionManagement_1.persistSession(session, sessionCookie);
+    }
+}
+exports.tryOldCookiesMigration = tryOldCookiesMigration;
+
+},{"../browser/cookie":"5eo0G","./sessionManagement":"6d6tu"}],"5s7rp":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var DEFAULT_LIMIT = 10000;
+var BoundedBuffer = /** @class */ (function () {
+    function BoundedBuffer(limit) {
+        if (limit === void 0) { limit = DEFAULT_LIMIT; }
+        this.limit = limit;
+        this.buffer = [];
+    }
+    BoundedBuffer.prototype.add = function (item) {
+        var length = this.buffer.push(item);
+        if (length > this.limit) {
+            this.buffer.splice(0, 1);
+        }
+    };
+    BoundedBuffer.prototype.drain = function (fn) {
+        this.buffer.forEach(function (item) { return fn(item); });
+        this.buffer.length = 0;
+    };
+    return BoundedBuffer;
+}());
+exports.BoundedBuffer = BoundedBuffer;
+
+},{}],"1veVv":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function createContextManager() {
+    var context = {};
+    return {
+        get: function () {
+            return context;
+        },
+        add: function (key, value) {
+            context[key] = value;
+        },
+        remove: function (key) {
+            delete context[key];
+        },
+        set: function (newContext) {
+            context = newContext;
+        },
+    };
+}
+exports.createContextManager = createContextManager;
+
+},{}],"5IBzO":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = require("tslib");
+var utils_1 = require("./utils");
+exports.SPEC_ENDPOINTS = {
+    internalMonitoringEndpoint: 'https://monitoring-intake.com/v1/input/abcde?foo=bar',
+    logsEndpoint: 'https://logs-intake.com/v1/input/abcde?foo=bar',
+    rumEndpoint: 'https://rum-intake.com/v1/input/abcde?foo=bar',
+    traceEndpoint: 'https://trace-intake.com/v1/input/abcde?foo=bar',
+};
+function isSafari() {
+    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+}
+exports.isSafari = isSafari;
+function isFirefox() {
+    return navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+}
+exports.isFirefox = isFirefox;
+function isIE() {
+    return navigator.userAgent.indexOf('MSIE ') > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./);
+}
+exports.isIE = isIE;
+function clearAllCookies() {
+    document.cookie.split(';').forEach(function (c) {
+        document.cookie = c.replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/;samesite=strict");
+    });
+}
+exports.clearAllCookies = clearAllCookies;
+function stubFetch() {
+    var _this = this;
+    var originalFetch = window.fetch;
+    var allFetchCompleteCallback = utils_1.noop;
+    var pendingRequests = 0;
+    function onRequestEnd() {
+        pendingRequests -= 1;
+        if (pendingRequests === 0) {
+            setTimeout(function () { return allFetchCompleteCallback(); });
+        }
+    }
+    window.fetch = (function () {
+        pendingRequests += 1;
+        var resolve;
+        var reject;
+        var promise = new Promise(function (res, rej) {
+            resolve = res;
+            reject = rej;
+        });
+        promise.resolveWith = function (response) { return tslib_1.__awaiter(_this, void 0, void 0, function () {
+            var resolved;
+            var _this = this;
+            return tslib_1.__generator(this, function (_a) {
+                resolved = resolve(tslib_1.__assign(tslib_1.__assign({}, response), { clone: function () {
+                        var cloned = {
+                            text: function () { return tslib_1.__awaiter(_this, void 0, void 0, function () {
+                                return tslib_1.__generator(this, function (_a) {
+                                    if (response.responseTextError) {
+                                        throw response.responseTextError;
+                                    }
+                                    return [2 /*return*/, response.responseText];
+                                });
+                            }); },
+                        };
+                        return cloned;
+                    } }));
+                onRequestEnd();
+                return [2 /*return*/, resolved];
+            });
+        }); };
+        promise.rejectWith = function (error) { return tslib_1.__awaiter(_this, void 0, void 0, function () {
+            var rejected;
+            return tslib_1.__generator(this, function (_a) {
+                rejected = reject(error);
+                onRequestEnd();
+                return [2 /*return*/, rejected];
+            });
+        }); };
+        return promise;
+    });
+    return {
+        whenAllComplete: function (callback) {
+            allFetchCompleteCallback = callback;
+        },
+        reset: function () {
+            window.fetch = originalFetch;
+            allFetchCompleteCallback = utils_1.noop;
+        },
+    };
+}
+exports.stubFetch = stubFetch;
+var StubXhr = /** @class */ (function () {
+    function StubXhr() {
+        this.response = undefined;
+        this.status = undefined;
+        this.readyState = XMLHttpRequest.UNSENT;
+        this.onreadystatechange = utils_1.noop;
+        this.fakeEventTarget = document.createElement('div');
+    }
+    // tslint:disable:no-empty
+    StubXhr.prototype.open = function (method, url) { };
+    StubXhr.prototype.send = function () { };
+    // tslint:enable:no-empty
+    StubXhr.prototype.abort = function () {
+        this.status = 0;
+    };
+    StubXhr.prototype.complete = function (status, response) {
+        this.response = response;
+        this.status = status;
+        this.readyState = XMLHttpRequest.DONE;
+        this.onreadystatechange();
+        if (status >= 200 && status < 500) {
+            this.dispatchEvent('load');
+        }
+        if (status >= 500) {
+            this.dispatchEvent('error');
+        }
+        this.dispatchEvent('loadend');
+    };
+    StubXhr.prototype.addEventListener = function (name, callback) {
+        this.fakeEventTarget.addEventListener(name, callback);
+    };
+    StubXhr.prototype.dispatchEvent = function (name) {
+        this.fakeEventTarget.dispatchEvent(createNewEvent(name));
+    };
+    return StubXhr;
+}());
+function createNewEvent(eventName, properties) {
+    if (properties === void 0) { properties = {}; }
+    var event;
+    if (typeof Event === 'function') {
+        event = new Event(eventName);
+    }
+    else {
+        event = document.createEvent('Event');
+        event.initEvent(eventName, true, true);
+    }
+    utils_1.objectEntries(properties).forEach(function (_a) {
+        var name = _a[0], value = _a[1];
+        // Setting values directly or with a `value` descriptor seems unsupported in IE11
+        Object.defineProperty(event, name, {
+            get: function () {
+                return value;
+            },
+        });
+    });
+    return event;
+}
+exports.createNewEvent = createNewEvent;
+function stubXhr() {
+    var originalXhr = XMLHttpRequest;
+    XMLHttpRequest = StubXhr;
+    return {
+        reset: function () {
+            XMLHttpRequest = originalXhr;
+        },
+    };
+}
+exports.stubXhr = stubXhr;
+function withXhr(_a) {
+    var setup = _a.setup, onComplete = _a.onComplete;
+    var xhr = new XMLHttpRequest();
+    xhr.addEventListener('loadend', function () {
+        setTimeout(function () {
+            onComplete(xhr);
+        });
+    });
+    setup(xhr);
+}
+exports.withXhr = withXhr;
+function setPageVisibility(visibility) {
+    Object.defineProperty(document, 'visibilityState', {
+        get: function () {
+            return visibility;
+        },
+        configurable: true,
+    });
+}
+exports.setPageVisibility = setPageVisibility;
+function restorePageVisibility() {
+    delete document.visibilityState;
+}
+exports.restorePageVisibility = restorePageVisibility;
+
+},{"tslib":"1HNh1","./utils":"1WfUQ"}],"1Gn4x":[function(require,module,exports) {
+"use strict";
+var _a;
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = require("tslib");
+var browser_core_1 = require("@datadog/browser-core");
+var StatusType;
+(function (StatusType) {
+    StatusType["debug"] = "debug";
+    StatusType["info"] = "info";
+    StatusType["warn"] = "warn";
+    StatusType["error"] = "error";
+})(StatusType = exports.StatusType || (exports.StatusType = {}));
+exports.STATUS_PRIORITIES = (_a = {},
+    _a[StatusType.debug] = 0,
+    _a[StatusType.info] = 1,
+    _a[StatusType.warn] = 2,
+    _a[StatusType.error] = 3,
+    _a);
+exports.STATUSES = Object.keys(StatusType);
+var HandlerType;
+(function (HandlerType) {
+    HandlerType["http"] = "http";
+    HandlerType["console"] = "console";
+    HandlerType["silent"] = "silent";
+})(HandlerType = exports.HandlerType || (exports.HandlerType = {}));
+var Logger = /** @class */ (function () {
+    function Logger(sendLog, handlerType, level, loggerContext) {
+        if (handlerType === void 0) { handlerType = HandlerType.http; }
+        if (level === void 0) { level = StatusType.debug; }
+        if (loggerContext === void 0) { loggerContext = {}; }
+        this.sendLog = sendLog;
+        this.handlerType = handlerType;
+        this.level = level;
+        this.contextManager = browser_core_1.createContextManager();
+        this.contextManager.set(loggerContext);
+    }
+    Logger.prototype.log = function (message, messageContext, status) {
+        if (status === void 0) { status = StatusType.info; }
+        if (exports.STATUS_PRIORITIES[status] >= exports.STATUS_PRIORITIES[this.level]) {
+            switch (this.handlerType) {
+                case HandlerType.http:
+                    this.sendLog(tslib_1.__assign({ message: message,
+                        status: status }, browser_core_1.combine(this.contextManager.get(), messageContext)));
+                    break;
+                case HandlerType.console:
+                    console.log(status + ": " + message, browser_core_1.combine(this.contextManager.get(), messageContext));
+                    break;
+                case HandlerType.silent:
+                    break;
+            }
+        }
+    };
+    Logger.prototype.debug = function (message, messageContext) {
+        this.log(message, messageContext, StatusType.debug);
+    };
+    Logger.prototype.info = function (message, messageContext) {
+        this.log(message, messageContext, StatusType.info);
+    };
+    Logger.prototype.warn = function (message, messageContext) {
+        this.log(message, messageContext, StatusType.warn);
+    };
+    Logger.prototype.error = function (message, messageContext) {
+        var errorOrigin = {
+            error: {
+                origin: browser_core_1.ErrorSource.LOGGER,
+            },
+        };
+        this.log(message, browser_core_1.combine(errorOrigin, messageContext), StatusType.error);
+    };
+    Logger.prototype.setContext = function (context) {
+        this.contextManager.set(context);
+    };
+    Logger.prototype.addContext = function (key, value) {
+        this.contextManager.add(key, value);
+    };
+    Logger.prototype.removeContext = function (key) {
+        this.contextManager.remove(key);
+    };
+    Logger.prototype.setHandler = function (handler) {
+        this.handlerType = handler;
+    };
+    Logger.prototype.setLevel = function (level) {
+        this.level = level;
+    };
+    tslib_1.__decorate([
+        browser_core_1.monitored
+    ], Logger.prototype, "log", null);
+    return Logger;
+}());
+exports.Logger = Logger;
+
+},{"tslib":"1HNh1","@datadog/browser-core":"4FRJa"}],"6iMA3":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = require("tslib");
+var browser_core_1 = require("@datadog/browser-core");
+var logger_1 = require("../domain/logger");
+var logs_1 = require("./logs");
+exports.datadogLogs = makeLogsGlobal(logs_1.startLogs);
+browser_core_1.defineGlobal(browser_core_1.getGlobalObject(), 'DD_LOGS', exports.datadogLogs);
+function makeLogsGlobal(startLogsImpl) {
+    var isAlreadyInitialized = false;
+    var globalContextManager = browser_core_1.createContextManager();
+    var customLoggers = {};
+    var beforeInitSendLog = new browser_core_1.BoundedBuffer();
+    var sendLogStrategy = function (message, currentContext) {
+        beforeInitSendLog.add([message, currentContext]);
+    };
+    var logger = new logger_1.Logger(sendLog);
+    return browser_core_1.makeGlobal({
+        logger: logger,
+        init: browser_core_1.monitor(function (userConfiguration) {
+            if (!browser_core_1.checkIsNotLocalFile() || !canInitLogs(userConfiguration)) {
+                return;
+            }
+            if (userConfiguration.publicApiKey) {
+                userConfiguration.clientToken = userConfiguration.publicApiKey;
+                console.warn('Public API Key is deprecated. Please use Client Token instead.');
+            }
+            sendLogStrategy = startLogsImpl(userConfiguration, logger, globalContextManager.get);
+            beforeInitSendLog.drain(function (_a) {
+                var message = _a[0], context = _a[1];
+                return sendLogStrategy(message, context);
+            });
+            isAlreadyInitialized = true;
+        }),
+        getLoggerGlobalContext: browser_core_1.monitor(globalContextManager.get),
+        setLoggerGlobalContext: browser_core_1.monitor(globalContextManager.set),
+        addLoggerGlobalContext: browser_core_1.monitor(globalContextManager.add),
+        removeLoggerGlobalContext: browser_core_1.monitor(globalContextManager.remove),
+        createLogger: browser_core_1.monitor(function (name, conf) {
+            if (conf === void 0) { conf = {}; }
+            customLoggers[name] = new logger_1.Logger(sendLog, conf.handler, conf.level, tslib_1.__assign(tslib_1.__assign({}, conf.context), { logger: { name: name } }));
+            return customLoggers[name];
+        }),
+        getLogger: browser_core_1.monitor(function (name) {
+            return customLoggers[name];
+        }),
+    });
+    function canInitLogs(userConfiguration) {
+        if (isAlreadyInitialized) {
+            if (!userConfiguration.silentMultipleInit) {
+                console.error('DD_LOGS is already initialized.');
+            }
+            return false;
+        }
+        if (!userConfiguration || (!userConfiguration.publicApiKey && !userConfiguration.clientToken)) {
+            console.error('Client Token is not configured, we will not send any data.');
+            return false;
+        }
+        if (userConfiguration.sampleRate !== undefined && !browser_core_1.isPercentage(userConfiguration.sampleRate)) {
+            console.error('Sample Rate should be a number between 0 and 100');
+            return false;
+        }
+        return true;
+    }
+    function sendLog(message) {
+        sendLogStrategy(message, browser_core_1.combine({
+            date: Date.now(),
+            view: {
+                referrer: document.referrer,
+                url: window.location.href,
+            },
+        }, globalContextManager.get()));
+    }
+}
+exports.makeLogsGlobal = makeLogsGlobal;
+
+},{"tslib":"1HNh1","@datadog/browser-core":"4FRJa","../domain/logger":"1Gn4x","./logs":"1xvTq"}],"1xvTq":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var browser_core_1 = require("@datadog/browser-core");
+var loggerSession_1 = require("../domain/loggerSession");
+var buildEnv_1 = require("./buildEnv");
+function startLogs(userConfiguration, errorLogger, getGlobalContext) {
+    var _a = browser_core_1.commonInit(userConfiguration, buildEnv_1.buildEnv), configuration = _a.configuration, internalMonitoring = _a.internalMonitoring;
+    var errorObservable = userConfiguration.forwardErrorsToLogs !== false
+        ? browser_core_1.startAutomaticErrorCollection(configuration)
+        : new browser_core_1.Observable();
+    var session = loggerSession_1.startLoggerSession(configuration, browser_core_1.areCookiesAuthorized(configuration.cookieOptions));
+    return doStartLogs(configuration, errorObservable, internalMonitoring, session, errorLogger, getGlobalContext);
+}
+exports.startLogs = startLogs;
+function doStartLogs(configuration, errorObservable, internalMonitoring, session, errorLogger, getGlobalContext) {
+    internalMonitoring.setExternalContextProvider(function () {
+        return browser_core_1.combine({ session_id: session.getId() }, getGlobalContext(), getRUMInternalContext());
+    });
+    var batch = startLoggerBatch(configuration, session);
+    errorObservable.subscribe(function (error) {
+        errorLogger.error(error.message, browser_core_1.combine({
+            date: browser_core_1.getTimestamp(error.startTime),
+            error: {
+                kind: error.type,
+                origin: error.source,
+                stack: error.stack,
+            },
+        }, error.resource
+            ? {
+                http: {
+                    method: error.resource.method,
+                    status_code: error.resource.statusCode,
+                    url: error.resource.url,
+                },
+            }
+            : undefined, getRUMInternalContext(error.startTime)));
+    });
+    return function (message, currentContext) {
+        if (session.isTracked()) {
+            batch.add(message, currentContext);
+        }
+    };
+}
+exports.doStartLogs = doStartLogs;
+function startLoggerBatch(configuration, session) {
+    var primaryBatch = createLoggerBatch(configuration.logsEndpoint);
+    var replicaBatch;
+    if (configuration.replica !== undefined) {
+        replicaBatch = createLoggerBatch(configuration.replica.logsEndpoint);
+    }
+    function createLoggerBatch(endpointUrl) {
+        return new browser_core_1.Batch(new browser_core_1.HttpRequest(endpointUrl, configuration.batchBytesLimit), configuration.maxBatchSize, configuration.batchBytesLimit, configuration.maxMessageSize, configuration.flushTimeout);
+    }
+    return {
+        add: function (message, currentContext) {
+            var contextualizedMessage = assembleMessageContexts({ service: configuration.service, session_id: session.getId() }, currentContext, getRUMInternalContext(), message);
+            primaryBatch.add(contextualizedMessage);
+            if (replicaBatch) {
+                replicaBatch.add(contextualizedMessage);
+            }
+        },
+    };
+}
+function assembleMessageContexts(defaultContext, currentContext, rumInternalContext, message) {
+    return browser_core_1.combine(defaultContext, currentContext, rumInternalContext, message);
+}
+exports.assembleMessageContexts = assembleMessageContexts;
+function getRUMInternalContext(startTime) {
+    var rum = window.DD_RUM;
+    return rum && rum.getInternalContext ? rum.getInternalContext(startTime) : undefined;
+}
+
+},{"@datadog/browser-core":"4FRJa","../domain/loggerSession":"4y2Mr","./buildEnv":"x9t6f"}],"4y2Mr":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var browser_core_1 = require("@datadog/browser-core");
+exports.LOGGER_SESSION_KEY = 'logs';
+var LoggerTrackingType;
+(function (LoggerTrackingType) {
+    LoggerTrackingType["NOT_TRACKED"] = "0";
+    LoggerTrackingType["TRACKED"] = "1";
+})(LoggerTrackingType = exports.LoggerTrackingType || (exports.LoggerTrackingType = {}));
+function startLoggerSession(configuration, areCookieAuthorized) {
+    if (!areCookieAuthorized) {
+        var isTracked_1 = computeTrackingType(configuration) === LoggerTrackingType.TRACKED;
+        return {
+            getId: function () { return undefined; },
+            isTracked: function () { return isTracked_1; },
+        };
+    }
+    var session = browser_core_1.startSessionManagement(configuration.cookieOptions, exports.LOGGER_SESSION_KEY, function (rawTrackingType) {
+        return computeSessionState(configuration, rawTrackingType);
+    });
+    return {
+        getId: session.getId,
+        isTracked: function () { return session.getTrackingType() === LoggerTrackingType.TRACKED; },
+    };
+}
+exports.startLoggerSession = startLoggerSession;
+function computeTrackingType(configuration) {
+    if (!browser_core_1.performDraw(configuration.sampleRate)) {
+        return LoggerTrackingType.NOT_TRACKED;
+    }
+    return LoggerTrackingType.TRACKED;
+}
+function computeSessionState(configuration, rawSessionType) {
+    var trackingType = hasValidLoggerSession(rawSessionType) ? rawSessionType : computeTrackingType(configuration);
+    return {
+        trackingType: trackingType,
+        isTracked: trackingType === LoggerTrackingType.TRACKED,
+    };
+}
+function hasValidLoggerSession(trackingType) {
+    return trackingType === LoggerTrackingType.NOT_TRACKED || trackingType === LoggerTrackingType.TRACKED;
+}
+
+},{"@datadog/browser-core":"4FRJa"}],"x9t6f":[function(require,module,exports) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildEnv = {
+    buildMode: 'release',
+    datacenter: 'us',
+    sdkVersion: '1.26.1',
+};
+
+},{}]},{},["UL4Xj","1NdLb"], "1NdLb", "parcelRequireabbc")
+
+//# sourceMappingURL=index.235c9063.js.map

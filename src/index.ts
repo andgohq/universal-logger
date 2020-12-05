@@ -64,10 +64,12 @@ const baseLogger = pino({
       const timeLabel = format(new Date(time), 'HH:mm:ss', { locale: ja });
       const levelLabel = PINO_TO_CONSOLE[baseLogger.levels.labels[`${level}`] as Level];
 
+      const s = `${timeLabel} [${module}] ${errMsg}${msg ?? ''}`;
+
       if (Object.keys(rest).length) {
-        console[levelLabel](`${timeLabel} ${errMsg}${msg ?? ''}`, rest);
+        console[levelLabel](s, rest);
       } else {
-        console[levelLabel](`${timeLabel} ${errMsg}${msg ?? ''}`);
+        console[levelLabel](s);
       }
 
       datadogMessage(msg ?? '', { ...rest }, levelLabel);

@@ -1,10 +1,10 @@
 import { Level, setLogLevel, logFactory } from './index';
 
-const logger = logFactory('Main');
-const childLogger = logFactory('Child');
-
 const output = (level: Level) => {
   setLogLevel(level);
+
+  const logger = logFactory('Main');
+  const childLogger = logFactory('Child');
 
   logger.fatal('fatal test');
 

@@ -39,7 +39,7 @@ logger.error(new Error('Something wrong'), 'optional error message: %2', 'REPLAC
 
 ```sh
 npm install
-npm start
+npm run dev
 
 ```
 
