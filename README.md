@@ -35,6 +35,18 @@ logger.error(new Error('Something wrong'), 'optional error message: %2', 'REPLAC
 
 ```
 
+## Pretty
+
+In nodejs environment, prettyPrint can be used.
+
+```sh
+npm install pino-pretty
+```
+
+```typescript
+setLogLevel('develop', true);
+```
+
 ## Develop
 
 ```sh

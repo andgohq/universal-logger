@@ -1,7 +1,7 @@
 import { Level, setLogLevel, logFactory } from './index';
 
-const output = (level: Level) => {
-  setLogLevel(level);
+export const output = (level: Level, pretty?: boolean) => {
+  setLogLevel(level, pretty);
 
   const logger = logFactory('Main');
   const childLogger = logFactory('Child');
@@ -23,9 +23,3 @@ const output = (level: Level) => {
 
   childLogger.info('Child');
 };
-
-console.log('=== DEBUG LEVEL ===');
-output('debug');
-
-console.log('=== INFO LEVEL ===');
-output('info');

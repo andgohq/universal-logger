@@ -5,8 +5,7 @@ import ja from 'date-fns/locale/ja';
 import { datadogLogs, StatusType, Datacenter } from '@datadog/browser-logs';
 import { Context } from '@datadog/browser-core';
 
-let DATADOG_INITIALIZED = false;
-let PRETTY_PRINT = false;
+const options = { datadogInitialized: false, logLevel: 'debug', prettyPrint: false };
 
 const PINO_TO_CONSOLE: Record<Level, StatusType> = {
   fatal: StatusType.error,
@@ -27,11 +26,11 @@ export function initDatadog(opts: { clientToken: string; applicationId: string }
     sampleRate: 100,
   });
 
-  DATADOG_INITIALIZED = true;
+  options.datadogInitialized = true;
 }
 
 export function datadogMessage(message: string, context?: Context, status?: StatusType) {
-  if (!DATADOG_INITIALIZED) {
+  if (!options.datadogInitialized) {
     return;
   }
 
@@ -44,42 +43,8 @@ export function datadogMessage(message: string, context?: Context, status?: Stat
   );
 }
 
-const baseLogger = pino({
-  prettyPrint: PRETTY_PRINT,
-  level: 'debug', // this is overwritten by setLogLevel
-  browser: {
-    serialize: true,
-    write: (o) => {
-      const { module, type, stack, level, time, msg, ...rest } = o as {
-        module: string;
-        type?: 'Error'; // exist when logger.error is used
-        stack?: string;
-        level: number; // this is not a label (maybe this is a spec. bug)
-        time: number;
-        msg?: string;
-      };
-
-      const errMsg = type === 'Error' ? `${stack?.split('\n')[0].substr(7)} ` ?? 'Error ' : '';
-
-      const timeLabel = format(new Date(time), 'HH:mm:ss', { locale: ja });
-      const levelLabel = PINO_TO_CONSOLE[baseLogger.levels.labels[`${level}`] as Level];
-
-      const s = `${timeLabel} [${module}] ${errMsg}${msg ?? ''}`;
-
-      if (Object.keys(rest).length) {
-        console[levelLabel](s, rest);
-      } else {
-        console[levelLabel](s);
-      }
-
-      datadogMessage(msg ?? '', { ...rest }, levelLabel);
-    },
-  },
-});
-
-export const setLogLevel = (level: Level, pretty = false) => {
-  baseLogger.level = level;
-  PRETTY_PRINT = pretty;
+export const setLogLevel = (logLevel: Level, prettyPrint = false) => {
+  Object.assign(options, { logLevel, prettyPrint });
 };
 
 export type AGLoggerFunc = (
@@ -96,8 +61,40 @@ export interface AGLogger {
   debug: AGLoggerFunc;
 }
 
-export const logFactory = (name: string): AGLogger => {
-  const _logger = baseLogger.child({ module: name });
+export const logFactory = (name: string): AGLogger =>
+  pino({
+    name,
+    prettyPrint: options.prettyPrint
+      ? {
+          translateTime: 'SYS:HH:mm:ss',
+        }
+      : false,
+    level: options.logLevel,
+    browser: {
+      serialize: true,
+      write: (o) => {
+        const { type, stack, level, time, msg, ...rest } = o as {
+          type?: 'Error'; // exist when logger.error is used
+          stack?: string; // exist when logger.error is used
+          level: number; // this is not a label (maybe this is a spec. bug)
+          time: number;
+          msg?: string;
+        };
 
-  return _logger;
-};
+        const errMsg = type === 'Error' ? `${stack?.split('\n')[0].substr(7)} ` ?? 'Error ' : '';
+
+        const timeLabel = format(new Date(time), 'HH:mm:ss', { locale: ja });
+        const levelLabel = PINO_TO_CONSOLE[pino.levels.labels[`${level}`] as Level];
+
+        const s = `${timeLabel} [${name}] ${errMsg}${msg ?? ''}`;
+
+        if (Object.keys(rest).length) {
+          console[levelLabel](s, rest);
+        } else {
+          console[levelLabel](s);
+        }
+
+        datadogMessage(msg ?? '', { ...rest }, levelLabel);
+      },
+    },
+  });
