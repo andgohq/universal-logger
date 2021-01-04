@@ -13,6 +13,7 @@ npm install @andgohq/universal-logger
 ```typescript
 import { setLogLevel, initDatadog, logFactory } from '@andgohq/universal-logger';
 
+// set output log level (default: LOG_LEVEL environment variable or 'develop')
 setLogLevel('develop');
 
 // optionally you can setup Datadog integration

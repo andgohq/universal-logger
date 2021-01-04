@@ -2,24 +2,26 @@ import pino, { Level } from 'pino';
 export type { Logger, Level } from 'pino';
 import { format } from 'date-fns';
 import ja from 'date-fns/locale/ja';
-import { datadogLogs, StatusType, Datacenter } from '@datadog/browser-logs';
+import { datadogLogs } from '@datadog/browser-logs';
 import { Context } from '@datadog/browser-core';
 
-const options = { datadogInitialized: false, logLevel: 'debug', prettyPrint: false };
+const options = { datadogInitialized: false, logLevel: process.env.LOG_LEVEL ?? 'debug', prettyPrint: false };
+
+export type StatusType = Exclude<Parameters<typeof datadogLogs['logger']['log']>[2], undefined>;
 
 const PINO_TO_CONSOLE: Record<Level, StatusType> = {
-  fatal: StatusType.error,
-  error: StatusType.error,
-  warn: StatusType.warn,
-  info: StatusType.info,
-  debug: StatusType.debug,
-  trace: StatusType.info,
+  fatal: 'error',
+  error: 'error',
+  warn: 'warn',
+  info: 'info',
+  debug: 'debug',
+  trace: 'info',
 };
 
 export function initDatadog(opts: { clientToken: string; applicationId: string }) {
   datadogLogs.init({
     clientToken: opts.clientToken,
-    datacenter: Datacenter.US,
+    datacenter: 'us',
     applicationId: opts.applicationId,
     silentMultipleInit: true,
     forwardErrorsToLogs: true,

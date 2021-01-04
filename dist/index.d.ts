@@ -1,7 +1,8 @@
 import { Level } from "pino";
-import { StatusType } from "@datadog/browser-logs";
+import { datadogLogs } from "@datadog/browser-logs";
 import { Context } from "@datadog/browser-core";
 export type { Logger, Level } from 'pino';
+export type StatusType = Exclude<Parameters<typeof datadogLogs['logger']['log']>[2], undefined>;
 export function initDatadog(opts: {
     clientToken: string;
     applicationId: string;
