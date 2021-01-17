@@ -1,6 +1,6 @@
 {
   "name": "@andgohq/universal-logger",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Logger for brower, nodejs and electron",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
@@ -38,16 +38,16 @@
     "pino-pretty": "^4.3.0"
   },
   "dependencies": {
-    "@datadog/browser-logs": "^2.1.1",
+    "@datadog/browser-logs": "^2.2.1",
     "date-fns": "^2.16.1",
-    "pino": "^6.9.0"
+    "pino": "^6.11.0"
   },
   "devDependencies": {
     "@andgohq/eslint-config-ts": "^1.2.0",
     "@andgohq/prettier-config": "^1.0.1",
-    "@types/pino": "^6.3.4",
-    "@typescript-eslint/eslint-plugin": "^4.11.1",
-    "eslint": "^7.17.0",
+    "@types/pino": "^6.3.5",
+    "@typescript-eslint/eslint-plugin": "^4.13.0",
+    "eslint": "^7.18.0",
     "parcel": "^2.0.0-nightly.506",
     "pino-pretty": "^4.3.0",
     "prettier": "^2.2.1",

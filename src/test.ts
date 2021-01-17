@@ -6,13 +6,13 @@ export const output = (level: Level, pretty?: boolean) => {
   const logger = logFactory('Main');
   const childLogger = logFactory('Child');
 
-  logger.fatal('fatal test');
+  logger.fatal('fatal message');
 
-  logger.error('error test');
-  logger.error({ param1: 'value1', param2: 123 }, 'error test');
-  logger.error(new Error('ERROR TEST'));
-  logger.error(new Error('ERROR TEST'), 'error message');
-  logger.error(new Error('ERROR TEST'), 'error message: %s', 'REPLACE');
+  logger.error('error message');
+  logger.error({ param1: 'value1', param2: 123 }, 'error message');
+  logger.error(new Error('ERROR_TEST'));
+  logger.error(new Error('ERROR_TEST'), 'error message');
+  logger.error(new Error('ERROR_TEST'), 'error message: %s', 'REPLACE');
 
   logger.warn('warn test');
 

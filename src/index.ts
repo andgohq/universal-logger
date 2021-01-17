@@ -84,12 +84,10 @@ export const logFactory = (name: string): AGLogger =>
           msg?: string;
         };
 
-        const errMsg = type === 'Error' ? `${stack?.split('\n')[0].substr(7)} ` ?? 'Error ' : '';
-
         const timeLabel = format(new Date(time), 'HH:mm:ss', { locale: ja });
         const levelLabel = PINO_TO_CONSOLE[pino.levels.labels[`${level}`] as Level];
 
-        const s = `${timeLabel} [${name}] ${errMsg}${msg ?? ''}`;
+        const s = `${timeLabel} [${name}] ${msg ?? ''}`;
 
         if (Object.keys(rest).length) {
           console[levelLabel](s, rest);
