@@ -5,7 +5,12 @@ import ja from 'date-fns/locale/ja';
 import { datadogLogs } from '@datadog/browser-logs';
 import { Context } from '@datadog/browser-core';
 
-const options = { datadogInitialized: false, logLevel: process.env.LOG_LEVEL ?? 'debug', prettyPrint: false };
+const options = {
+  datadogInitialized: false,
+  logLevel: process.env.LOG_LEVEL ?? 'debug',
+  prettyPrint: false,
+  sharedContext: {},
+};
 
 export type StatusType = Exclude<Parameters<typeof datadogLogs['logger']['log']>[2], undefined>;
 
@@ -39,7 +44,7 @@ export function datadogMessage(message: string, context?: Context, status?: Stat
   datadogLogs.logger.log(
     message,
     {
-      context,
+      context: { ...options.sharedContext, ...context },
     },
     status
   );
@@ -47,6 +52,10 @@ export function datadogMessage(message: string, context?: Context, status?: Stat
 
 export const setLogLevel = (logLevel: Level, prettyPrint = false) => {
   Object.assign(options, { logLevel, prettyPrint });
+};
+
+export const setContext = (context: Record<string, any>) => {
+  options.sharedContext = context;
 };
 
 export type AGLoggerFunc = (

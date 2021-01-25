@@ -11,12 +11,12 @@ npm install @andgohq/universal-logger
 ## Usage
 
 ```typescript
-import { setLogLevel, initDatadog, logFactory } from '@andgohq/universal-logger';
+import { setLogLevel, initDatadog, logFactory, setContext } from '@andgohq/universal-logger';
 
-// set output log level (default: LOG_LEVEL environment variable or 'develop')
+// Set output log level (default: LOG_LEVEL environment variable or 'develop')
 setLogLevel('develop');
 
-// optionally you can setup Datadog integration
+// Optionally you can setup Datadog integration
 // initDatadog({ clientToken: DATADOG_CLIENT_TOKEN, applicationId: APPLICATION_ID });
 
 const logger = logFactory('Main');
@@ -27,6 +27,9 @@ const logger = logFactory('Main');
 // - logger.warn -> outputs with yellow warn icon
 // - logger.info -> outputs with regular style
 // - logger.debug -> hidden outputs (should turn on the verbose flag on dev console to see logs)
+
+// Optionally you can add context
+// setContext({ user: 'test1@example.com' });
 
 // Support usage
 logger.info('Hello world');

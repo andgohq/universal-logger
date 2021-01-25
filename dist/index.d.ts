@@ -9,6 +9,7 @@ export function initDatadog(opts: {
 }): void;
 export function datadogMessage(message: string, context?: Context, status?: StatusType): void;
 export const setLogLevel: (logLevel: Level, prettyPrint?: boolean) => void;
+export const setContext: (context: Record<string, any>) => void;
 export type AGLoggerFunc = (msgOrMergingObject?: string | Record<string, any>, msg?: string, ...interpolationValues: any[]) => void;
 export interface AGLogger {
     fatal: AGLoggerFunc;
