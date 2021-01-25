@@ -104,7 +104,7 @@ export const logFactory = (name: string): AGLogger =>
           console[levelLabel](s);
         }
 
-        datadogMessage(msg ?? '', { ...rest }, levelLabel);
+        datadogMessage(msg ?? '', { logger: name, ...rest }, levelLabel);
       },
     },
   });
