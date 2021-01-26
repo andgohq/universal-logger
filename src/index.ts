@@ -23,15 +23,8 @@ const PINO_TO_CONSOLE: Record<Level, StatusType> = {
   trace: 'info',
 };
 
-export function initDatadog(opts: { clientToken: string; applicationId: string }) {
-  datadogLogs.init({
-    clientToken: opts.clientToken,
-    datacenter: 'us',
-    applicationId: opts.applicationId,
-    silentMultipleInit: true,
-    forwardErrorsToLogs: true,
-    sampleRate: 100,
-  });
+export function initDatadog(userConfiguration: Parameters<typeof datadogLogs.init>[0]) {
+  datadogLogs.init(userConfiguration);
 
   options.datadogInitialized = true;
 }

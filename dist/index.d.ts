@@ -3,10 +3,7 @@ import { datadogLogs } from "@datadog/browser-logs";
 import { Context } from "@datadog/browser-core";
 export type { Logger, Level } from 'pino';
 export type StatusType = Exclude<Parameters<typeof datadogLogs['logger']['log']>[2], undefined>;
-export function initDatadog(opts: {
-    clientToken: string;
-    applicationId: string;
-}): void;
+export function initDatadog(userConfiguration: Parameters<typeof datadogLogs.init>[0]): void;
 export function datadogMessage(message: string, context?: Context, status?: StatusType): void;
 export const setLogLevel: (logLevel: Level, prettyPrint?: boolean) => void;
 export const setContext: (context: Record<string, any>) => void;

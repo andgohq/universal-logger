@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.7.0] - 2020-01-26
+
+### Added
+
+- Allow any parameters for initDataDog.
+
 ## [1.6.0] - 2020-01-25
 
 ### Added
