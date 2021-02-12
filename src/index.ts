@@ -10,6 +10,8 @@ const options = {
   logLevel: process.env.LOG_LEVEL ?? 'debug',
   prettyPrint: false,
   sharedContext: {},
+  masks: [] as string[],
+  maskFunc: (s: string) => `${s.substr(0, 8)}***`,
 };
 
 export type StatusType = Exclude<Parameters<typeof datadogLogs['logger']['log']>[2], undefined>;
@@ -51,6 +53,14 @@ export const setContext = (context: Record<string, any>) => {
   options.sharedContext = context;
 };
 
+export const setMasks = (masks: string[]) => {
+  options.masks = masks;
+};
+
+export const setMaskFunc = (f: (s: string) => string) => {
+  options.maskFunc = f;
+};
+
 export type AGLoggerFunc = (
   msgOrMergingObject?: string | Record<string, any>,
   msg?: string,
@@ -75,6 +85,17 @@ export const logFactory = (name: string): AGLogger =>
         }
       : false,
     level: options.logLevel,
+    formatters: {
+      log: (o) =>
+        Object.fromEntries(
+          Object.entries(o).map(([k, v]) => [
+            k,
+            options.masks.findIndex((ele) => ele === k) >= 0 && (typeof v === 'string' || typeof v === 'number')
+              ? options.maskFunc(`${v}`)
+              : v,
+          ])
+        ),
+    },
     browser: {
       serialize: true,
       write: (o) => {
@@ -91,13 +112,22 @@ export const logFactory = (name: string): AGLogger =>
 
         const s = `${timeLabel} [${name}] ${msg ?? ''}`;
 
-        if (Object.keys(rest).length) {
-          console[levelLabel](s, rest);
+        const masked = Object.fromEntries(
+          Object.entries(rest).map(([k, v]) => [
+            k,
+            options.masks.findIndex((ele) => ele === k) >= 0 && (typeof v === 'string' || typeof v === 'number')
+              ? options.maskFunc(`${v}`)
+              : v,
+          ])
+        );
+
+        if (Object.keys(masked).length) {
+          console[levelLabel](s, masked);
         } else {
           console[levelLabel](s);
         }
 
-        datadogMessage(msg ?? '', { logger: name, ...rest }, levelLabel);
+        datadogMessage(msg ?? '', { logger: name, ...masked }, levelLabel);
       },
     },
   });

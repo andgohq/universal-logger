@@ -1,6 +1,6 @@
 {
   "name": "@andgohq/universal-logger",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Logger for brower, nodejs and electron",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
@@ -10,7 +10,7 @@
     "not dead"
   ],
   "engines": {
-    "node": ">=4.x"
+    "node": ">=14.x"
   },
   "targets": {
     "main": {

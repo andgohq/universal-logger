@@ -2,25 +2,35 @@
 
 ## [Unreleased]
 
-## [1.7.0] - 2020-01-26
+## [1.8.0] - 2021-02-12
+
+### Added
+
+- Add mask feature.
+
+### Fixed
+
+- Fix a ahange log date.
+
+## [1.7.0] - 2021-01-26
 
 ### Added
 
 - Allow any parameters for initDataDog.
 
-## [1.6.0] - 2020-01-25
+## [1.6.0] - 2021-01-25
 
 ### Added
 
 - Include logger name on DataDog logs.
 
-## [1.5.0] - 2020-01-25
+## [1.5.0] - 2021-01-25
 
 ### Added
 
 - Introduce setContext.
 
-## [1.4.0] - 2020-01-04
+## [1.4.0] - 2021-01-04
 
 ### Added
 

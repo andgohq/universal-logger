@@ -11,10 +11,15 @@ npm install @andgohq/universal-logger
 ## Usage
 
 ```typescript
-import { setLogLevel, initDatadog, logFactory, setContext } from '@andgohq/universal-logger';
+import { setLogLevel, initDatadog, logFactory, setContext, setMasks, setMaskFunc } from '@andgohq/universal-logger';
 
 // Set output log level (default: LOG_LEVEL environment variable or 'develop')
 setLogLevel('develop');
+
+
+setMasks(['maskedKey']);
+
+setMaskFunc((s: string) => `${s.substr(0.8)}***`);
 
 // Optionally you can setup Datadog integration
 // initDatadog({ clientToken: DATADOG_CLIENT_TOKEN, applicationId: APPLICATION_ID });
@@ -33,7 +38,7 @@ const logger = logFactory('Main');
 
 // Support usage
 logger.info('Hello world');
-logger.info({ param1: 'value1' }, 'Hello world');
+logger.info({ param1: 'value1', maskedKey: 'sensitive data...' }, 'Hello world');
 logger.info({ param1: 'value1' }, 'Hello world %s %s', 'REPLACE STRING1', 'REPLACE STRING2');
 logger.error(new Error('Something wrong'), 'optional error message: %2', 'REPLACE STRING');
 
@@ -56,6 +61,7 @@ setLogLevel('develop', true);
 ```sh
 npm install
 npm run dev
+npm run dev:nodejs
 
 ```
 
