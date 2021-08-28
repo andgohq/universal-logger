@@ -1,52 +1,43 @@
-import pino, { Level } from 'pino';
-export type { Logger, Level } from 'pino';
+import pino from 'pino';
 import { format } from 'date-fns';
 import ja from 'date-fns/locale/ja';
-import { datadogLogs } from '@datadog/browser-logs';
-import { Context } from '@datadog/browser-core';
+import * as stackTraceParser from 'stacktrace-parser';
 
 const options = {
-  datadogInitialized: false,
   logLevel: process.env.LOG_LEVEL ?? 'debug',
-  prettyPrint: false,
   sharedContext: {},
   masks: [] as string[],
   maskFunc: (s: string) => `${s.substr(0, 8)}***`,
 };
 
-export type StatusType = Exclude<Parameters<typeof datadogLogs['logger']['log']>[2], undefined>;
+export type Level = 'debug' | 'fatal' | 'error' | 'warn' | 'info' | 'trace';
+export type StatusType = 'error' | 'warn' | 'info' | 'debug';
 
 const PINO_TO_CONSOLE: Record<Level, StatusType> = {
+  debug: 'debug',
   fatal: 'error',
   error: 'error',
   warn: 'warn',
   info: 'info',
-  debug: 'debug',
   trace: 'info',
 };
 
-export function initDatadog(userConfiguration: Parameters<typeof datadogLogs.init>[0]) {
-  datadogLogs.init(userConfiguration);
+export type ExternalLoggerType = (opts: {
+  message: string;
+  context?: Record<string, any>;
+  status?: StatusType;
+}) => void;
 
-  options.datadogInitialized = true;
+export const NO_OPS_LOGGER: ExternalLoggerType = () => {};
+
+let _PRESENT_EXTERNAL_LOGGER = NO_OPS_LOGGER;
+
+export function setExternalLogger(logger: ExternalLoggerType) {
+  _PRESENT_EXTERNAL_LOGGER = logger;
 }
 
-export function datadogMessage(message: string, context?: Context, status?: StatusType) {
-  if (!options.datadogInitialized) {
-    return;
-  }
-
-  datadogLogs.logger.log(
-    message,
-    {
-      context: { ...options.sharedContext, ...context },
-    },
-    status
-  );
-}
-
-export const setLogLevel = (logLevel: Level, prettyPrint = false) => {
-  Object.assign(options, { logLevel, prettyPrint });
+export const setLogLevel = (logLevel: Level) => {
+  Object.assign(options, { logLevel });
 };
 
 export const setContext = (context: Record<string, any>) => {
@@ -78,20 +69,17 @@ export interface AGLogger {
 export const logFactory = (name: string): AGLogger =>
   pino({
     name,
-    prettyPrint: options.prettyPrint
-      ? {
-          translateTime: 'SYS:HH:mm:ss',
-          ignore: 'pid,hostname',
-        }
-      : false,
     level: options.logLevel,
     formatters: {
+      bindings: () => ({}), // omit pid and hostname
       log: (o) =>
         Object.fromEntries(
           Object.entries(o).map(([k, v]) => [
             k,
             options.masks.findIndex((ele) => ele === k) >= 0 && (typeof v === 'string' || typeof v === 'number')
               ? options.maskFunc(`${v}`)
+              : k === 'stack' && typeof v === 'string'
+              ? stackTraceParser.parse(v)
               : v,
           ])
         ),
@@ -117,6 +105,8 @@ export const logFactory = (name: string): AGLogger =>
             k,
             options.masks.findIndex((ele) => ele === k) >= 0 && (typeof v === 'string' || typeof v === 'number')
               ? options.maskFunc(`${v}`)
+              : k === 'stack' && typeof v === 'string'
+              ? stackTraceParser.parse(v)
               : v,
           ])
         );
@@ -127,7 +117,7 @@ export const logFactory = (name: string): AGLogger =>
           console[levelLabel](s);
         }
 
-        datadogMessage(msg ?? '', { logger: name, ...masked }, levelLabel);
+        _PRESENT_EXTERNAL_LOGGER({ message: msg ?? '', context: { logger: name, ...masked }, status: levelLabel });
       },
     },
   });

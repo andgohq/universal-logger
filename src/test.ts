@@ -1,7 +1,7 @@
 import { Level, setLogLevel, logFactory, setMasks } from './index';
 
-export const output = (level: Level, pretty?: boolean) => {
-  setLogLevel(level, pretty);
+export const output = (level: Level) => {
+  setLogLevel(level);
 
   setMasks(['maskKey']);
 

@@ -1,2 +1,91 @@
-import{datadogLogs as t}from"@datadog/browser-logs";import e from"date-fns/locale/ja";import{format as o}from"date-fns";import n from"pino";const s={datadogInitialized:!1,logLevel:(void 0,"debug"),prettyPrint:!1,sharedContext:{},masks:[],maskFunc:t=>"".concat(t.substr(0,8),"***")},a={fatal:"error",error:"error",warn:"warn",info:"info",debug:"debug",trace:"info"};export function initDatadog(e){t.init(e),s.datadogInitialized=!0}export function datadogMessage(e,o,n){s.datadogInitialized&&t.logger.log(e,{context:{...s.sharedContext,...o}},n)}export const setLogLevel=(t,e=!1)=>{Object.assign(s,{logLevel:t,prettyPrint:e})};export const setContext=t=>{s.sharedContext=t};export const setMasks=t=>{s.masks=t};export const setMaskFunc=t=>{s.maskFunc=t};export const logFactory=t=>n({name:t,prettyPrint:!!s.prettyPrint&&{translateTime:"SYS:HH:mm:ss",ignore:"pid,hostname"},level:s.logLevel,formatters:{log:t=>Object.fromEntries(Object.entries(t).map((([t,e])=>[t,s.masks.findIndex((e=>e===t))>=0&&("string"==typeof e||"number"==typeof e)?s.maskFunc("".concat(e)):e])))},browser:{serialize:!0,write:r=>{const{type:i,stack:c,level:l,time:m,msg:d,...g}=r,p=o(new Date(m),"HH:mm:ss",{locale:e}),f=a[n.levels.labels["".concat(l)]],b="".concat(p," [").concat(t,"] ").concat(null!=d?d:""),u=Object.fromEntries(Object.entries(g).map((([t,e])=>[t,s.masks.findIndex((e=>e===t))>=0&&("string"==typeof e||"number"==typeof e)?s.maskFunc("".concat(e)):e])));Object.keys(u).length?console[f](b,u):console[f](b),datadogMessage(null!=d?d:"",{logger:t,...u},f)}}});
+import $6Xyho$pino from "pino";
+import {format as $6Xyho$format} from "date-fns";
+import $6Xyho$datefnslocaleja from "date-fns/locale/ja";
+import {parse as $6Xyho$parse} from "stacktrace-parser";
+
+
+
+
+
+const $53a9eefb35e8ba3a$var$options = {
+    logLevel: undefined ?? 'debug',
+    sharedContext: {
+    },
+    masks: [],
+    maskFunc: (s)=>`${s.substr(0, 8)}***`
+};
+const $53a9eefb35e8ba3a$var$PINO_TO_CONSOLE = {
+    debug: 'debug',
+    fatal: 'error',
+    error: 'error',
+    warn: 'warn',
+    info: 'info',
+    trace: 'info'
+};
+const $53a9eefb35e8ba3a$export$ad9af676a058916b = ()=>{
+};
+let $53a9eefb35e8ba3a$var$_PRESENT_EXTERNAL_LOGGER = $53a9eefb35e8ba3a$export$ad9af676a058916b;
+function $53a9eefb35e8ba3a$export$aaadf1406491db8f(logger) {
+    $53a9eefb35e8ba3a$var$_PRESENT_EXTERNAL_LOGGER = logger;
+}
+const $53a9eefb35e8ba3a$export$c8a49597075a01d1 = (logLevel)=>{
+    Object.assign($53a9eefb35e8ba3a$var$options, {
+        logLevel: logLevel
+    });
+};
+const $53a9eefb35e8ba3a$export$7447501bdd5a114f = (context)=>{
+    $53a9eefb35e8ba3a$var$options.sharedContext = context;
+};
+const $53a9eefb35e8ba3a$export$9743ba9d972d3c84 = (masks)=>{
+    $53a9eefb35e8ba3a$var$options.masks = masks;
+};
+const $53a9eefb35e8ba3a$export$5e658725549043b7 = (f)=>{
+    $53a9eefb35e8ba3a$var$options.maskFunc = f;
+};
+const $53a9eefb35e8ba3a$export$1815758bd3c8c304 = (name)=>$6Xyho$pino({
+        name: name,
+        level: $53a9eefb35e8ba3a$var$options.logLevel,
+        formatters: {
+            bindings: ()=>({
+                })
+            ,
+            log: (o)=>Object.fromEntries(Object.entries(o).map(([k, v])=>[
+                        k,
+                        $53a9eefb35e8ba3a$var$options.masks.findIndex((ele)=>ele === k
+                        ) >= 0 && (typeof v === 'string' || typeof v === 'number') ? $53a9eefb35e8ba3a$var$options.maskFunc(`${v}`) : k === 'stack' && typeof v === 'string' ? $6Xyho$parse(v) : v, 
+                    ]
+                ))
+        },
+        browser: {
+            serialize: true,
+            write: (o)=>{
+                const { type: type , stack: stack , level: level , time: time , msg: msg , ...rest } = o;
+                const timeLabel = $6Xyho$format(new Date(time), 'HH:mm:ss', {
+                    locale: $6Xyho$datefnslocaleja
+                });
+                const levelLabel = $53a9eefb35e8ba3a$var$PINO_TO_CONSOLE[$6Xyho$pino.levels.labels[`${level}`]];
+                const s = `${timeLabel} [${name}] ${msg ?? ''}`;
+                const masked = Object.fromEntries(Object.entries(rest).map(([k, v])=>[
+                        k,
+                        $53a9eefb35e8ba3a$var$options.masks.findIndex((ele)=>ele === k
+                        ) >= 0 && (typeof v === 'string' || typeof v === 'number') ? $53a9eefb35e8ba3a$var$options.maskFunc(`${v}`) : k === 'stack' && typeof v === 'string' ? $6Xyho$parse(v) : v, 
+                    ]
+                ));
+                if (Object.keys(masked).length) console[levelLabel](s, masked);
+                else console[levelLabel](s);
+                $53a9eefb35e8ba3a$var$_PRESENT_EXTERNAL_LOGGER({
+                    message: msg ?? '',
+                    context: {
+                        logger: name,
+                        ...masked
+                    },
+                    status: levelLabel
+                });
+            }
+        }
+    })
+;
+
+
+export {$53a9eefb35e8ba3a$export$aaadf1406491db8f as setExternalLogger, $53a9eefb35e8ba3a$export$ad9af676a058916b as NO_OPS_LOGGER, $53a9eefb35e8ba3a$export$7447501bdd5a114f as setContext, $53a9eefb35e8ba3a$export$9743ba9d972d3c84 as setMasks, $53a9eefb35e8ba3a$export$c8a49597075a01d1 as setLogLevel, $53a9eefb35e8ba3a$export$5e658725549043b7 as setMaskFunc, $53a9eefb35e8ba3a$export$1815758bd3c8c304 as logFactory};
 //# sourceMappingURL=index.js.map

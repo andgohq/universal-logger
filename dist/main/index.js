@@ -1,2 +1,104 @@
-var e=require("@datadog/browser-logs").datadogLogs,t=o(require("date-fns/locale/ja")),r=require("date-fns").format,n=o(require("pino"));function o(e){return e&&e.__esModule?e.default:e}function a(e,t){if(null==e)return{};var r,n,o=function(e,t){if(null==e)return{};var r,n,o={},a=Object.keys(e);for(n=0;n<a.length;n++)r=a[n],t.indexOf(r)>=0||(o[r]=e[r]);return o}(e,t);if(Object.getOwnPropertySymbols){var a=Object.getOwnPropertySymbols(e);for(n=0;n<a.length;n++)r=a[n],t.indexOf(r)>=0||Object.prototype.propertyIsEnumerable.call(e,r)&&(o[r]=e[r])}return o}function i(e,t){return function(e){if(Array.isArray(e))return e}(e)||function(e,t){if("undefined"==typeof Symbol||!(Symbol.iterator in Object(e)))return;var r=[],n=!0,o=!1,a=void 0;try{for(var i,c=e[Symbol.iterator]();!(n=(i=c.next()).done)&&(r.push(i.value),!t||r.length!==t);n=!0);}catch(e){o=!0,a=e}finally{try{n||null==c.return||c.return()}finally{if(o)throw a}}return r}(e,t)||function(e,t){if(!e)return;if("string"==typeof e)return c(e,t);var r=Object.prototype.toString.call(e).slice(8,-1);"Object"===r&&e.constructor&&(r=e.constructor.name);if("Map"===r||"Set"===r)return Array.from(e);if("Arguments"===r||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r))return c(e,t)}(e,t)||function(){throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function c(e,t){(null==t||t>e.length)&&(t=e.length);for(var r=0,n=new Array(t);r<t;r++)n[r]=e[r];return n}function u(e,t){var r=Object.keys(e);if(Object.getOwnPropertySymbols){var n=Object.getOwnPropertySymbols(e);t&&(n=n.filter((function(t){return Object.getOwnPropertyDescriptor(e,t).enumerable}))),r.push.apply(r,n)}return r}function s(e){for(var t=1;t<arguments.length;t++){var r=null!=arguments[t]?arguments[t]:{};t%2?u(Object(r),!0).forEach((function(t){l(e,t,r[t])})):Object.getOwnPropertyDescriptors?Object.defineProperties(e,Object.getOwnPropertyDescriptors(r)):u(Object(r)).forEach((function(t){Object.defineProperty(e,t,Object.getOwnPropertyDescriptor(r,t))}))}return e}function l(e,t,r){return t in e?Object.defineProperty(e,t,{value:r,enumerable:!0,configurable:!0,writable:!0}):e[t]=r,e}var f={datadogInitialized:!1,logLevel:(void 0,"debug"),prettyPrint:!1,sharedContext:{},masks:[],maskFunc:function(e){return"".concat(e.substr(0,8),"***")}},p={fatal:"error",error:"error",warn:"warn",info:"info",debug:"debug",trace:"info"};function b(t,r,n){f.datadogInitialized&&e.logger.log(t,{context:s(s({},f.sharedContext),r)},n)}exports.initDatadog=function(t){e.init(t),f.datadogInitialized=!0},exports.datadogMessage=b;exports.setLogLevel=function(e){var t=arguments.length>1&&void 0!==arguments[1]&&arguments[1];Object.assign(f,{logLevel:e,prettyPrint:t})};exports.setContext=function(e){f.sharedContext=e};exports.setMasks=function(e){f.masks=e};exports.setMaskFunc=function(e){f.maskFunc=e};exports.logFactory=function(e){return n({name:e,prettyPrint:!!f.prettyPrint&&{translateTime:"SYS:HH:mm:ss",ignore:"pid,hostname"},level:f.logLevel,formatters:{log:function(e){return Object.fromEntries(Object.entries(e).map((function(e){var t=i(e,2),r=t[0],n=t[1];return[r,f.masks.findIndex((function(e){return e===r}))>=0&&("string"==typeof n||"number"==typeof n)?f.maskFunc("".concat(n)):n]})))}},browser:{serialize:!0,write:function(o){var c=o,u=(c.type,c.stack,c.level),l=c.time,g=c.msg,y=a(c,["type","stack","level","time","msg"]),d=r(new Date(l),"HH:mm:ss",{locale:t}),m=p[n.levels.labels["".concat(u)]],O="".concat(d," [").concat(e,"] ").concat(null!=g?g:""),v=Object.fromEntries(Object.entries(y).map((function(e){var t=i(e,2),r=t[0],n=t[1];return[r,f.masks.findIndex((function(e){return e===r}))>=0&&("string"==typeof n||"number"==typeof n)?f.maskFunc("".concat(n)):n]})));Object.keys(v).length?console[m](O,v):console[m](O),b(null!=g?g:"",s({logger:e},v),m)}}})};
+var $Y2jCW$pino = require("pino");
+var $Y2jCW$datefns = require("date-fns");
+var $Y2jCW$datefnslocaleja = require("date-fns/locale/ja");
+var $Y2jCW$stacktraceparser = require("stacktrace-parser");
+
+function $parcel$interopDefault(a) {
+  return a && a.__esModule ? a.default : a;
+}
+function $parcel$export(e, n, v, s) {
+  Object.defineProperty(e, n, {get: v, set: s, enumerable: true, configurable: true});
+}
+
+$parcel$export(module.exports, "setMasks", function () { return $72eddd5c956b2791$export$9743ba9d972d3c84; });
+$parcel$export(module.exports, "setMaskFunc", function () { return $72eddd5c956b2791$export$5e658725549043b7; });
+$parcel$export(module.exports, "setExternalLogger", function () { return $72eddd5c956b2791$export$aaadf1406491db8f; });
+$parcel$export(module.exports, "setLogLevel", function () { return $72eddd5c956b2791$export$c8a49597075a01d1; });
+$parcel$export(module.exports, "NO_OPS_LOGGER", function () { return $72eddd5c956b2791$export$ad9af676a058916b; });
+$parcel$export(module.exports, "setContext", function () { return $72eddd5c956b2791$export$7447501bdd5a114f; });
+$parcel$export(module.exports, "logFactory", function () { return $72eddd5c956b2791$export$1815758bd3c8c304; });
+
+
+
+
+const $72eddd5c956b2791$var$options = {
+    logLevel: undefined ?? 'debug',
+    sharedContext: {
+    },
+    masks: [],
+    maskFunc: (s)=>`${s.substr(0, 8)}***`
+};
+const $72eddd5c956b2791$var$PINO_TO_CONSOLE = {
+    debug: 'debug',
+    fatal: 'error',
+    error: 'error',
+    warn: 'warn',
+    info: 'info',
+    trace: 'info'
+};
+const $72eddd5c956b2791$export$ad9af676a058916b = ()=>{
+};
+let $72eddd5c956b2791$var$_PRESENT_EXTERNAL_LOGGER = $72eddd5c956b2791$export$ad9af676a058916b;
+function $72eddd5c956b2791$export$aaadf1406491db8f(logger) {
+    $72eddd5c956b2791$var$_PRESENT_EXTERNAL_LOGGER = logger;
+}
+const $72eddd5c956b2791$export$c8a49597075a01d1 = (logLevel)=>{
+    Object.assign($72eddd5c956b2791$var$options, {
+        logLevel: logLevel
+    });
+};
+const $72eddd5c956b2791$export$7447501bdd5a114f = (context)=>{
+    $72eddd5c956b2791$var$options.sharedContext = context;
+};
+const $72eddd5c956b2791$export$9743ba9d972d3c84 = (masks)=>{
+    $72eddd5c956b2791$var$options.masks = masks;
+};
+const $72eddd5c956b2791$export$5e658725549043b7 = (f)=>{
+    $72eddd5c956b2791$var$options.maskFunc = f;
+};
+const $72eddd5c956b2791$export$1815758bd3c8c304 = (name)=>$parcel$interopDefault($Y2jCW$pino)({
+        name: name,
+        level: $72eddd5c956b2791$var$options.logLevel,
+        formatters: {
+            bindings: ()=>({
+                })
+            ,
+            log: (o)=>Object.fromEntries(Object.entries(o).map(([k, v])=>[
+                        k,
+                        $72eddd5c956b2791$var$options.masks.findIndex((ele)=>ele === k
+                        ) >= 0 && (typeof v === 'string' || typeof v === 'number') ? $72eddd5c956b2791$var$options.maskFunc(`${v}`) : k === 'stack' && typeof v === 'string' ? $Y2jCW$stacktraceparser.parse(v) : v, 
+                    ]
+                ))
+        },
+        browser: {
+            serialize: true,
+            write: (o)=>{
+                const { type: type , stack: stack , level: level , time: time , msg: msg , ...rest } = o;
+                const timeLabel = $Y2jCW$datefns.format(new Date(time), 'HH:mm:ss', {
+                    locale: $parcel$interopDefault($Y2jCW$datefnslocaleja)
+                });
+                const levelLabel = $72eddd5c956b2791$var$PINO_TO_CONSOLE[$parcel$interopDefault($Y2jCW$pino).levels.labels[`${level}`]];
+                const s = `${timeLabel} [${name}] ${msg ?? ''}`;
+                const masked = Object.fromEntries(Object.entries(rest).map(([k, v])=>[
+                        k,
+                        $72eddd5c956b2791$var$options.masks.findIndex((ele)=>ele === k
+                        ) >= 0 && (typeof v === 'string' || typeof v === 'number') ? $72eddd5c956b2791$var$options.maskFunc(`${v}`) : k === 'stack' && typeof v === 'string' ? $Y2jCW$stacktraceparser.parse(v) : v, 
+                    ]
+                ));
+                if (Object.keys(masked).length) console[levelLabel](s, masked);
+                else console[levelLabel](s);
+                $72eddd5c956b2791$var$_PRESENT_EXTERNAL_LOGGER({
+                    message: msg ?? '',
+                    context: {
+                        logger: name,
+                        ...masked
+                    },
+                    status: levelLabel
+                });
+            }
+        }
+    })
+;
+
+
 //# sourceMappingURL=index.js.map

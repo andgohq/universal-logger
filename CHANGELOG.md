@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [1.9.0] - 2021-08-28
+
+### Added
+
+- Add external logger support
+- Add stack trace parser
+
+### Removed
+
+- Remove pino-pretty support
+- Remove DataDog support
+- Remove pid and hostname information
+
 ## [1.8.0] - 2021-02-12
 
 ### Added
