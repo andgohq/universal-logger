@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.10.0] - 2021-08-28
+
+### Added
+
+- Add child function
+
 ## [1.9.0] - 2021-08-28
 
 ### Added

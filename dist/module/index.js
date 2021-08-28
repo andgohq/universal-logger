@@ -87,5 +87,5 @@ const $53a9eefb35e8ba3a$export$1815758bd3c8c304 = (name)=>$6Xyho$pino({
 ;
 
 
-export {$53a9eefb35e8ba3a$export$aaadf1406491db8f as setExternalLogger, $53a9eefb35e8ba3a$export$ad9af676a058916b as NO_OPS_LOGGER, $53a9eefb35e8ba3a$export$7447501bdd5a114f as setContext, $53a9eefb35e8ba3a$export$9743ba9d972d3c84 as setMasks, $53a9eefb35e8ba3a$export$c8a49597075a01d1 as setLogLevel, $53a9eefb35e8ba3a$export$5e658725549043b7 as setMaskFunc, $53a9eefb35e8ba3a$export$1815758bd3c8c304 as logFactory};
+export {$53a9eefb35e8ba3a$export$9743ba9d972d3c84 as setMasks, $53a9eefb35e8ba3a$export$5e658725549043b7 as setMaskFunc, $53a9eefb35e8ba3a$export$1815758bd3c8c304 as logFactory, $53a9eefb35e8ba3a$export$ad9af676a058916b as NO_OPS_LOGGER, $53a9eefb35e8ba3a$export$aaadf1406491db8f as setExternalLogger, $53a9eefb35e8ba3a$export$c8a49597075a01d1 as setLogLevel, $53a9eefb35e8ba3a$export$7447501bdd5a114f as setContext};
 //# sourceMappingURL=index.js.map

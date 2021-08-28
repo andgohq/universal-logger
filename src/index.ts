@@ -64,6 +64,7 @@ export interface AGLogger {
   warn: AGLoggerFunc;
   info: AGLoggerFunc;
   debug: AGLoggerFunc;
+  child: (params: Record<string, any>) => AGLogger;
 }
 
 export const logFactory = (name: string): AGLogger =>

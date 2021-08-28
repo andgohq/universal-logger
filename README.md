@@ -40,6 +40,10 @@ logger.info('Message text');
 logger.info({ param1: 'value1', maskedKey: 'sensitive data...' }, 'Message text');
 logger.info({ param1: 'value1' }, 'Message Text %s %s', 'REPLACE STRING1', 'REPLACE STRING2');
 logger.error(new Error('Something wrong'), 'optional error message: %2', 'REPLACE STRING');
+
+// Child logger
+const childLogger = logger.child({ method: 'child' });
+childLogger.info('Hello');
 ```
 
 ## Develop

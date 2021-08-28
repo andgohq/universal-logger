@@ -6,7 +6,7 @@ export const output = (level: Level) => {
   setMasks(['maskKey']);
 
   const logger = logFactory('Main');
-  const childLogger = logFactory('Child');
+  const childLogger = logger.child({ method: 'child' });
 
   logger.fatal('fatal message');
 

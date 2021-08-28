@@ -1,6 +1,6 @@
 {
   "name": "@andgohq/universal-logger",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "description": "Logger for browser, nodejs and electron",
   "main": "dist/main/index.js",
   "module": "dist/module/index.js",
