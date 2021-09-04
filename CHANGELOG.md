@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.10.3] - 2021-09-04
+
+### Fixed
+
+- Improve a compatibility
+
 ## [1.10.2] - 2021-09-04
 
 ### Fixed

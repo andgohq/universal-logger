@@ -10,33 +10,13 @@ const bundle = (config) => ({
   external: (id) => !/^[./]/.test(id),
 });
 
-const bundleDevWeb = (config) => ({
-  ...config,
-  input: 'tests/runner-browser.ts',
-});
-
 export default [
-  bundleDevWeb({
-    plugins: [esbuild()],
-    output: [
-      {
-        file: `tests/${name}.mjs`,
-        format: 'es',
-        sourcemap: true,
-      },
-    ],
-  }),
   bundle({
     plugins: [esbuild()],
     output: [
       {
         file: `${name}.js`,
         format: 'cjs',
-        sourcemap: true,
-      },
-      {
-        file: `${name}.mjs`,
-        format: 'es',
         sourcemap: true,
       },
     ],
