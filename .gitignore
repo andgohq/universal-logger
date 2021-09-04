@@ -18,3 +18,4 @@ yarn-error.log*
 
 # parcel
 .parcel-cache
+tests/dist

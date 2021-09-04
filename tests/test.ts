@@ -1,4 +1,4 @@
-import { Level, setLogLevel, logFactory, setMasks } from './index';
+import { Level, setLogLevel, logFactory, setMasks } from '../src/index';
 
 export const output = (level: Level) => {
   setLogLevel(level);
