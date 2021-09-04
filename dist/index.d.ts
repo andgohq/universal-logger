@@ -1,3 +1,5 @@
+import pino from 'pino';
+
 declare type Level = 'debug' | 'fatal' | 'error' | 'warn' | 'info' | 'trace';
 declare type StatusType = 'error' | 'warn' | 'info' | 'debug';
 declare type ExternalLoggerType = (opts: {
@@ -11,15 +13,15 @@ declare const setLogLevel: (logLevel: Level) => void;
 declare const setContext: (context: Record<string, any>) => void;
 declare const setMasks: (masks: string[]) => void;
 declare const setMaskFunc: (f: (s: string) => string) => void;
-declare type AGLoggerFunc = (msgOrMergingObject?: string | Record<string, any>, msg?: string, ...interpolationValues: any[]) => void;
+declare type LogFn = pino.LogFn;
 interface AGLogger {
-    fatal: AGLoggerFunc;
-    error: AGLoggerFunc;
-    warn: AGLoggerFunc;
-    info: AGLoggerFunc;
-    debug: AGLoggerFunc;
+    fatal: LogFn;
+    error: LogFn;
+    warn: LogFn;
+    info: LogFn;
+    debug: LogFn;
     child: (params: Record<string, any>) => AGLogger;
 }
 declare const logFactory: (name: string) => AGLogger;
 
-export { AGLogger, AGLoggerFunc, ExternalLoggerType, Level, NO_OPS_LOGGER, StatusType, logFactory, setContext, setExternalLogger, setLogLevel, setMaskFunc, setMasks };
+export { AGLogger, ExternalLoggerType, Level, LogFn, NO_OPS_LOGGER, StatusType, logFactory, setContext, setExternalLogger, setLogLevel, setMaskFunc, setMasks };

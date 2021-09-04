@@ -52,18 +52,14 @@ export const setMaskFunc = (f: (s: string) => string) => {
   options.maskFunc = f;
 };
 
-export type AGLoggerFunc = (
-  msgOrMergingObject?: string | Record<string, any>,
-  msg?: string,
-  ...interpolationValues: any[]
-) => void;
+export type LogFn = pino.LogFn;
 
 export interface AGLogger {
-  fatal: AGLoggerFunc;
-  error: AGLoggerFunc;
-  warn: AGLoggerFunc;
-  info: AGLoggerFunc;
-  debug: AGLoggerFunc;
+  fatal: LogFn;
+  error: LogFn;
+  warn: LogFn;
+  info: LogFn;
+  debug: LogFn;
   child: (params: Record<string, any>) => AGLogger;
 }
 

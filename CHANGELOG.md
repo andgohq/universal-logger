@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.11.0] - 2021-09-04
+
+### Improved
+
+- Improve logger type
+
 ## [1.10.3] - 2021-09-04
 
 ### Fixed
