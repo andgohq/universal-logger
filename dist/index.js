@@ -34,7 +34,7 @@ var ja__default = /*#__PURE__*/_interopDefaultLegacy(ja);
 var stackTraceParser__namespace = /*#__PURE__*/_interopNamespace(stackTraceParser);
 
 const options = {
-  logLevel: process.env.LOG_LEVEL ?? "debug",
+  logLevel: process.env.LOG_LEVEL || "debug",
   sharedContext: {},
   masks: [],
   maskFunc: (s) => `${s.substr(0, 8)}***`
@@ -81,7 +81,7 @@ const logFactory = (name) => pino__default['default']({
       const { type, stack, level, time, msg, ...rest } = o;
       const timeLabel = dateFns.format(new Date(time), "HH:mm:ss", { locale: ja__default['default'] });
       const levelLabel = PINO_TO_CONSOLE[pino__default['default'].levels.labels[`${level}`]];
-      const s = `${timeLabel} [${name}] ${msg ?? ""}`;
+      const s = `${timeLabel} [${name}] ${msg || ""}`;
       const masked = Object.fromEntries(Object.entries(rest).map(([k, v]) => [
         k,
         options.masks.findIndex((ele) => ele === k) >= 0 && (typeof v === "string" || typeof v === "number") ? options.maskFunc(`${v}`) : k === "stack" && typeof v === "string" ? stackTraceParser__namespace.parse(v) : v
@@ -91,7 +91,7 @@ const logFactory = (name) => pino__default['default']({
       } else {
         console[levelLabel](s);
       }
-      _PRESENT_EXTERNAL_LOGGER({ message: msg ?? "", context: { logger: name, ...masked }, status: levelLabel });
+      _PRESENT_EXTERNAL_LOGGER({ message: msg || "", context: { logger: name, ...masked }, status: levelLabel });
     }
   }
 });

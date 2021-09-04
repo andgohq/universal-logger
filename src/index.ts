@@ -4,7 +4,7 @@ import ja from 'date-fns/locale/ja';
 import * as stackTraceParser from 'stacktrace-parser';
 
 const options = {
-  logLevel: process.env.LOG_LEVEL ?? 'debug',
+  logLevel: process.env.LOG_LEVEL || 'debug',
   sharedContext: {},
   masks: [] as string[],
   maskFunc: (s: string) => `${s.substr(0, 8)}***`,
@@ -99,7 +99,7 @@ export const logFactory = (name: string): AGLogger =>
         const timeLabel = format(new Date(time), 'HH:mm:ss', { locale: ja });
         const levelLabel = PINO_TO_CONSOLE[pino.levels.labels[`${level}`] as Level];
 
-        const s = `${timeLabel} [${name}] ${msg ?? ''}`;
+        const s = `${timeLabel} [${name}] ${msg || ''}`;
 
         const masked = Object.fromEntries(
           Object.entries(rest).map(([k, v]) => [
@@ -118,7 +118,7 @@ export const logFactory = (name: string): AGLogger =>
           console[levelLabel](s);
         }
 
-        _PRESENT_EXTERNAL_LOGGER({ message: msg ?? '', context: { logger: name, ...masked }, status: levelLabel });
+        _PRESENT_EXTERNAL_LOGGER({ message: msg || '', context: { logger: name, ...masked }, status: levelLabel });
       },
     },
   });
