@@ -69,7 +69,7 @@ const logFactory = (name) => pino__default['default']({
   name,
   level: options.logLevel,
   formatters: {
-    bindings: () => ({}),
+    bindings: ({ name: name2 }) => ({ name: name2 }),
     log: (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [
       k,
       options.masks.findIndex((ele) => ele === k) >= 0 && (typeof v === "string" || typeof v === "number") ? options.maskFunc(`${v}`) : k === "stack" && typeof v === "string" ? stackTraceParser__namespace.parse(v) : v

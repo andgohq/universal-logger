@@ -68,7 +68,7 @@ export const logFactory = (name: string): AGLogger =>
     name,
     level: options.logLevel,
     formatters: {
-      bindings: () => ({}), // omit pid and hostname
+      bindings: ({ name }) => ({ name }), // omit pid and hostname
       log: (o) =>
         Object.fromEntries(
           Object.entries(o).map(([k, v]) => [

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.11.1] - 2021-09-04
+
+### Fixed
+
+- Fix a name field disappear problem
+
 ## [1.11.0] - 2021-09-04
 
 ### Improved
