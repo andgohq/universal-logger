@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.11.3] - 2022-03-10
+
+### Fixed
+
+- Bump distribute files
+
 ## [1.11.2] - 2022-03-10
 
 ### Fixed

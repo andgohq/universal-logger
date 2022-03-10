@@ -18,14 +18,12 @@ function _interopNamespace(e) {
         var d = Object.getOwnPropertyDescriptor(e, k);
         Object.defineProperty(n, k, d.get ? d : {
           enumerable: true,
-          get: function () {
-            return e[k];
-          }
+          get: function () { return e[k]; }
         });
       }
     });
   }
-  n['default'] = e;
+  n["default"] = e;
   return Object.freeze(n);
 }
 
@@ -65,7 +63,7 @@ const setMasks = (masks) => {
 const setMaskFunc = (f) => {
   options.maskFunc = f;
 };
-const logFactory = (name) => pino__default['default']({
+const logFactory = (name) => pino__default["default"]({
   name,
   level: options.logLevel,
   formatters: {
@@ -79,8 +77,8 @@ const logFactory = (name) => pino__default['default']({
     serialize: true,
     write: (o) => {
       const { type, stack, level, time, msg, ...rest } = o;
-      const timeLabel = dateFns.format(new Date(time), "HH:mm:ss", { locale: ja__default['default'] });
-      const levelLabel = PINO_TO_CONSOLE[pino__default['default'].levels.labels[`${level}`]];
+      const timeLabel = dateFns.format(new Date(time), "HH:mm:ss", { locale: ja__default["default"] });
+      const levelLabel = PINO_TO_CONSOLE[pino__default["default"].levels.labels[`${level}`]];
       const s = `${timeLabel} [${name}] ${msg || ""}`;
       const masked = Object.fromEntries(Object.entries(rest).map(([k, v]) => [
         k,
