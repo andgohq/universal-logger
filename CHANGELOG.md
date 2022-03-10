@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.11.2] - 2022-03-10
+
+### Fixed
+
+- Bump dependencies
+
 ## [1.11.1] - 2021-09-04
 
 ### Fixed
