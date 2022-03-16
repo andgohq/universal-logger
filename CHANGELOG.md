@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.12.0] - 2022-03-16
+
+### Added
+
+- setBrowserOptions - Set the browser options for the browser
+
 ## [1.11.3] - 2022-03-10
 
 ### Fixed

@@ -7,7 +7,10 @@ const options = {
   logLevel: process.env.LOG_LEVEL || 'debug',
   sharedContext: {},
   masks: [] as string[],
-  maskFunc: (s: string) => `${s.substr(0, 8)}***`,
+  maskFunc: (s: string) => `${s.substring(0, 8)}***`,
+  browser: {
+    inline: false,
+  },
 };
 
 export type Level = 'debug' | 'fatal' | 'error' | 'warn' | 'info' | 'trace';
@@ -50,6 +53,10 @@ export const setMasks = (masks: string[]) => {
 
 export const setMaskFunc = (f: (s: string) => string) => {
   options.maskFunc = f;
+};
+
+export const setBrowserOptions = (opts: { inline?: boolean }) => {
+  Object.assign(options.browser, opts);
 };
 
 export type LogFn = pino.LogFn;
@@ -109,7 +116,10 @@ export const logFactory = (name: string): AGLogger =>
         );
 
         if (Object.keys(masked).length) {
-          console[levelLabel](s, masked);
+          if (options.browser.inline) {
+          } else {
+            console[levelLabel](s, JSON.stringify(masked));
+          }
         } else {
           console[levelLabel](s);
         }

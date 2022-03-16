@@ -21,7 +21,12 @@ setLogLevel('info');
 setMasks(['maskedKey']);
 
 // Set mask function
-setMaskFunc((s: string) => `${s.substr(0.8)}***`);
+setMaskFunc((s: string) => `${s.substring(0, 8)}***`);
+
+// Set browser options
+setBrowserOptions({
+  inline: false,
+});
 
 // Logger usage
 const logger = logFactory('Main');
