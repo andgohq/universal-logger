@@ -91,8 +91,10 @@ const logFactory = (name) => pino__default["default"]({
         options.masks.findIndex((ele) => ele === k) >= 0 && (typeof v === "string" || typeof v === "number") ? options.maskFunc(`${v}`) : k === "stack" && typeof v === "string" ? stackTraceParser__namespace.parse(v) : v
       ]));
       if (Object.keys(masked).length) {
-        if (options.browser.inline) ; else {
+        if (options.browser.inline) {
           console[levelLabel](s, JSON.stringify(masked));
+        } else {
+          console[levelLabel](s, masked);
         }
       } else {
         console[levelLabel](s);

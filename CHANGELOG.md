@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.12.1] - 2022-03-16
+
+### Fixed
+
+- Fix a critical bug
+
 ## [1.12.0] - 2022-03-16
 
 ### Added

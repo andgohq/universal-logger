@@ -117,8 +117,9 @@ export const logFactory = (name: string): AGLogger =>
 
         if (Object.keys(masked).length) {
           if (options.browser.inline) {
-          } else {
             console[levelLabel](s, JSON.stringify(masked));
+          } else {
+            console[levelLabel](s, masked);
           }
         } else {
           console[levelLabel](s);
