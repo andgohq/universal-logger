@@ -1,4 +1,4 @@
-import { Level, setLogLevel, logFactory, setMasks } from '../src/index';
+import { Level, setLogLevel, logFactory, setMasks, setBrowserOptions } from '../src/index';
 
 export const output = (level: Level) => {
   setLogLevel(level);
@@ -24,4 +24,12 @@ export const output = (level: Level) => {
   logger.debug({ param1: 'value1', param2: 123, maskKey: '12' }, 'debug test');
 
   childLogger.info('Child');
+
+  setBrowserOptions({ inline: true });
+
+  logger.info({ msg: 'inline test 1: no options' });
+  logger.info({ msg: 'inline test 2: 1 option', param1: 'value1' });
+  logger.info({ msg: 'inline test 3: 2 options', param1: 'value1', param2: 'value2' });
+  childLogger.info({ msg: 'inline test 4: child - no options' });
+  childLogger.info({ msg: 'inline test 4: child - 1 option', param1: 'value1' });
 };
