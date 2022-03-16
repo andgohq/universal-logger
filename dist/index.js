@@ -35,7 +35,10 @@ const options = {
   logLevel: process.env.LOG_LEVEL || "debug",
   sharedContext: {},
   masks: [],
-  maskFunc: (s) => `${s.substr(0, 8)}***`
+  maskFunc: (s) => `${s.substring(0, 8)}***`,
+  browser: {
+    inline: false
+  }
 };
 const PINO_TO_CONSOLE = {
   debug: "debug",
@@ -63,6 +66,9 @@ const setMasks = (masks) => {
 const setMaskFunc = (f) => {
   options.maskFunc = f;
 };
+const setBrowserOptions = (opts) => {
+  Object.assign(options.browser, opts);
+};
 const logFactory = (name) => pino__default["default"]({
   name,
   level: options.logLevel,
@@ -85,7 +91,9 @@ const logFactory = (name) => pino__default["default"]({
         options.masks.findIndex((ele) => ele === k) >= 0 && (typeof v === "string" || typeof v === "number") ? options.maskFunc(`${v}`) : k === "stack" && typeof v === "string" ? stackTraceParser__namespace.parse(v) : v
       ]));
       if (Object.keys(masked).length) {
-        console[levelLabel](s, masked);
+        if (options.browser.inline) ; else {
+          console[levelLabel](s, JSON.stringify(masked));
+        }
       } else {
         console[levelLabel](s);
       }
@@ -96,6 +104,7 @@ const logFactory = (name) => pino__default["default"]({
 
 exports.NO_OPS_LOGGER = NO_OPS_LOGGER;
 exports.logFactory = logFactory;
+exports.setBrowserOptions = setBrowserOptions;
 exports.setContext = setContext;
 exports.setExternalLogger = setExternalLogger;
 exports.setLogLevel = setLogLevel;

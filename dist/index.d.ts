@@ -13,6 +13,9 @@ declare const setLogLevel: (logLevel: Level) => void;
 declare const setContext: (context: Record<string, any>) => void;
 declare const setMasks: (masks: string[]) => void;
 declare const setMaskFunc: (f: (s: string) => string) => void;
+declare const setBrowserOptions: (opts: {
+    inline?: boolean;
+}) => void;
 declare type LogFn = pino.LogFn;
 interface AGLogger {
     fatal: LogFn;
@@ -24,4 +27,4 @@ interface AGLogger {
 }
 declare const logFactory: (name: string) => AGLogger;
 
-export { AGLogger, ExternalLoggerType, Level, LogFn, NO_OPS_LOGGER, StatusType, logFactory, setContext, setExternalLogger, setLogLevel, setMaskFunc, setMasks };
+export { AGLogger, ExternalLoggerType, Level, LogFn, NO_OPS_LOGGER, StatusType, logFactory, setBrowserOptions, setContext, setExternalLogger, setLogLevel, setMaskFunc, setMasks };
