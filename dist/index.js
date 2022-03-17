@@ -101,7 +101,7 @@ const logFactory = (name) => pino__default["default"]({
         debug: chalk.yellow,
         fatal: chalk.bgRed.white,
         error: chalk.red,
-        warn: chalk.yellow,
+        warn: chalk.gray,
         info: (s2) => s2,
         trace: (s2) => s2
       };

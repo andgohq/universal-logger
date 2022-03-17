@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.13.1] - 2022-03-17
+
+### Fixed
+
+- Change warning color to gray
+
 ## [1.13.0] - 2022-03-17
 
 ### Added

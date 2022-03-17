@@ -119,7 +119,7 @@ export const logFactory = (name: string): AGLogger =>
           debug: chalk.yellow,
           fatal: chalk.bgRed.white,
           error: chalk.red,
-          warn: chalk.yellow,
+          warn: chalk.gray,
           info: (s: string) => s,
           trace: (s: string) => s,
         };
