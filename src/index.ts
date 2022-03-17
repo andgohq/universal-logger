@@ -116,10 +116,10 @@ export const logFactory = (name: string): AGLogger =>
         };
 
         const LEVEL_TO_COLOR: Record<Level, typeof chalkModule.Instance | ((s: string) => string)> = {
-          debug: chalk.yellow,
+          debug: chalk.gray,
           fatal: chalk.bgRed.white,
           error: chalk.red,
-          warn: chalk.gray,
+          warn: chalk.yellow,
           info: (s: string) => s,
           trace: (s: string) => s,
         };

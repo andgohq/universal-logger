@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.13.2] - 2022-03-17
+
+### Fixed
+
+- Fix warning, debug color
+
 ## [1.13.1] - 2022-03-17
 
 ### Fixed

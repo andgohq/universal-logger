@@ -98,10 +98,10 @@ const logFactory = (name) => pino__default["default"]({
     write: (o) => {
       const { type, stack, level, time, msg, ...rest } = o;
       const LEVEL_TO_COLOR = {
-        debug: chalk.yellow,
+        debug: chalk.gray,
         fatal: chalk.bgRed.white,
         error: chalk.red,
-        warn: chalk.gray,
+        warn: chalk.yellow,
         info: (s2) => s2,
         trace: (s2) => s2
       };
