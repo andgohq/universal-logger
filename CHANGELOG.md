@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.13.0] - 2022-03-17
+
+### Added
+
+- Support color
+
 ## [1.12.1] - 2022-03-16
 
 ### Fixed

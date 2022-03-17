@@ -1,4 +1,5 @@
 import pino from 'pino';
+import chalkModule from 'chalk';
 
 declare type Level = 'debug' | 'fatal' | 'error' | 'warn' | 'info' | 'trace';
 declare type StatusType = 'error' | 'warn' | 'info' | 'debug';
@@ -16,6 +17,7 @@ declare const setMaskFunc: (f: (s: string) => string) => void;
 declare const setBrowserOptions: (opts: {
     inline?: boolean;
 }) => void;
+declare const setColorLevel: (level: chalkModule.Level) => void;
 declare type LogFn = pino.LogFn;
 interface AGLogger {
     fatal: LogFn;
@@ -27,4 +29,4 @@ interface AGLogger {
 }
 declare const logFactory: (name: string) => AGLogger;
 
-export { AGLogger, ExternalLoggerType, Level, LogFn, NO_OPS_LOGGER, StatusType, logFactory, setBrowserOptions, setContext, setExternalLogger, setLogLevel, setMaskFunc, setMasks };
+export { AGLogger, ExternalLoggerType, Level, LogFn, NO_OPS_LOGGER, StatusType, logFactory, setBrowserOptions, setColorLevel, setContext, setExternalLogger, setLogLevel, setMaskFunc, setMasks };

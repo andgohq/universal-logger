@@ -11,7 +11,15 @@ npm install @andgohq/universal-logger
 ## Usage examples
 
 ```typescript
-import { setLogLevel, initDatadog, logFactory, setContext, setMasks, setMaskFunc } from '@andgohq/universal-logger';
+import {
+  setLogLevel,
+  initDatadog,
+  logFactory,
+  setContext,
+  setMasks,
+  setMaskFunc,
+  setColorLevel,
+} from '@andgohq/universal-logger';
 
 // Set output log level (default: LOG_LEVEL environment variable or 'debug')
 // log level: debug, fata, error, warn, info
@@ -27,6 +35,9 @@ setMaskFunc((s: string) => `${s.substring(0, 8)}***`);
 setBrowserOptions({
   inline: false,
 });
+
+// Set color level (chalk.level)
+setColorLevel(1);
 
 // Logger usage
 const logger = logFactory('Main');

@@ -1,9 +1,11 @@
-import { Level, setLogLevel, logFactory, setMasks, setBrowserOptions } from '../src/index';
+import { Level, setLogLevel, logFactory, setMasks, setBrowserOptions, setColorLevel } from '../src/index';
 
 export const output = (level: Level) => {
   setLogLevel(level);
 
   setMasks(['maskKey']);
+
+  setColorLevel(1);
 
   const logger = logFactory('Main');
   const childLogger = logger.child({ method: 'child' });

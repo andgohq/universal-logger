@@ -1,6 +1,6 @@
 {
   "name": "@andgohq/universal-logger",
-  "version": "1.12.1",
+  "version": "1.13.0",
   "description": "Logger for browser, nodejs and electron",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -34,6 +34,7 @@
   "repository": "git://github.com/andgohq/universal-logger.git",
   "prettier": "@andgohq/prettier-config",
   "dependencies": {
+    "chalk": "^4.1.2",
     "date-fns": "^2.28.0",
     "pino": "^7.8.1",
     "stacktrace-parser": "^0.1.10"

@@ -2,6 +2,9 @@ import pino from 'pino';
 import { format } from 'date-fns';
 import ja from 'date-fns/locale/ja';
 import * as stackTraceParser from 'stacktrace-parser';
+import chalkModule from 'chalk';
+
+let chalk = new chalkModule.Instance({ level: 0 });
 
 const options = {
   logLevel: process.env.LOG_LEVEL || 'debug',
@@ -23,6 +26,15 @@ const PINO_TO_CONSOLE: Record<Level, StatusType> = {
   warn: 'warn',
   info: 'info',
   trace: 'info',
+};
+
+const LEVEL_TO_LABEL: Record<Level, string> = {
+  debug: 'D',
+  fatal: 'F',
+  error: 'E',
+  warn: 'W',
+  info: 'I',
+  trace: 'I',
 };
 
 export type ExternalLoggerType = (opts: {
@@ -57,6 +69,10 @@ export const setMaskFunc = (f: (s: string) => string) => {
 
 export const setBrowserOptions = (opts: { inline?: boolean }) => {
   Object.assign(options.browser, opts);
+};
+
+export const setColorLevel = (level: chalkModule.Level) => {
+  chalk = new chalkModule.Instance({ level });
 };
 
 export type LogFn = pino.LogFn;
@@ -99,10 +115,22 @@ export const logFactory = (name: string): AGLogger =>
           msg?: string;
         };
 
-        const timeLabel = format(new Date(time), 'HH:mm:ss', { locale: ja });
-        const levelLabel = PINO_TO_CONSOLE[pino.levels.labels[`${level}`] as Level];
+        const LEVEL_TO_COLOR: Record<Level, typeof chalkModule.Instance | ((s: string) => string)> = {
+          debug: chalk.yellow,
+          fatal: chalk.bgRed.white,
+          error: chalk.red,
+          warn: chalk.yellow,
+          info: (s: string) => s,
+          trace: (s: string) => s,
+        };
 
-        const s = `${timeLabel} [${name}] ${msg || ''}`;
+        const color = LEVEL_TO_COLOR[pino.levels.labels[`${level}`]];
+        const timeLabel = format(new Date(time), 'HH:mm:ss', { locale: ja });
+        const levelKey = pino.levels.labels[`${level}`] as Level;
+        const consoleKey = PINO_TO_CONSOLE[levelKey];
+        const levelLabel = LEVEL_TO_LABEL[levelKey];
+
+        const s = `${timeLabel} ${levelLabel} [${name}] ${msg || ''}`;
 
         const masked = Object.fromEntries(
           Object.entries(rest).map(([k, v]) => [
@@ -117,15 +145,15 @@ export const logFactory = (name: string): AGLogger =>
 
         if (Object.keys(masked).length) {
           if (options.browser.inline) {
-            console[levelLabel](s, JSON.stringify(masked));
+            console[consoleKey](color(`${s} ${JSON.stringify(masked)}`));
           } else {
-            console[levelLabel](s, masked);
+            console[consoleKey](color(s), masked);
           }
         } else {
-          console[levelLabel](s);
+          console[consoleKey](color(s));
         }
 
-        _PRESENT_EXTERNAL_LOGGER({ message: msg || '', context: { logger: name, ...masked }, status: levelLabel });
+        _PRESENT_EXTERNAL_LOGGER({ message: msg || '', context: { logger: name, ...masked }, status: consoleKey });
       },
     },
   });
