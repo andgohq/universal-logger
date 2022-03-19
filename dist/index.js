@@ -45,8 +45,8 @@ const options = {
 };
 const PINO_TO_CONSOLE = {
   debug: "debug",
-  fatal: "error",
-  error: "error",
+  fatal: "info",
+  error: "info",
   warn: "warn",
   info: "info",
   trace: "info"
@@ -96,7 +96,7 @@ const logFactory = (name) => pino__default["default"]({
   browser: {
     serialize: true,
     write: (o) => {
-      const { type, stack, level, time, msg, ...rest } = o;
+      const { type, level, time, msg, ...rest } = o;
       const LEVEL_TO_COLOR = {
         debug: chalk.gray,
         fatal: chalk.bgRed.white,

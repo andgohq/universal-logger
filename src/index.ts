@@ -21,8 +21,8 @@ export type StatusType = 'error' | 'warn' | 'info' | 'debug';
 
 const PINO_TO_CONSOLE: Record<Level, StatusType> = {
   debug: 'debug',
-  fatal: 'error',
-  error: 'error',
+  fatal: 'info',
+  error: 'info',
   warn: 'warn',
   info: 'info',
   trace: 'info',
@@ -107,9 +107,8 @@ export const logFactory = (name: string): AGLogger =>
     browser: {
       serialize: true,
       write: (o) => {
-        const { type, stack, level, time, msg, ...rest } = o as {
+        const { type, level, time, msg, ...rest } = o as {
           type?: 'Error'; // exist when logger.error is used
-          stack?: string; // exist when logger.error is used
           level: number; // this is not a label (maybe this is a spec. bug)
           time: number;
           msg?: string;

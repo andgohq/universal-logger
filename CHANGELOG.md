@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.13.3] - 2022-03-19
+
+### Fixed
+
+- Fix stack trace
+
 ## [1.13.2] - 2022-03-17
 
 ### Fixed
