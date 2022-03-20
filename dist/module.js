@@ -1,7 +1,5 @@
 import $fuI5D$pino from "pino";
 import $fuI5D$chalk from "chalk";
-import $fuI5D$stacktracey from "stacktracey";
-
 
 
 
@@ -81,8 +79,7 @@ const $f54e6e80c53e998d$var$summarize = (obj)=>{
     const finalParams = {
         ...$f54e6e80c53e998d$var$transform(rest),
         ...isErrorMode ? {
-            stack: new $fuI5D$stacktracey((stack ?? err?.stack) ?? '').items.map((item)=>item.beforeParse
-            )
+            stack: ((stack ?? err?.stack) ?? '').split('\n')
         } : $f54e6e80c53e998d$var$pickExists({
             type: type,
             message: message,

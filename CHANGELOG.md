@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.14.5] - 2022-03-20
+
+### Fixed
+
+- Improve react-native compatibility
+
 ## [1.14.4] - 2022-03-20
 
 ### Fixed

@@ -1,6 +1,5 @@
 var $53U0h$pino = require("pino");
 var $53U0h$chalk = require("chalk");
-var $53U0h$stacktracey = require("stacktracey");
 
 function $parcel$interopDefault(a) {
   return a && a.__esModule ? a.default : a;
@@ -14,7 +13,6 @@ $parcel$export(module.exports, "updateOptions", function () { return $163cd63d21
 $parcel$export(module.exports, "setExternalLogger", function () { return $163cd63d215c95aa$export$8f19a62963079f27; });
 $parcel$export(module.exports, "setColorLevel", function () { return $163cd63d215c95aa$export$f928010dd6a36a71; });
 $parcel$export(module.exports, "logFactory", function () { return $163cd63d215c95aa$export$43641a4cf14c61ba; });
-
 
 
 const $163cd63d215c95aa$export$a58c827866c87469 = ()=>{
@@ -93,8 +91,7 @@ const $163cd63d215c95aa$var$summarize = (obj)=>{
     const finalParams = {
         ...$163cd63d215c95aa$var$transform(rest),
         ...isErrorMode ? {
-            stack: new ($parcel$interopDefault($53U0h$stacktracey))((stack ?? err?.stack) ?? '').items.map((item)=>item.beforeParse
-            )
+            stack: ((stack ?? err?.stack) ?? '').split('\n')
         } : $163cd63d215c95aa$var$pickExists({
             type: type,
             message: message,

@@ -1,5 +1,4 @@
 import pino from 'pino';
-import StackTracey from 'stacktracey';
 import chalkModule from 'chalk';
 
 export type Level = 'debug' | 'fatal' | 'error' | 'warn' | 'info' | 'trace';
@@ -111,9 +110,7 @@ const summarize = (obj: Record<string, any>) => {
   const finalMsg = (isErrorMode ? msg ?? message ?? err?.message : msg) ?? '';
   const finalParams = {
     ...transform(rest),
-    ...(isErrorMode
-      ? { stack: new StackTracey(stack ?? err?.stack ?? '').items.map((item) => item.beforeParse) }
-      : pickExists({ type, message, stack })),
+    ...(isErrorMode ? { stack: (stack ?? err?.stack ?? '').split('\n') } : pickExists({ type, message, stack })),
   };
 
   return { msg: finalMsg, ...finalParams };
