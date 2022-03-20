@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.14.2] - 2022-03-20
+
+### Fixed
+
+- Fixed the type definition
+
 ## [1.14.1] - 2022-03-20
 
 ### Fixed
