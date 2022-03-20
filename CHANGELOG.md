@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.14.3] - 2022-03-20
+
+### Fixed
+
+- Added npmignore
+
 ## [1.14.2] - 2022-03-20
 
 ### Fixed
