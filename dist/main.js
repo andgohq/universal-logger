@@ -1,5 +1,6 @@
 var $53U0h$pino = require("pino");
 var $53U0h$chalk = require("chalk");
+var $53U0h$dayjs = require("dayjs");
 
 function $parcel$interopDefault(a) {
   return a && a.__esModule ? a.default : a;
@@ -15,15 +16,11 @@ $parcel$export(module.exports, "setColorLevel", function () { return $163cd63d21
 $parcel$export(module.exports, "logFactory", function () { return $163cd63d215c95aa$export$43641a4cf14c61ba; });
 
 
+
 const $163cd63d215c95aa$export$a58c827866c87469 = ()=>{
 };
 const $163cd63d215c95aa$var$DEFAULT_MASK_LENGTH = 8;
 const $163cd63d215c95aa$var$DEFAULT_CHALK_LEVEL = 1;
-const $163cd63d215c95aa$var$dateTimeFormatter = new Intl.DateTimeFormat('ja-jp', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-});
 const $163cd63d215c95aa$var$LEVEL_TO_CONSOLE = {
     debug: 'debug',
     fatal: 'info',
@@ -140,7 +137,8 @@ const $163cd63d215c95aa$export$43641a4cf14c61ba = (name1)=>($parcel$interopDefau
                     trace: (s)=>s
                 };
                 const color = LEVEL_TO_COLOR[($parcel$interopDefault($53U0h$pino)).levels.labels[`${level}`]];
-                const timeLabel = $163cd63d215c95aa$var$dateTimeFormatter.format(time);
+                // get HH:mm:ss
+                const timeLabel = ($parcel$interopDefault($53U0h$dayjs))(time).format('HH:mm:ss');
                 const levelKey = ($parcel$interopDefault($53U0h$pino)).levels.labels[`${level}`];
                 const consoleKey = $163cd63d215c95aa$var$LEVEL_TO_CONSOLE[levelKey];
                 const levelLabel = $163cd63d215c95aa$var$LEVEL_TO_LABEL[levelKey];

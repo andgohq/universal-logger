@@ -1,5 +1,7 @@
 import $fuI5D$pino from "pino";
 import $fuI5D$chalk from "chalk";
+import $fuI5D$dayjs from "dayjs";
+
 
 
 
@@ -7,11 +9,6 @@ const $f54e6e80c53e998d$export$a58c827866c87469 = ()=>{
 };
 const $f54e6e80c53e998d$var$DEFAULT_MASK_LENGTH = 8;
 const $f54e6e80c53e998d$var$DEFAULT_CHALK_LEVEL = 1;
-const $f54e6e80c53e998d$var$dateTimeFormatter = new Intl.DateTimeFormat('ja-jp', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-});
 const $f54e6e80c53e998d$var$LEVEL_TO_CONSOLE = {
     debug: 'debug',
     fatal: 'info',
@@ -128,7 +125,8 @@ const $f54e6e80c53e998d$export$43641a4cf14c61ba = (name1)=>$fuI5D$pino({
                     trace: (s)=>s
                 };
                 const color = LEVEL_TO_COLOR[$fuI5D$pino.levels.labels[`${level}`]];
-                const timeLabel = $f54e6e80c53e998d$var$dateTimeFormatter.format(time);
+                // get HH:mm:ss
+                const timeLabel = $fuI5D$dayjs(time).format('HH:mm:ss');
                 const levelKey = $fuI5D$pino.levels.labels[`${level}`];
                 const consoleKey = $f54e6e80c53e998d$var$LEVEL_TO_CONSOLE[levelKey];
                 const levelLabel = $f54e6e80c53e998d$var$LEVEL_TO_LABEL[levelKey];

@@ -1,5 +1,6 @@
 import pino from 'pino';
 import chalkModule from 'chalk';
+import dayjs from 'dayjs';
 
 export type Level = 'debug' | 'fatal' | 'error' | 'warn' | 'info' | 'trace';
 export type StatusType = 'error' | 'warn' | 'info' | 'debug';
@@ -23,12 +24,6 @@ export const NO_OPS_LOGGER: ExternalLoggerType = () => {};
 
 const DEFAULT_MASK_LENGTH = 8;
 const DEFAULT_CHALK_LEVEL = 1;
-
-const dateTimeFormatter = new Intl.DateTimeFormat('ja-jp', {
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-});
 
 const LEVEL_TO_CONSOLE: Record<Level, StatusType> = {
   debug: 'debug',
@@ -151,7 +146,8 @@ export const logFactory = (name: string): AGLogger =>
         };
 
         const color = LEVEL_TO_COLOR[pino.levels.labels[`${level}`]];
-        const timeLabel = dateTimeFormatter.format(time);
+        // get HH:mm:ss
+        const timeLabel = dayjs(time).format('HH:mm:ss');
         const levelKey = pino.levels.labels[`${level}`] as Level;
         const consoleKey = LEVEL_TO_CONSOLE[levelKey];
         const levelLabel = LEVEL_TO_LABEL[levelKey];
