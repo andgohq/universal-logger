@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.14.4] - 2022-03-20
+
+### Fixed
+
+- Ignore unnecessary directories
+
 ## [1.14.3] - 2022-03-20
 
 ### Fixed
