@@ -28,6 +28,8 @@ updateOptions({
   maskTargets: [],
   // mask function
   maskFunc: (s: string) => `${s.substring(0, 8)}***`
+  // enable stack trace
+  enableStack: true,
   // browser option
   browser: {
     // show inline logs when inline=true

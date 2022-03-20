@@ -56,6 +56,7 @@ const OPTIONS = {
   context: {} as Record<string, any>,
   maskTargets: [] as string[],
   maskFunc: (s: string) => `${s.substring(0, DEFAULT_MASK_LENGTH)}***`,
+  enableStack: true,
   browser: {
     inline: false,
   },
@@ -110,7 +111,9 @@ const summarize = (obj: Record<string, any>) => {
   const finalMsg = (isErrorMode ? msg ?? message ?? err?.message : msg) ?? '';
   const finalParams = {
     ...transform(rest),
-    ...(isErrorMode ? { stack: (stack ?? err?.stack ?? '').split('\n') } : pickExists({ type, message, stack })),
+    ...(isErrorMode && OPTIONS.enableStack
+      ? { stack: (stack ?? err?.stack ?? '').split('\n') }
+      : pickExists({ type, message, stack })),
   };
 
   return { msg: finalMsg, ...finalParams };

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.15.0] - 2022-03-20
+
+### Added
+
+- Added enableStack option
+
 ## [1.14.5] - 2022-03-20
 
 ### Fixed

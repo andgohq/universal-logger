@@ -39,6 +39,7 @@ const $f54e6e80c53e998d$var$OPTIONS = {
     maskTargets: [],
     maskFunc: (s)=>`${s.substring(0, $f54e6e80c53e998d$var$DEFAULT_MASK_LENGTH)}***`
     ,
+    enableStack: true,
     browser: {
         inline: false
     }
@@ -78,7 +79,7 @@ const $f54e6e80c53e998d$var$summarize = (obj)=>{
     const finalMsg = (isErrorMode ? (msg ?? message) ?? err?.message : msg) ?? '';
     const finalParams = {
         ...$f54e6e80c53e998d$var$transform(rest),
-        ...isErrorMode ? {
+        ...isErrorMode && $f54e6e80c53e998d$var$OPTIONS.enableStack ? {
             stack: ((stack ?? err?.stack) ?? '').split('\n')
         } : $f54e6e80c53e998d$var$pickExists({
             type: type,
