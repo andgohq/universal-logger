@@ -1,37 +1,42 @@
-import { Level, setLogLevel, logFactory, setMasks, setBrowserOptions, setColorLevel } from '../src/index';
+import { Level, updateOptions, logFactory, setColorLevel } from '../src/index';
 
 export const output = (level: Level) => {
-  setLogLevel(level);
-
-  setMasks(['maskKey']);
-
+  updateOptions({
+    level,
+    maskTargets: ['maskedMsg'],
+  });
   setColorLevel(1);
 
-  const logger = logFactory('Main');
-  const childLogger = logger.child({ method: 'child' });
+  const logger = logFactory('Module Logger');
+  const childLogger = logger.child({ method: 'Child Logger' });
 
-  logger.fatal('fatal message');
+  logger.fatal('simple fatal message');
 
-  logger.error('error message');
-  logger.error({ param1: 'value1', param2: 123, maskKey: '123456789' }, 'error message');
-  logger.error(new Error('ERROR_TEST'));
-  logger.error(new Error('ERROR_TEST'), 'error message');
-  logger.error(new Error('ERROR_TEST'), 'error message: %s', 'REPLACE');
+  logger.error('simple error message');
+  logger.error({ param1: 'value1', param2: 123, maskedMsg: '123456789' }, 'error message');
+  logger.error(new Error('simple error object'));
+  logger.error(new Error('error object with custom message'), 'error message');
+  logger.error(new Error('error object with custom replacing message'), 'error message: %s', 'REPLACE');
+  logger.error({ err: new Error('error object without custom message'), param1: 'value1' });
+  logger.error({ err: new Error('error object with custom message'), msg: 'custom message', param1: 'value1' });
 
-  logger.warn('warn test');
+  logger.warn('simple warning message');
 
-  logger.info('info test');
-  logger.info({ param1: 'value1', param2: 123, maskKey: '1' }, 'info test');
+  logger.info('simple info message');
+  logger.info({ param1: 'value1', param2: 123, maskedMsg: '1' }, 'custom message');
 
-  logger.debug({ param1: 'value1', param2: 123, maskKey: '12' }, 'debug test');
+  logger.debug({ param1: 'value1', param2: 123, maskedMsg: '12' }, 'custom message');
 
-  childLogger.info('Child');
+  childLogger.info('simple info message');
 
-  setBrowserOptions({ inline: true });
+  updateOptions({
+    browser: {
+      inline: true,
+    },
+  });
 
-  logger.info({ msg: 'inline test 1: no options' });
-  logger.info({ msg: 'inline test 2: 1 option', param1: 'value1' });
-  logger.info({ msg: 'inline test 3: 2 options', param1: 'value1', param2: 'value2' });
-  childLogger.info({ msg: 'inline test 4: child - no options' });
-  childLogger.info({ msg: 'inline test 4: child - 1 option', param1: 'value1' });
+  logger.info({ msg: 'inline message' });
+  logger.info({ msg: 'inline message with option', param1: 'value1' });
+  childLogger.info({ msg: 'inline message on the child logger' });
+  childLogger.info({ msg: 'inline message on the child logger with option', param1: 'value1' });
 };

@@ -1,7 +1,7 @@
 import { output } from './test';
 
-console.log('=== DEBUG LEVEL ===');
+console.log('=== LOG_LEVEL=debug ===');
 output('debug');
 
-console.log('=== INFO LEVEL ===');
+console.log('=== LOG_LEVEL=info ===');
 output('info');
