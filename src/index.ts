@@ -1,7 +1,5 @@
 import pino from 'pino';
-import { format } from 'date-fns';
-import ja from 'date-fns/locale/ja';
-import * as stackTraceParser from 'stacktrace-parser';
+import StackTracey from 'stacktracey';
 import chalkModule from 'chalk';
 
 export type Level = 'debug' | 'fatal' | 'error' | 'warn' | 'info' | 'trace';
@@ -24,6 +22,15 @@ export interface AGLogger {
 
 export const NO_OPS_LOGGER: ExternalLoggerType = () => {};
 
+const DEFAULT_MASK_LENGTH = 8;
+const DEFAULT_CHALK_LEVEL = 1;
+
+const dateTimeFormatter = new Intl.DateTimeFormat('ja-jp', {
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+});
+
 const LEVEL_TO_CONSOLE: Record<Level, StatusType> = {
   debug: 'debug',
   fatal: 'info',
@@ -42,11 +49,8 @@ const LEVEL_TO_LABEL: Record<Level, string> = {
   trace: 'I',
 };
 
-const DEFAULT_MASK_LENGTH = 8;
-const DEFAULT_CHALK_LEVEL = 0;
-
 let chalk = new chalkModule.Instance({ level: DEFAULT_CHALK_LEVEL });
-let _PRESENT_EXTERNAL_LOGGER = NO_OPS_LOGGER;
+let PRESENT_EXTERNAL_LOGGER = NO_OPS_LOGGER;
 
 const OPTIONS = {
   level: (process.env.LOG_LEVEL ?? 'debug') as Level,
@@ -63,11 +67,56 @@ export const updateOptions = (options: Partial<typeof OPTIONS>) => {
 };
 
 export function setExternalLogger(logger: ExternalLoggerType) {
-  _PRESENT_EXTERNAL_LOGGER = logger;
+  PRESENT_EXTERNAL_LOGGER = logger;
 }
 
 export const setColorLevel = (level: chalkModule.Level) => {
   chalk = new chalkModule.Instance({ level });
+};
+
+const serializer = (k: string, v: any) => {
+  const isMaskTarget =
+    OPTIONS.maskTargets.findIndex((ele) => ele === k) >= 0 && (typeof v === 'string' || typeof v === 'number');
+
+  if (isMaskTarget) {
+    return OPTIONS.maskFunc(`${v}`);
+  } else {
+    return v;
+  }
+};
+
+const transform = (obj: Record<string, any>) => {
+  return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, serializer(k, v)]));
+};
+
+const pickExists = (obj: Record<string, any>) => {
+  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
+};
+
+const summarize = (obj: Record<string, any>) => {
+  // omit stack, level, time, msg from the parameter object
+  const { type, message, stack, err, msg, ...rest } = obj as {
+    // properties when the object is Error instance
+    // error style 1
+    type?: 'Error';
+    message?: string; // exist when logger.error is used
+    stack?: string; // exist when logger.error is used
+    // error style 2
+    err?: Error;
+    // standard properties
+    msg?: string;
+  };
+
+  const isErrorMode = (type == 'Error' && stack) || err;
+  const finalMsg = (isErrorMode ? msg ?? message ?? err?.message : msg) ?? '';
+  const finalParams = {
+    ...transform(rest),
+    ...(isErrorMode
+      ? { stack: new StackTracey(stack ?? err?.stack ?? '').items.map((item) => item.beforeParse) }
+      : pickExists({ type, message, stack })),
+  };
+
+  return { msg: finalMsg, ...finalParams };
 };
 
 export const logFactory = (name: string): AGLogger =>
@@ -78,32 +127,19 @@ export const logFactory = (name: string): AGLogger =>
       // omit pid and hostname
       bindings: ({ name }) => ({ name }),
       // for nodejs environment only
-      log: (o) =>
-        Object.fromEntries(
-          Object.entries(o).map(([k, v]) => [
-            k,
-            OPTIONS.maskTargets.findIndex((ele) => ele === k) >= 0 && (typeof v === 'string' || typeof v === 'number')
-              ? OPTIONS.maskFunc(`${v}`)
-              : k === 'err' && v instanceof Error
-              ? { message: v.message, stack: stackTraceParser.parse(v.stack ?? '') }
-              : v,
-          ])
-        ),
+      log: (o) => {
+        const { level, time, ...rest } = o as Record<string, any>;
+
+        return { level, time, ...summarize(rest) };
+      },
     },
     browser: {
       // use Pino's standard serializers
       // https://github.com/pinojs/pino-std-serializers
-      serialize: true,
+      serialize: false,
       write: (o) => {
-        // omit level, time, msg from the parameter object
-        const { level, time, msg, ...rest } = o as {
-          type?: 'Error'; // exist when logger.error is used
-          stack?: string;
-          err?: Error;
-          level: number; // this is not a label (maybe this is a spec. bug)
-          time: number;
-          msg?: string;
-        };
+        const { level, time, ...rest } = o as Record<string, any>;
+        const { msg, ...params } = summarize(rest);
 
         const LEVEL_TO_COLOR: Record<Level, typeof chalkModule.Instance | ((s: string) => string)> = {
           debug: chalk.gray,
@@ -115,35 +151,24 @@ export const logFactory = (name: string): AGLogger =>
         };
 
         const color = LEVEL_TO_COLOR[pino.levels.labels[`${level}`]];
-        const timeLabel = format(new Date(time), 'HH:mm:ss', { locale: ja });
+        const timeLabel = dateTimeFormatter.format(time);
         const levelKey = pino.levels.labels[`${level}`] as Level;
         const consoleKey = LEVEL_TO_CONSOLE[levelKey];
         const levelLabel = LEVEL_TO_LABEL[levelKey];
 
-        const s = `${timeLabel} ${levelLabel} [${name}] ${msg || ''}`;
+        const s = `${timeLabel} ${levelLabel} [${name}] ${msg}`;
 
-        const masked = Object.fromEntries(
-          Object.entries(rest).map(([k, v]) => [
-            k,
-            OPTIONS.maskTargets.findIndex((ele) => ele === k) >= 0 && (typeof v === 'string' || typeof v === 'number')
-              ? OPTIONS.maskFunc(`${v}`)
-              : k === 'err' && v instanceof Error
-              ? { type: 'AAA', message: v.message, stack: stackTraceParser.parse(v.stack ?? '') }
-              : v,
-          ])
-        );
-
-        if (Object.keys(masked).length) {
+        if (Object.keys(params).length) {
           if (OPTIONS.browser.inline) {
-            console[consoleKey](color(`${s} ${JSON.stringify(masked)}`));
+            console[consoleKey](color(`${s} ${JSON.stringify(params)}`));
           } else {
-            console[consoleKey](color(s), masked);
+            console[consoleKey](color(s), params);
           }
         } else {
           console[consoleKey](color(s));
         }
 
-        _PRESENT_EXTERNAL_LOGGER({ message: msg || '', context: { logger: name, ...masked }, status: consoleKey });
+        PRESENT_EXTERNAL_LOGGER({ message: msg || '', context: { logger: name, ...params }, status: consoleKey });
       },
     },
   });

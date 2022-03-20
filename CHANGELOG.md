@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.14.0] - 2022-03-20
+
+### Improved
+
+- Refactored
+
 ## [1.13.3] - 2022-03-19
 
 ### Fixed

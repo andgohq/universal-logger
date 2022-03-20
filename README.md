@@ -12,38 +12,38 @@ npm install @andgohq/universal-logger
 
 ```typescript
 import {
-  setLogLevel,
-  initDatadog,
-  logFactory,
-  setContext,
-  setMasks,
-  setMaskFunc,
+  updateOptions
+  setExternalLogger,
   setColorLevel,
+  logFactory,
 } from '@andgohq/universal-logger';
 
-// Set output log level (default: LOG_LEVEL environment variable or 'debug')
-// log level: debug, fata, error, warn, info
-setLogLevel('info');
+// update options (the below is a default value)
+updateOptions({
+  // debug, fatal, error, warn, info could be used
+  level: 'debug', // LOG_LEVEL environment variable overwrites this
+  // this value is appended to the every logs
+  context: {},
+  // the keys for masking value
+  maskTargets: [],
+  // mask function
+  maskFunc: (s: string) => `${s.substring(0, 8)}***`
+  // browser option
+  browser: {
+    // show inline logs when inline=true
+    inline: false,
+  }
+})
 
-// Set mask keys for sensitive data
-setMasks(['maskedKey']);
-
-// Set mask function
-setMaskFunc((s: string) => `${s.substring(0, 8)}***`);
-
-// Set browser options
-setBrowserOptions({
-  inline: false,
-});
-
-// Set color level (chalk.level)
+// set color level
+// 0 - simple, 1 - 16 colors, 2 - 256 colors
 setColorLevel(1);
 
-// Logger usage
+// usage
 const logger = logFactory('Main');
 
 // Support methods:
-// - logger.debug -> hidden outputs (should turn on the verbose flag on dev console to see logs)
+// - logger.debug -> outputs with gray color (should turn on the verbose flag on dev console to see logs)
 // - logger.fatal -> outputs with red error icon and stacktrace
 // - logger.error -> outputs with red error icon and stacktrace
 // - logger.warn -> outputs with yellow warn icon
@@ -55,7 +55,10 @@ const logger = logFactory('Main');
 logger.info('Message text');
 logger.info({ param1: 'value1', maskedKey: 'sensitive data...' }, 'Message text');
 logger.info({ param1: 'value1' }, 'Message Text %s %s', 'REPLACE STRING1', 'REPLACE STRING2');
+logger.info({ msg: 'Message text', param1: 'value1', maskedKey: 'sensitive data...' });
 logger.error(new Error('Something wrong'), 'optional error message: %2', 'REPLACE STRING');
+logger.error({ err: new Error('Something wrong'), msg: 'optional message', param1: 'value1' });
+
 
 // Child logger
 const childLogger = logger.child({ method: 'child' });
@@ -66,7 +69,7 @@ childLogger.info('Hello');
 
 ```sh
 npm install
-npm run dev
+npm run dev:web
 npm run -s dev:nodejs | jq .
 
 ```

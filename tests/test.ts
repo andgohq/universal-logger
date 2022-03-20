@@ -5,7 +5,6 @@ export const output = (level: Level) => {
     level,
     maskTargets: ['maskedMsg'],
   });
-  setColorLevel(1);
 
   const logger = logFactory('Module Logger');
   const childLogger = logger.child({ method: 'Child Logger' });
