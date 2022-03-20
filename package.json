@@ -1,10 +1,11 @@
 {
   "name": "@andgohq/universal-logger",
-  "version": "1.14.0",
+  "version": "1.14.1",
   "description": "Logger for browser, nodejs and electron",
   "source": "src/index.ts",
   "main": "dist/main.js",
   "module": "dist/module.js",
+  "types": "dist/types.d.ts",
   "typings": "dist/index.d.ts",
   "browserslist": [
     "> 1%",
@@ -36,7 +37,6 @@
   "repository": "git://github.com/andgohq/universal-logger.git",
   "prettier": "@andgohq/prettier-config",
   "dependencies": {
-    "@swc-node/register": "^1.4.2",
     "chalk": "^4.1.2",
     "pino": "^7.9.1",
     "stacktracey": "^2.1.8"
@@ -44,6 +44,9 @@
   "devDependencies": {
     "@andgohq/eslint-config-ts": "^1.6.0",
     "@andgohq/prettier-config": "^1.0.1",
+    "@parcel/packager-ts": "^2.3.2",
+    "@parcel/transformer-typescript-types": "^2.3.2",
+    "@swc-node/register": "^1.4.2",
     "@types/node": "^17.0.21",
     "@typescript-eslint/eslint-plugin": "^5.15.0",
     "buffer": "^6.0.3",

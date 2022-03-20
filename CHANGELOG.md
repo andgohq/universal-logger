@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.14.1] - 2022-03-20
+
+### Fixed
+
+- Added type definition file
+
 ## [1.14.0] - 2022-03-20
 
 ### Improved
