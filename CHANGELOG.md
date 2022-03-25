@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.16.0] - 2022-03-25
+
+### Improved
+
+- Change browser output
+
 ## [1.15.1] - 2022-03-20
 
 ### Fixed

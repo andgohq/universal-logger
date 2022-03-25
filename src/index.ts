@@ -28,8 +28,8 @@ const DEFAULT_CHALK_LEVEL = 1;
 const LEVEL_TO_CONSOLE: Record<Level, StatusType> = {
   debug: 'debug',
   fatal: 'info',
-  error: 'info',
-  warn: 'warn',
+  error: 'info', // use info to disable stack trace
+  warn: 'info', // use info to disable stack trace
   info: 'info',
   trace: 'info',
 };
@@ -90,7 +90,7 @@ const pickExists = (obj: Record<string, any>) => {
 
 const summarize = (obj: Record<string, any>) => {
   // omit stack, level, time, msg from the parameter object
-  const { type, message, stack, err, msg, ...rest } = obj as {
+  const { type, message, stack, err, msg, method, ...rest } = obj as {
     // properties when the object is Error instance
     // error style 1
     type?: 'Error';
@@ -100,6 +100,7 @@ const summarize = (obj: Record<string, any>) => {
     err?: Error;
     // standard properties
     msg?: string;
+    method?: string;
   };
 
   const isErrorMode = (type == 'Error' && stack) || err;
@@ -111,7 +112,7 @@ const summarize = (obj: Record<string, any>) => {
       : pickExists({ type, message, stack })),
   };
 
-  return { msg: finalMsg, ...finalParams };
+  return { msg: finalMsg, method, ...finalParams };
 };
 
 export const logFactory = (name: string): AGLogger =>
@@ -134,7 +135,7 @@ export const logFactory = (name: string): AGLogger =>
       serialize: false,
       write: (o) => {
         const { level, time, ...rest } = o as Record<string, any>;
-        const { msg, ...params } = summarize(rest);
+        const { msg, method, ...params } = summarize(rest);
 
         const LEVEL_TO_COLOR: Record<Level, typeof chalkModule.Instance | ((s: string) => string)> = {
           debug: chalk.gray,
@@ -152,7 +153,8 @@ export const logFactory = (name: string): AGLogger =>
         const consoleKey = LEVEL_TO_CONSOLE[levelKey];
         const levelLabel = LEVEL_TO_LABEL[levelKey];
 
-        const s = `${timeLabel} ${levelLabel} [${name}] ${msg}`;
+        const _method = method ? `:${method}` : '';
+        const s = `${timeLabel} ${levelLabel} [${name}${_method}] ${msg}`;
 
         if (Object.keys(params).length) {
           if (OPTIONS.browser.inline) {

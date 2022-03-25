@@ -13,7 +13,7 @@ const $f54e6e80c53e998d$var$LEVEL_TO_CONSOLE = {
     debug: 'debug',
     fatal: 'info',
     error: 'info',
-    warn: 'warn',
+    warn: 'info',
     info: 'info',
     trace: 'info'
 };
@@ -71,7 +71,7 @@ const $f54e6e80c53e998d$var$pickExists = (obj)=>{
 };
 const $f54e6e80c53e998d$var$summarize = (obj)=>{
     // omit stack, level, time, msg from the parameter object
-    const { type: type , message: message , stack: stack , err: err , msg: msg , ...rest } = obj;
+    const { type: type , message: message , stack: stack , err: err , msg: msg , method: method , ...rest } = obj;
     const isErrorMode = type == 'Error' && stack || err;
     const finalMsg = (isErrorMode ? (msg ?? message) ?? err?.message : msg) ?? '';
     const finalParams = {
@@ -86,6 +86,7 @@ const $f54e6e80c53e998d$var$summarize = (obj)=>{
     };
     return {
         msg: finalMsg,
+        method: method,
         ...finalParams
     };
 };
@@ -114,7 +115,7 @@ const $f54e6e80c53e998d$export$43641a4cf14c61ba = (name1)=>$fuI5D$pino({
             serialize: false,
             write: (o)=>{
                 const { level: level , time: time , ...rest } = o;
-                const { msg: msg , ...params } = $f54e6e80c53e998d$var$summarize(rest);
+                const { msg: msg , method: method , ...params } = $f54e6e80c53e998d$var$summarize(rest);
                 const LEVEL_TO_COLOR = {
                     debug: $f54e6e80c53e998d$var$chalk.gray,
                     fatal: $f54e6e80c53e998d$var$chalk.bgRed.white,
@@ -130,7 +131,8 @@ const $f54e6e80c53e998d$export$43641a4cf14c61ba = (name1)=>$fuI5D$pino({
                 const levelKey = $fuI5D$pino.levels.labels[`${level}`];
                 const consoleKey = $f54e6e80c53e998d$var$LEVEL_TO_CONSOLE[levelKey];
                 const levelLabel = $f54e6e80c53e998d$var$LEVEL_TO_LABEL[levelKey];
-                const s1 = `${timeLabel} ${levelLabel} [${name1}] ${msg}`;
+                const _method = method ? `:${method}` : '';
+                const s1 = `${timeLabel} ${levelLabel} [${name1}${_method}] ${msg}`;
                 if (Object.keys(params).length) {
                     if ($f54e6e80c53e998d$var$OPTIONS.browser.inline) console[consoleKey](color(`${s1} ${JSON.stringify(params)}`));
                     else console[consoleKey](color(s1), params);
