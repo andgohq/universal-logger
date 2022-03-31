@@ -17,8 +17,7 @@ $parcel$export(module.exports, "logFactory", function () { return $163cd63d215c9
 
 
 
-const $163cd63d215c95aa$export$a58c827866c87469 = ()=>{
-};
+const $163cd63d215c95aa$export$a58c827866c87469 = ()=>{};
 const $163cd63d215c95aa$var$DEFAULT_MASK_LENGTH = 8;
 const $163cd63d215c95aa$var$DEFAULT_CHALK_LEVEL = 1;
 const $163cd63d215c95aa$var$LEVEL_TO_CONSOLE = {
@@ -43,8 +42,7 @@ let $163cd63d215c95aa$var$chalk = new ($parcel$interopDefault($53U0h$chalk)).Ins
 let $163cd63d215c95aa$var$PRESENT_EXTERNAL_LOGGER = $163cd63d215c95aa$export$a58c827866c87469;
 const $163cd63d215c95aa$var$OPTIONS = {
     level: undefined ?? 'debug',
-    context: {
-    },
+    context: {},
     maskTargets: [],
     maskFunc: (s)=>`${s.substring(0, $163cd63d215c95aa$var$DEFAULT_MASK_LENGTH)}***`
     ,

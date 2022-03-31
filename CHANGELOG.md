@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.16.1] - 2022-03-31
+
+### Fixed
+
+- Update compatibility with old versions of browser
+
 ## [1.16.0] - 2022-03-25
 
 ### Improved
