@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.17.0] - 2022-08-10
+
+### Improved
+
+- Update mask functionality
+
 ## [1.16.1] - 2022-03-31
 
 ### Fixed

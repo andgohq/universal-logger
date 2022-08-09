@@ -21,7 +21,7 @@ declare const OPTIONS: {
     level: Level;
     context: Record<string, any>;
     maskTargets: string[];
-    maskFunc: (s: string) => string;
+    maskReplacement: string;
     enableStack: boolean;
     browser: {
         inline: boolean;
