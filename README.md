@@ -26,8 +26,8 @@ updateOptions({
   context: {},
   // the keys for masking value
   maskTargets: [],
-  // mask function
-  maskFunc: (s: string) => `${s.substring(0, 8)}***`
+  // mask replacement
+  maskReplacement: '***',
   // enable stack trace
   enableStack: true,
   // browser option

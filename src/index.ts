@@ -1,6 +1,7 @@
 import pino from 'pino';
 import chalkModule from 'chalk';
 import dayjs from 'dayjs';
+import maskJsonFactory from 'mask-json';
 
 export type Level = 'debug' | 'fatal' | 'error' | 'warn' | 'info' | 'trace';
 export type StatusType = 'error' | 'warn' | 'info' | 'debug';
@@ -22,7 +23,6 @@ export interface AGLogger {
 
 export const NO_OPS_LOGGER: ExternalLoggerType = () => {};
 
-const DEFAULT_MASK_LENGTH = 8;
 const DEFAULT_CHALK_LEVEL = 1;
 
 const LEVEL_TO_CONSOLE: Record<Level, StatusType> = {
@@ -43,22 +43,25 @@ const LEVEL_TO_LABEL: Record<Level, string> = {
   trace: 'I',
 };
 
-let chalk = new chalkModule.Instance({ level: DEFAULT_CHALK_LEVEL });
-let PRESENT_EXTERNAL_LOGGER = NO_OPS_LOGGER;
-
 const OPTIONS = {
   level: (process.env.LOG_LEVEL ?? 'debug') as Level,
   context: {} as Record<string, any>,
   maskTargets: [] as string[],
-  maskFunc: (s: string) => `${s.substring(0, DEFAULT_MASK_LENGTH)}***`,
+  maskReplacement: '***',
   enableStack: true,
   browser: {
     inline: false,
   },
 };
 
+let chalk = new chalkModule.Instance({ level: DEFAULT_CHALK_LEVEL });
+let maskJson = maskJsonFactory([], { replacement: OPTIONS.maskReplacement });
+let PRESENT_EXTERNAL_LOGGER = NO_OPS_LOGGER;
+
 export const updateOptions = (options: Partial<typeof OPTIONS>) => {
   Object.assign(OPTIONS, options);
+
+  maskJson = maskJsonFactory(OPTIONS.maskTargets, { replacement: OPTIONS.maskReplacement });
 };
 
 export function setExternalLogger(logger: ExternalLoggerType) {
@@ -67,21 +70,6 @@ export function setExternalLogger(logger: ExternalLoggerType) {
 
 export const setColorLevel = (level: chalkModule.Level) => {
   chalk = new chalkModule.Instance({ level });
-};
-
-const serializer = (k: string, v: any) => {
-  const isMaskTarget =
-    OPTIONS.maskTargets.findIndex((ele) => ele === k) >= 0 && (typeof v === 'string' || typeof v === 'number');
-
-  if (isMaskTarget) {
-    return OPTIONS.maskFunc(`${v}`);
-  } else {
-    return v;
-  }
-};
-
-const transform = (obj: Record<string, any>) => {
-  return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, serializer(k, v)]));
 };
 
 const pickExists = (obj: Record<string, any>) => {
@@ -106,7 +94,7 @@ const summarize = (obj: Record<string, any>) => {
   const isErrorMode = (type == 'Error' && stack) || err;
   const finalMsg = (isErrorMode ? msg ?? message ?? err?.message : msg) ?? '';
   const finalParams = {
-    ...transform(rest),
+    ...maskJson(rest),
     ...(isErrorMode && OPTIONS.enableStack
       ? { stack: (stack ?? err?.stack ?? '').split('\n') }
       : pickExists({ type, message, stack })),
