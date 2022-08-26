@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.17.1] - 2022-08-27
+
+### Fixed
+
+- Fix an external logger status
+
 ## [1.17.0] - 2022-08-10
 
 ### Improved

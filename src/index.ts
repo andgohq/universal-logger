@@ -154,7 +154,11 @@ export const logFactory = (name: string): AGLogger =>
           console[consoleKey](color(s));
         }
 
-        PRESENT_EXTERNAL_LOGGER({ message: msg || '', context: { logger: name, ...params }, status: consoleKey });
+        PRESENT_EXTERNAL_LOGGER({
+          message: msg || '',
+          context: { logger: name, ...params },
+          status: levelKey as StatusType,
+        });
       },
     },
   });

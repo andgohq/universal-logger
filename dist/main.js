@@ -143,7 +143,7 @@ const $163cd63d215c95aa$export$43641a4cf14c61ba = (name)=>(0, ($parcel$interopDe
                         logger: name,
                         ...params
                     },
-                    status: consoleKey
+                    status: levelKey
                 });
             }
         }

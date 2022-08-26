@@ -133,7 +133,7 @@ const $8348e366130e695f$export$43641a4cf14c61ba = (name)=>(0, $2RCvR$pino)({
                         logger: name,
                         ...params
                     },
-                    status: consoleKey
+                    status: levelKey
                 });
             }
         }
