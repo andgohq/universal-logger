@@ -1,5 +1,5 @@
 import $2RCvR$pino from "pino";
-import $2RCvR$chalk from "chalk";
+import $2RCvR$ansicolors from "ansi-colors";
 import $2RCvR$dayjs from "dayjs";
 import $2RCvR$maskjson from "mask-json";
 
@@ -8,7 +8,6 @@ import $2RCvR$maskjson from "mask-json";
 
 
 const $8348e366130e695f$export$a58c827866c87469 = ()=>{};
-const $8348e366130e695f$var$DEFAULT_CHALK_LEVEL = 1;
 const $8348e366130e695f$var$LEVEL_TO_CONSOLE = {
     debug: "debug",
     fatal: "info",
@@ -32,12 +31,10 @@ const $8348e366130e695f$var$OPTIONS = {
     maskReplacement: "***",
     enableStack: true,
     browser: {
+        color: true,
         inline: false
     }
 };
-let $8348e366130e695f$var$chalk = new (0, $2RCvR$chalk).Instance({
-    level: $8348e366130e695f$var$DEFAULT_CHALK_LEVEL
-});
 let $8348e366130e695f$var$maskJson = (0, $2RCvR$maskjson)([], {
     replacement: $8348e366130e695f$var$OPTIONS.maskReplacement
 });
@@ -51,25 +48,20 @@ const $8348e366130e695f$export$c6fe4049d20353ac = (options)=>{
 function $8348e366130e695f$export$8f19a62963079f27(logger) {
     $8348e366130e695f$var$PRESENT_EXTERNAL_LOGGER = logger;
 }
-const $8348e366130e695f$export$f928010dd6a36a71 = (level)=>{
-    $8348e366130e695f$var$chalk = new (0, $2RCvR$chalk).Instance({
-        level: level
-    });
-};
 const $8348e366130e695f$var$pickExists = (obj)=>{
     return Object.fromEntries(Object.entries(obj).filter(([, v])=>v !== undefined));
 };
 const $8348e366130e695f$var$summarize = (obj)=>{
     // omit stack, level, time, msg from the parameter object
     const { type: type , message: message , stack: stack , err: err , msg: msg , method: method , ...rest } = obj;
-    const isErrorMode = type == "Error" && stack || err;
-    var ref, ref1;
-    const finalMsg = (ref1 = isErrorMode ? (ref = msg !== null && msg !== void 0 ? msg : message) !== null && ref !== void 0 ? ref : err === null || err === void 0 ? void 0 : err.message : msg) !== null && ref1 !== void 0 ? ref1 : "";
-    var ref2;
+    const isErrorMode = type === "Error" && stack || err;
+    var _ref, _ref1;
+    const finalMsg = (_ref1 = isErrorMode ? (_ref = msg !== null && msg !== void 0 ? msg : message) !== null && _ref !== void 0 ? _ref : err === null || err === void 0 ? void 0 : err.message : msg) !== null && _ref1 !== void 0 ? _ref1 : "";
+    var _ref2;
     const finalParams = {
         ...$8348e366130e695f$var$maskJson(rest),
         ...isErrorMode && $8348e366130e695f$var$OPTIONS.enableStack ? {
-            stack: ((ref2 = stack !== null && stack !== void 0 ? stack : err === null || err === void 0 ? void 0 : err.stack) !== null && ref2 !== void 0 ? ref2 : "").split("\n")
+            stack: ((_ref2 = stack !== null && stack !== void 0 ? stack : err === null || err === void 0 ? void 0 : err.stack) !== null && _ref2 !== void 0 ? _ref2 : "").split("\n")
         } : $8348e366130e695f$var$pickExists({
             type: type,
             message: message,
@@ -107,13 +99,14 @@ const $8348e366130e695f$export$43641a4cf14c61ba = (name)=>(0, $2RCvR$pino)({
             write: (o)=>{
                 const { level: level , time: time , ...rest } = o;
                 const { msg: msg , method: method , ...params } = $8348e366130e695f$var$summarize(rest);
+                const noColor = (s)=>s;
                 const LEVEL_TO_COLOR = {
-                    debug: $8348e366130e695f$var$chalk.gray,
-                    fatal: $8348e366130e695f$var$chalk.bgRed.white,
-                    error: $8348e366130e695f$var$chalk.red,
-                    warn: $8348e366130e695f$var$chalk.yellow,
-                    info: (s)=>s,
-                    trace: (s)=>s
+                    debug: $8348e366130e695f$var$OPTIONS.browser.color ? (0, $2RCvR$ansicolors).gray : noColor,
+                    fatal: $8348e366130e695f$var$OPTIONS.browser.color ? (0, $2RCvR$ansicolors).bgRed.white : noColor,
+                    error: $8348e366130e695f$var$OPTIONS.browser.color ? (0, $2RCvR$ansicolors).red : noColor,
+                    warn: $8348e366130e695f$var$OPTIONS.browser.color ? (0, $2RCvR$ansicolors).yellow : noColor,
+                    info: noColor,
+                    trace: noColor
                 };
                 const color = LEVEL_TO_COLOR[(0, $2RCvR$pino).levels.labels[`${level}`]];
                 // get HH:mm:ss
@@ -140,5 +133,5 @@ const $8348e366130e695f$export$43641a4cf14c61ba = (name)=>(0, $2RCvR$pino)({
     });
 
 
-export {$8348e366130e695f$export$a58c827866c87469 as NO_OPS_LOGGER, $8348e366130e695f$export$c6fe4049d20353ac as updateOptions, $8348e366130e695f$export$8f19a62963079f27 as setExternalLogger, $8348e366130e695f$export$f928010dd6a36a71 as setColorLevel, $8348e366130e695f$export$43641a4cf14c61ba as logFactory};
+export {$8348e366130e695f$export$a58c827866c87469 as NO_OPS_LOGGER, $8348e366130e695f$export$c6fe4049d20353ac as updateOptions, $8348e366130e695f$export$8f19a62963079f27 as setExternalLogger, $8348e366130e695f$export$43641a4cf14c61ba as logFactory};
 //# sourceMappingURL=module.js.map

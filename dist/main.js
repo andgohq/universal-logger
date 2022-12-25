@@ -1,7 +1,7 @@
-var $53U0h$pino = require("pino");
-var $53U0h$chalk = require("chalk");
-var $53U0h$dayjs = require("dayjs");
-var $53U0h$maskjson = require("mask-json");
+var $33vPW$pino = require("pino");
+var $33vPW$ansicolors = require("ansi-colors");
+var $33vPW$dayjs = require("dayjs");
+var $33vPW$maskjson = require("mask-json");
 
 function $parcel$interopDefault(a) {
   return a && a.__esModule ? a.default : a;
@@ -10,18 +10,16 @@ function $parcel$export(e, n, v, s) {
   Object.defineProperty(e, n, {get: v, set: s, enumerable: true, configurable: true});
 }
 
-$parcel$export(module.exports, "NO_OPS_LOGGER", function () { return $163cd63d215c95aa$export$a58c827866c87469; });
-$parcel$export(module.exports, "updateOptions", function () { return $163cd63d215c95aa$export$c6fe4049d20353ac; });
-$parcel$export(module.exports, "setExternalLogger", function () { return $163cd63d215c95aa$export$8f19a62963079f27; });
-$parcel$export(module.exports, "setColorLevel", function () { return $163cd63d215c95aa$export$f928010dd6a36a71; });
-$parcel$export(module.exports, "logFactory", function () { return $163cd63d215c95aa$export$43641a4cf14c61ba; });
+$parcel$export(module.exports, "NO_OPS_LOGGER", () => $a11effce52aa2bec$export$a58c827866c87469);
+$parcel$export(module.exports, "updateOptions", () => $a11effce52aa2bec$export$c6fe4049d20353ac);
+$parcel$export(module.exports, "setExternalLogger", () => $a11effce52aa2bec$export$8f19a62963079f27);
+$parcel$export(module.exports, "logFactory", () => $a11effce52aa2bec$export$43641a4cf14c61ba);
 
 
 
 
-const $163cd63d215c95aa$export$a58c827866c87469 = ()=>{};
-const $163cd63d215c95aa$var$DEFAULT_CHALK_LEVEL = 1;
-const $163cd63d215c95aa$var$LEVEL_TO_CONSOLE = {
+const $a11effce52aa2bec$export$a58c827866c87469 = ()=>{};
+const $a11effce52aa2bec$var$LEVEL_TO_CONSOLE = {
     debug: "debug",
     fatal: "info",
     error: "info",
@@ -29,7 +27,7 @@ const $163cd63d215c95aa$var$LEVEL_TO_CONSOLE = {
     info: "info",
     trace: "info"
 };
-const $163cd63d215c95aa$var$LEVEL_TO_LABEL = {
+const $a11effce52aa2bec$var$LEVEL_TO_LABEL = {
     debug: "D",
     fatal: "F",
     error: "E",
@@ -37,50 +35,43 @@ const $163cd63d215c95aa$var$LEVEL_TO_LABEL = {
     info: "I",
     trace: "I"
 };
-const $163cd63d215c95aa$var$OPTIONS = {
+const $a11effce52aa2bec$var$OPTIONS = {
     level: undefined ?? "debug",
     context: {},
     maskTargets: [],
     maskReplacement: "***",
     enableStack: true,
     browser: {
+        color: true,
         inline: false
     }
 };
-let $163cd63d215c95aa$var$chalk = new (0, ($parcel$interopDefault($53U0h$chalk))).Instance({
-    level: $163cd63d215c95aa$var$DEFAULT_CHALK_LEVEL
+let $a11effce52aa2bec$var$maskJson = (0, ($parcel$interopDefault($33vPW$maskjson)))([], {
+    replacement: $a11effce52aa2bec$var$OPTIONS.maskReplacement
 });
-let $163cd63d215c95aa$var$maskJson = (0, ($parcel$interopDefault($53U0h$maskjson)))([], {
-    replacement: $163cd63d215c95aa$var$OPTIONS.maskReplacement
-});
-let $163cd63d215c95aa$var$PRESENT_EXTERNAL_LOGGER = $163cd63d215c95aa$export$a58c827866c87469;
-const $163cd63d215c95aa$export$c6fe4049d20353ac = (options)=>{
-    Object.assign($163cd63d215c95aa$var$OPTIONS, options);
-    $163cd63d215c95aa$var$maskJson = (0, ($parcel$interopDefault($53U0h$maskjson)))($163cd63d215c95aa$var$OPTIONS.maskTargets, {
-        replacement: $163cd63d215c95aa$var$OPTIONS.maskReplacement
+let $a11effce52aa2bec$var$PRESENT_EXTERNAL_LOGGER = $a11effce52aa2bec$export$a58c827866c87469;
+const $a11effce52aa2bec$export$c6fe4049d20353ac = (options)=>{
+    Object.assign($a11effce52aa2bec$var$OPTIONS, options);
+    $a11effce52aa2bec$var$maskJson = (0, ($parcel$interopDefault($33vPW$maskjson)))($a11effce52aa2bec$var$OPTIONS.maskTargets, {
+        replacement: $a11effce52aa2bec$var$OPTIONS.maskReplacement
     });
 };
-function $163cd63d215c95aa$export$8f19a62963079f27(logger) {
-    $163cd63d215c95aa$var$PRESENT_EXTERNAL_LOGGER = logger;
+function $a11effce52aa2bec$export$8f19a62963079f27(logger) {
+    $a11effce52aa2bec$var$PRESENT_EXTERNAL_LOGGER = logger;
 }
-const $163cd63d215c95aa$export$f928010dd6a36a71 = (level)=>{
-    $163cd63d215c95aa$var$chalk = new (0, ($parcel$interopDefault($53U0h$chalk))).Instance({
-        level: level
-    });
-};
-const $163cd63d215c95aa$var$pickExists = (obj)=>{
+const $a11effce52aa2bec$var$pickExists = (obj)=>{
     return Object.fromEntries(Object.entries(obj).filter(([, v])=>v !== undefined));
 };
-const $163cd63d215c95aa$var$summarize = (obj)=>{
+const $a11effce52aa2bec$var$summarize = (obj)=>{
     // omit stack, level, time, msg from the parameter object
     const { type: type , message: message , stack: stack , err: err , msg: msg , method: method , ...rest } = obj;
-    const isErrorMode = type == "Error" && stack || err;
-    const finalMsg = (isErrorMode ? (msg ?? message) ?? err?.message : msg) ?? "";
+    const isErrorMode = type === "Error" && stack || err;
+    const finalMsg = (isErrorMode ? msg ?? message ?? err?.message : msg) ?? "";
     const finalParams = {
-        ...$163cd63d215c95aa$var$maskJson(rest),
-        ...isErrorMode && $163cd63d215c95aa$var$OPTIONS.enableStack ? {
-            stack: ((stack ?? err?.stack) ?? "").split("\n")
-        } : $163cd63d215c95aa$var$pickExists({
+        ...$a11effce52aa2bec$var$maskJson(rest),
+        ...isErrorMode && $a11effce52aa2bec$var$OPTIONS.enableStack ? {
+            stack: (stack ?? err?.stack ?? "").split("\n")
+        } : $a11effce52aa2bec$var$pickExists({
             type: type,
             message: message,
             stack: stack
@@ -92,9 +83,9 @@ const $163cd63d215c95aa$var$summarize = (obj)=>{
         ...finalParams
     };
 };
-const $163cd63d215c95aa$export$43641a4cf14c61ba = (name)=>(0, ($parcel$interopDefault($53U0h$pino)))({
+const $a11effce52aa2bec$export$43641a4cf14c61ba = (name)=>(0, ($parcel$interopDefault($33vPW$pino)))({
         name: name,
-        level: $163cd63d215c95aa$var$OPTIONS.level,
+        level: $a11effce52aa2bec$var$OPTIONS.level,
         formatters: {
             // omit pid and hostname
             bindings: ({ name: name  })=>({
@@ -106,7 +97,7 @@ const $163cd63d215c95aa$export$43641a4cf14c61ba = (name)=>(0, ($parcel$interopDe
                 return {
                     level: level,
                     time: time,
-                    ...$163cd63d215c95aa$var$summarize(rest)
+                    ...$a11effce52aa2bec$var$summarize(rest)
                 };
             }
         },
@@ -116,28 +107,29 @@ const $163cd63d215c95aa$export$43641a4cf14c61ba = (name)=>(0, ($parcel$interopDe
             serialize: false,
             write: (o)=>{
                 const { level: level , time: time , ...rest } = o;
-                const { msg: msg , method: method , ...params } = $163cd63d215c95aa$var$summarize(rest);
+                const { msg: msg , method: method , ...params } = $a11effce52aa2bec$var$summarize(rest);
+                const noColor = (s)=>s;
                 const LEVEL_TO_COLOR = {
-                    debug: $163cd63d215c95aa$var$chalk.gray,
-                    fatal: $163cd63d215c95aa$var$chalk.bgRed.white,
-                    error: $163cd63d215c95aa$var$chalk.red,
-                    warn: $163cd63d215c95aa$var$chalk.yellow,
-                    info: (s)=>s,
-                    trace: (s)=>s
+                    debug: $a11effce52aa2bec$var$OPTIONS.browser.color ? (0, ($parcel$interopDefault($33vPW$ansicolors))).gray : noColor,
+                    fatal: $a11effce52aa2bec$var$OPTIONS.browser.color ? (0, ($parcel$interopDefault($33vPW$ansicolors))).bgRed.white : noColor,
+                    error: $a11effce52aa2bec$var$OPTIONS.browser.color ? (0, ($parcel$interopDefault($33vPW$ansicolors))).red : noColor,
+                    warn: $a11effce52aa2bec$var$OPTIONS.browser.color ? (0, ($parcel$interopDefault($33vPW$ansicolors))).yellow : noColor,
+                    info: noColor,
+                    trace: noColor
                 };
-                const color = LEVEL_TO_COLOR[(0, ($parcel$interopDefault($53U0h$pino))).levels.labels[`${level}`]];
+                const color = LEVEL_TO_COLOR[(0, ($parcel$interopDefault($33vPW$pino))).levels.labels[`${level}`]];
                 // get HH:mm:ss
-                const timeLabel = (0, ($parcel$interopDefault($53U0h$dayjs)))(time).format("HH:mm:ss");
-                const levelKey = (0, ($parcel$interopDefault($53U0h$pino))).levels.labels[`${level}`];
-                const consoleKey = $163cd63d215c95aa$var$LEVEL_TO_CONSOLE[levelKey];
-                const levelLabel = $163cd63d215c95aa$var$LEVEL_TO_LABEL[levelKey];
+                const timeLabel = (0, ($parcel$interopDefault($33vPW$dayjs)))(time).format("HH:mm:ss");
+                const levelKey = (0, ($parcel$interopDefault($33vPW$pino))).levels.labels[`${level}`];
+                const consoleKey = $a11effce52aa2bec$var$LEVEL_TO_CONSOLE[levelKey];
+                const levelLabel = $a11effce52aa2bec$var$LEVEL_TO_LABEL[levelKey];
                 const _method = method ? `:${method}` : "";
                 const s = `${timeLabel} ${levelLabel} [${name}${_method}] ${msg}`;
                 if (Object.keys(params).length) {
-                    if ($163cd63d215c95aa$var$OPTIONS.browser.inline) console[consoleKey](color(`${s} ${JSON.stringify(params)}`));
+                    if ($a11effce52aa2bec$var$OPTIONS.browser.inline) console[consoleKey](color(`${s} ${JSON.stringify(params)}`));
                     else console[consoleKey](color(s), params);
                 } else console[consoleKey](color(s));
-                $163cd63d215c95aa$var$PRESENT_EXTERNAL_LOGGER({
+                $a11effce52aa2bec$var$PRESENT_EXTERNAL_LOGGER({
                     message: msg || "",
                     context: {
                         logger: name,

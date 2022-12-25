@@ -1,5 +1,4 @@
 import pino from "pino";
-import chalkModule from "chalk";
 export type Level = 'debug' | 'fatal' | 'error' | 'warn' | 'info' | 'trace';
 export type StatusType = 'error' | 'warn' | 'info' | 'debug';
 export type LogFn = pino.LogFn;
@@ -24,12 +23,12 @@ declare const OPTIONS: {
     maskReplacement: string;
     enableStack: boolean;
     browser: {
+        color: boolean;
         inline: boolean;
     };
 };
 export const updateOptions: (options: Partial<typeof OPTIONS>) => void;
 export function setExternalLogger(logger: ExternalLoggerType): void;
-export const setColorLevel: (level: chalkModule.Level) => void;
 export const logFactory: (name: string) => AGLogger;
 
 //# sourceMappingURL=types.d.ts.map
