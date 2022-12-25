@@ -1,5 +1,5 @@
 import pino from 'pino';
-import chalkModule from 'chalk';
+import c from 'ansi-colors';
 import dayjs from 'dayjs';
 import maskJsonFactory from 'mask-json';
 
@@ -22,8 +22,6 @@ export interface AGLogger {
 }
 
 export const NO_OPS_LOGGER: ExternalLoggerType = () => {};
-
-const DEFAULT_CHALK_LEVEL = 1;
 
 const LEVEL_TO_CONSOLE: Record<Level, StatusType> = {
   debug: 'debug',
@@ -50,27 +48,25 @@ const OPTIONS = {
   maskReplacement: '***',
   enableStack: true,
   browser: {
+    color: true,
     inline: false,
   },
 };
 
-let chalk = new chalkModule.Instance({ level: DEFAULT_CHALK_LEVEL });
 let maskJson = maskJsonFactory([], { replacement: OPTIONS.maskReplacement });
 let PRESENT_EXTERNAL_LOGGER = NO_OPS_LOGGER;
 
 export const updateOptions = (options: Partial<typeof OPTIONS>) => {
   Object.assign(OPTIONS, options);
 
-  maskJson = maskJsonFactory(OPTIONS.maskTargets, { replacement: OPTIONS.maskReplacement });
+  maskJson = maskJsonFactory(OPTIONS.maskTargets, {
+    replacement: OPTIONS.maskReplacement,
+  });
 };
 
 export function setExternalLogger(logger: ExternalLoggerType) {
   PRESENT_EXTERNAL_LOGGER = logger;
 }
-
-export const setColorLevel = (level: chalkModule.Level) => {
-  chalk = new chalkModule.Instance({ level });
-};
 
 const pickExists = (obj: Record<string, any>) => {
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
@@ -91,13 +87,11 @@ const summarize = (obj: Record<string, any>) => {
     method?: string;
   };
 
-  const isErrorMode = (type == 'Error' && stack) || err;
+  const isErrorMode = (type === 'Error' && stack) || err;
   const finalMsg = (isErrorMode ? msg ?? message ?? err?.message : msg) ?? '';
   const finalParams = {
     ...maskJson(rest),
-    ...(isErrorMode && OPTIONS.enableStack
-      ? { stack: (stack ?? err?.stack ?? '').split('\n') }
-      : pickExists({ type, message, stack })),
+    ...(isErrorMode && OPTIONS.enableStack ? { stack: (stack ?? err?.stack ?? '').split('\n') } : pickExists({ type, message, stack })),
   };
 
   return { msg: finalMsg, method, ...finalParams };
@@ -125,13 +119,15 @@ export const logFactory = (name: string): AGLogger =>
         const { level, time, ...rest } = o as Record<string, any>;
         const { msg, method, ...params } = summarize(rest);
 
-        const LEVEL_TO_COLOR: Record<Level, typeof chalkModule.Instance | ((s: string) => string)> = {
-          debug: chalk.gray,
-          fatal: chalk.bgRed.white,
-          error: chalk.red,
-          warn: chalk.yellow,
-          info: (s: string) => s,
-          trace: (s: string) => s,
+        const noColor = (s: string) => s;
+
+        const LEVEL_TO_COLOR: Record<Level, (s: string) => string> = {
+          debug: OPTIONS.browser.color ? c.gray : noColor,
+          fatal: OPTIONS.browser.color ? c.bgRed.white : noColor,
+          error: OPTIONS.browser.color ? c.red : noColor,
+          warn: OPTIONS.browser.color ? c.yellow : noColor,
+          info: noColor,
+          trace: noColor,
         };
 
         const color = LEVEL_TO_COLOR[pino.levels.labels[`${level}`]];

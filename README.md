@@ -14,7 +14,6 @@ npm install @andgohq/universal-logger
 import {
   updateOptions
   setExternalLogger,
-  setColorLevel,
   logFactory,
 } from '@andgohq/universal-logger';
 
@@ -32,14 +31,12 @@ updateOptions({
   enableStack: true,
   // browser option
   browser: {
+    // use color output when color=true
+    color: true,
     // show inline logs when inline=true
     inline: false,
   }
 })
-
-// set color level
-// 0 - simple, 1 - 16 colors, 2 - 256 colors
-setColorLevel(1);
 
 // usage
 const logger = logFactory('Main');

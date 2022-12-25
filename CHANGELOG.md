@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.18.0] - 2022-12-25
+
+### Improved
+
+- Use ansi-color in replace of chalk
+
 ## [1.17.1] - 2022-08-27
 
 ### Fixed

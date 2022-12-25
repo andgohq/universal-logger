@@ -1,8 +1,12 @@
-import { Level, updateOptions, logFactory, setColorLevel } from '../src/index';
+import { Level, updateOptions, logFactory } from '../src/index';
 
-export const output = (level: Level) => {
+export const output = (level: Level, color: boolean) => {
   updateOptions({
     level,
+    browser: {
+      color,
+      inline: false,
+    },
     maskTargets: ['maskedMsg'],
   });
 
@@ -16,8 +20,15 @@ export const output = (level: Level) => {
   logger.error(new Error('simple error object'));
   logger.error(new Error('error object with custom message'), 'error message');
   logger.error(new Error('error object with custom replacing message'), 'error message: %s', 'REPLACE');
-  logger.error({ err: new Error('error object without custom message'), param1: 'value1' });
-  logger.error({ err: new Error('error object with custom message'), msg: 'custom message', param1: 'value1' });
+  logger.error({
+    err: new Error('error object without custom message'),
+    param1: 'value1',
+  });
+  logger.error({
+    err: new Error('error object with custom message'),
+    msg: 'custom message',
+    param1: 'value1',
+  });
 
   logger.warn('simple warning message');
 
@@ -30,6 +41,7 @@ export const output = (level: Level) => {
 
   updateOptions({
     browser: {
+      color,
       inline: true,
     },
   });
@@ -37,5 +49,8 @@ export const output = (level: Level) => {
   logger.info({ msg: 'inline message' });
   logger.info({ msg: 'inline message with option', param1: 'value1' });
   childLogger.info({ msg: 'inline message on the child logger' });
-  childLogger.info({ msg: 'inline message on the child logger with option', param1: 'value1' });
+  childLogger.info({
+    msg: 'inline message on the child logger with option',
+    param1: 'value1',
+  });
 };

@@ -1,5 +1,5 @@
 import { output } from './test';
 
-output('debug');
+output('debug', false);
 
-output('info');
+output('info', false);

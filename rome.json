@@ -1,0 +1,45 @@
+{
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "ignore": [
+      "./node_modules/**",
+      "./dist-electron/**",
+      "./dist/**",
+      "./src/model/messages.ts"
+    ],
+    "indentStyle": "space",
+    "lineWidth": 150
+  },
+  "linter": {
+    "enabled": true,
+    "ignore": [
+      "./node_modules/**",
+      "./dist-electron/**",
+      "./dist/**",
+      "./src/model/messages.ts"
+    ],
+    "rules": {
+      "recommended": true,
+      "complexity": {
+        "useSimplifiedLogicExpression": "off"
+      },
+      "correctness": {},
+      "style": {
+        "noShoutyConstants": "off",
+        "noUnusedTemplateLiteral": "off",
+        "noNegationElse": "off"
+      },
+      "a11y": {
+        "useKeyWithClickEvents": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
+      }
+    }
+  }
+}

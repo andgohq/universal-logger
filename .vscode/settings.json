@@ -1,13 +1,22 @@
 {
   "typescript.format.enable": false,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript]": {
+    "editor.defaultFormatter": "rome.rome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "rome.rome"
+  },
   "editor.codeActionsOnSave": {
     "source.fixAll": true,
     "source.fixAll.eslint": true
   },
   "editor.formatOnSave": true,
-  "eslint.debug": false,
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.suggest.autoImports": false,
-  "prettier.disableLanguages": ["markdown"]
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "javascript.preferences.quoteStyle": "single",
+  "typescript.preferences.quoteStyle": "single"
 }
