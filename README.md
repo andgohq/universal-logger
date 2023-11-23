@@ -1,3 +1,5 @@
+**This product is deprecated. Please use pino instead.**
+
 # universal-logger
 
 Logger for brower, nodejs and electron.
